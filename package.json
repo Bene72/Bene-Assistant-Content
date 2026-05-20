@@ -1,0 +1,12 @@
+{
+  "name": "benfit",
+  "version": "1.0.0",
+  "description": "Ben&Fit — Site officiel de Benoît, coach CrossFit & Hyrox à Nantes",
+  "scripts": {
+    "dev": "npx serve public -p 3000",
+    "preview": "npx serve public -p 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.3"
+  }
+}
