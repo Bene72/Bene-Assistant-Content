@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #D4A017;
+  --gold-light: #F5BE1F;
+  --gold-dark: #A87B0E;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Gold divider */
+.gold-line {
+  width: 60px;
+  height: 2px;
+  background: var(--gold);
+  display: inline-block;
+}
+
+/* Smooth underline on nav */
+nav a {
+  position: relative;
+}
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+nav a:hover::after {
+  width: 100%;
+}
+
+/* Form inputs */
+input, textarea, select {
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus, textarea:focus {
+  border-color: var(--gold) !important;
+}
+
+/* Fade-in animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeUp 0.7s ease forwards;
+}
+.delay-1 { animation-delay: 0.15s; opacity: 0; }
+.delay-2 { animation-delay: 0.30s; opacity: 0; }
+.delay-3 { animation-delay: 0.45s; opacity: 0; }
+.delay-4 { animation-delay: 0.60s; opacity: 0; }
