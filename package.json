@@ -1,12 +1,19 @@
 {
   "name": "benfit",
-  "version": "1.0.0",
-  "description": "Ben&Fit — Site officiel de Benoît, coach CrossFit & Hyrox à Nantes",
+  "version": "1.1.0",
+  "description": "Ben&Fit - site officiel et agents AutoFlow pour Benoit, coach CrossFit & Hyrox à Nantes",
+  "type": "module",
   "scripts": {
-    "dev": "npx serve public -p 3000",
+    "dev": "vercel dev",
     "preview": "npx serve public -p 3000"
   },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.57.0",
+    "@supabase/supabase-js": "^2.49.8",
+    "resend": "^4.5.1"
+  },
   "devDependencies": {
-    "serve": "^14.2.3"
+    "serve": "^14.2.3",
+    "vercel": "^41.7.3"
   }
 }

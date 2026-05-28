@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoFlow Cockpit</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0c1222; color: #f6f3ea; }
+    main { max-width: 1040px; margin: 0 auto; padding: 40px 20px; }
+    header { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; margin-bottom: 28px; }
+    h1 { margin: 0 0 8px; font-size: clamp(32px, 6vw, 64px); line-height: .92; letter-spacing: 0; }
+    p { margin: 0; color: #b9c1d6; line-height: 1.55; }
+    .status { padding: 10px 14px; border: 1px solid #26334f; background: #111a2e; color: #d8e4ff; white-space: nowrap; }
+    .grid { display: grid; grid-template-columns: 280px 1fr; gap: 16px; align-items: start; }
+    .panel, .output { border: 1px solid #26334f; background: #111a2e; padding: 18px; }
+    label { display: block; font-size: 13px; color: #d8e4ff; margin: 0 0 8px; }
+    input, select, textarea, button { width: 100%; border: 1px solid #33415f; background: #0c1222; color: #f6f3ea; padding: 12px; font: inherit; }
+    textarea { min-height: 190px; resize: vertical; line-height: 1.5; }
+    button { margin-top: 12px; cursor: pointer; background: #e9c84a; color: #0c1222; border: 0; font-weight: 800; }
+    .quick { display: grid; gap: 8px; margin-top: 18px; }
+    .quick button { margin: 0; background: #1b2740; color: #f6f3ea; border: 1px solid #33415f; text-align: left; font-weight: 600; }
+    pre { white-space: pre-wrap; word-break: break-word; margin: 0; line-height: 1.55; color: #f6f3ea; }
+    @media (max-width: 760px) { header { display: block; } .status { margin-top: 16px; display: inline-block; } .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header><div><h1>AutoFlow Cockpit</h1><p>Assistant fondateur pour construire l'offre, le site, les scripts, les workflows Make et les livrables clients.</p></div><div class="status" id="status">Prêt</div></header>
+    <section class="grid">
+      <aside class="panel">
+        <label for="token">Webhook secret</label><input id="token" type="password" placeholder="WEBHOOK_SECRET">
+        <label for="mode" style="margin-top:14px;">Mode</label><select id="mode"><option value="strategy">Stratégie</option><option value="offer">Offre</option><option value="website">Site</option><option value="sales">Vente</option><option value="workflow">Workflow Make</option></select>
+        <div class="quick"><button data-prompt="Crée une offre AutoFlow pour les coachs sportifs à 490€/mois, avec livrables, bénéfices et objections.">Offre coach 490€</button><button data-prompt="Écris une section de page d'accueil pour vendre AutoFlow aux indépendants et PME locales.">Section site AutoFlow</button><button data-prompt="Prépare un script d'appel découverte de 20 minutes pour vendre AutoFlow à un coach sportif.">Script appel</button><button data-prompt="Donne-moi les scénarios Make à créer pour un nouveau client coach sportif.">Scénarios Make</button></div>
+      </aside>
+      <section class="panel"><label for="message">Demande</label><textarea id="message" placeholder="Exemple : construis-moi une offre pour les kinés avec prix, promesse, livrables et email d'approche."></textarea><button id="send">Générer</button></section>
+    </section>
+    <section class="output" style="margin-top:16px;"><pre id="output">Les réponses de l'assistant apparaîtront ici.</pre></section>
+  </main>
+  <script>
+    const token = document.querySelector("#token"), mode = document.querySelector("#mode"), message = document.querySelector("#message"), output = document.querySelector("#output"), status = document.querySelector("#status");
+    document.querySelectorAll("[data-prompt]").forEach((button) => button.addEventListener("click", () => { message.value = button.dataset.prompt; }));
+    document.querySelector("#send").addEventListener("click", async () => {
+      status.textContent = "Génération..."; output.textContent = "";
+      try {
+        const response = await fetch("/api/agents/founder", { method: "POST", headers: { "Content-Type": "application/json", "x-autoflow-token": token.value }, body: JSON.stringify({ mode: mode.value, message: message.value }) });
+        const data = await response.json(); if (!response.ok) throw new Error(data.error || "Erreur inconnue");
+        output.textContent = data.reply; status.textContent = "Terminé";
+      } catch (error) { output.textContent = error.message; status.textContent = "Erreur"; }
+    });
+  </script>
+</body>
+</html>
