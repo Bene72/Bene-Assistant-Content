@@ -2,22 +2,5 @@
   "version": 2,
   "name": "bene-assistant",
   "buildCommand": null,
-  "outputDirectory": "public",
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/assistant.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/images/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    }
-  ]
+  "outputDirectory": "public"
 }
