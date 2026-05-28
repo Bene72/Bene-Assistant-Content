@@ -1,19 +1,12 @@
 ﻿{
   "version": 2,
-  "name": "benfit",
+  "name": "bene-assistant",
   "buildCommand": null,
   "outputDirectory": "public",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/assistant.html"
-    },
-    {
-      "handle": "filesystem"
+      "source": "/",
+      "destination": "/assistant.html"
     }
   ],
   "headers": [
