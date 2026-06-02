@@ -7,46 +7,126 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0c1222; color: #f6f3ea; }
-    main { max-width: 1040px; margin: 0 auto; padding: 40px 20px; }
-    header { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; margin-bottom: 28px; }
-    h1 { margin: 0 0 8px; font-size: clamp(32px, 6vw, 64px); line-height: .92; letter-spacing: 0; }
+    main { max-width: 1180px; margin: 0 auto; padding: 36px 20px; }
+    header { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; margin-bottom: 24px; }
+    h1 { margin: 0 0 8px; font-size: clamp(34px, 6vw, 68px); line-height: .92; letter-spacing: 0; }
     p { margin: 0; color: #b9c1d6; line-height: 1.55; }
+    a { color: #e9c84a; }
     .status { padding: 10px 14px; border: 1px solid #26334f; background: #111a2e; color: #d8e4ff; white-space: nowrap; }
-    .grid { display: grid; grid-template-columns: 280px 1fr; gap: 16px; align-items: start; }
+    .grid { display: grid; grid-template-columns: 330px 1fr; gap: 16px; align-items: start; }
     .panel, .output { border: 1px solid #26334f; background: #111a2e; padding: 18px; }
     label { display: block; font-size: 13px; color: #d8e4ff; margin: 0 0 8px; }
     input, select, textarea, button { width: 100%; border: 1px solid #33415f; background: #0c1222; color: #f6f3ea; padding: 12px; font: inherit; }
-    textarea { min-height: 190px; resize: vertical; line-height: 1.5; }
+    textarea { min-height: 360px; resize: vertical; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; }
     button { margin-top: 12px; cursor: pointer; background: #e9c84a; color: #0c1222; border: 0; font-weight: 800; }
+    .ghost { background: #1b2740; color: #f6f3ea; border: 1px solid #33415f; }
     .quick { display: grid; gap: 8px; margin-top: 18px; }
-    .quick button { margin: 0; background: #1b2740; color: #f6f3ea; border: 1px solid #33415f; text-align: left; font-weight: 600; }
+    .quick button { margin: 0; text-align: left; }
+    .hint { margin-top: 12px; font-size: 13px; color: #93a1bd; }
     pre { white-space: pre-wrap; word-break: break-word; margin: 0; line-height: 1.55; color: #f6f3ea; }
-    @media (max-width: 760px) { header { display: block; } .status { margin-top: 16px; display: inline-block; } .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 820px) { header { display: block; } .status { margin-top: 16px; display: inline-block; } .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <main>
-    <header><div><h1>AutoFlow Cockpit</h1><p>Assistant fondateur pour construire l'offre, le site, les scripts, les workflows Make et les livrables clients.</p></div><div class="status" id="status">Prêt</div></header>
+    <header>
+      <div>
+        <h1>AutoFlow Cockpit</h1>
+        <p>Teste et pilote les agents SaaS : acquisition, relance argent, satisfaction, contenu, devis, onboarding, coach business et ROI.</p>
+      </div>
+      <div class="status" id="status">Prêt</div>
+    </header>
+
     <section class="grid">
       <aside class="panel">
-        <label for="token">Webhook secret</label><input id="token" type="password" placeholder="WEBHOOK_SECRET">
-        <label for="mode" style="margin-top:14px;">Mode</label><select id="mode"><option value="strategy">Stratégie</option><option value="offer">Offre</option><option value="website">Site</option><option value="sales">Vente</option><option value="workflow">Workflow Make</option></select>
-        <div class="quick"><button data-prompt="Crée une offre AutoFlow pour les coachs sportifs à 490€/mois, avec livrables, bénéfices et objections.">Offre coach 490€</button><button data-prompt="Écris une section de page d'accueil pour vendre AutoFlow aux indépendants et PME locales.">Section site AutoFlow</button><button data-prompt="Prépare un script d'appel découverte de 20 minutes pour vendre AutoFlow à un coach sportif.">Script appel</button><button data-prompt="Donne-moi les scénarios Make à créer pour un nouveau client coach sportif.">Scénarios Make</button></div>
+        <label for="token">Webhook secret</label>
+        <input id="token" type="password" placeholder="WEBHOOK_SECRET">
+
+        <label for="agent" style="margin-top:14px;">Agent</label>
+        <select id="agent"></select>
+
+        <div class="quick">
+          <button class="ghost" data-example="lead">Exemple prospect chaud</button>
+          <button class="ghost" data-example="money">Exemple relance argent</button>
+          <button class="ghost" data-example="onboarding">Exemple onboarding</button>
+          <button class="ghost" data-example="dashboard">Exemple dashboard</button>
+        </div>
+
+        <p class="hint">Les agents appellent l'API avec le secret Vercel. Pour Make, utilise les mêmes endpoints et le header <strong>x-autoflow-token</strong>.</p>
+        <p class="hint"><a href="/dashboard-patron.html" target="_blank">Ouvrir le Dashboard Patron</a></p>
       </aside>
-      <section class="panel"><label for="message">Demande</label><textarea id="message" placeholder="Exemple : construis-moi une offre pour les kinés avec prix, promesse, livrables et email d'approche."></textarea><button id="send">Générer</button></section>
+
+      <section class="panel">
+        <label for="payload">Payload JSON</label>
+        <textarea id="payload"></textarea>
+        <button id="send">Lancer l'agent</button>
+      </section>
     </section>
-    <section class="output" style="margin-top:16px;"><pre id="output">Les réponses de l'assistant apparaîtront ici.</pre></section>
+
+    <section class="output" style="margin-top:16px;">
+      <pre id="output">La réponse de l'agent apparaîtra ici.</pre>
+    </section>
   </main>
+
   <script>
-    const token = document.querySelector("#token"), mode = document.querySelector("#mode"), message = document.querySelector("#message"), output = document.querySelector("#output"), status = document.querySelector("#status");
-    document.querySelectorAll("[data-prompt]").forEach((button) => button.addEventListener("click", () => { message.value = button.dataset.prompt; }));
+    const agents = {
+      founder: { label: "Assistant fondateur", path: "/api/agents/founder", payload: { mode: "strategy", message: "Crée une nouvelle offre AutoFlow pour les kinés.", context: "AutoFlow vend des agents IA et automatisations aux indépendants." } },
+      acquisition: { label: "1. Acquisition Boost", path: "/api/agents/acquisition-boost", payload: { action: "process", orgId: "BENOIT_ORG_ID", agentId: "ACQUISITION_AGENT_ID", prospectData: { name: "Lucas Martin", email: "lucas@example.com", phone: "0600000000", source: "formulaire", goal: "Préparer un Hyrox à Nantes", timeline: "8 semaines", budget: "pack coaching", message: "Je veux être prêt rapidement et être suivi sérieusement." } } },
+      relance: { label: "2. Relance Argent", path: "/api/agents/relance-argent", payload: { action: "generate", orgId: "BENOIT_ORG_ID", agentId: "RELANCE_AGENT_ID", relanceType: "fin_de_pack", targetData: { client_name: "Marie", client_email: "marie@example.com", amount_euros: 600, sessions_remaining: 2, last_result: "progression nette sur les WOD Hyrox" } } },
+      satisfaction: { label: "3. Satisfaction & Avis", path: "/api/agents/satisfaction", payload: { action: "survey", orgId: "BENOIT_ORG_ID", agentId: "SATISFACTION_AGENT_ID", clientData: { name: "Sarah", email: "sarah@example.com", service: "coaching Hyrox", rating: 5, comment: "Super accompagnement" } } },
+      contenu: { label: "5. Contenu Réseaux", path: "/api/agents/contenu-reseaux", payload: { action: "generate", orgId: "BENOIT_ORG_ID", agentId: "CONTENU_AGENT_ID", brief: { platform: "instagram", topic: "préparation Hyrox", format: "carousel", objective: "attirer des prospects à Nantes" } } },
+      devis: { label: "7. Offre & Devis", path: "/api/agents/devis", payload: { action: "generate", orgId: "BENOIT_ORG_ID", agentId: "DEVIS_AGENT_ID", brief: { client_name: "Thomas", need: "prépa Hyrox 12 semaines", budget: "600-900", offer: "pack 10 séances + suivi" } } },
+      onboarding: { label: "6. Onboarding Client", path: "/api/agents/onboarding", payload: { action: "start", orgId: "BENOIT_ORG_ID", agentId: "ONBOARDING_AGENT_ID", clientData: { name: "Emma", email: "emma@example.com", offer: "Pack 10 séances", goal: "remise en forme + Hyrox" } } },
+      coach: { label: "8. Coach Business", path: "/api/agents/coach-business", payload: { action: "weekly_coaching", orgId: "BENOIT_ORG_ID", agentId: "COACH_BUSINESS_AGENT_ID", metrics: { leads: 8, hot_leads: 3, inactive_clients: 2, revenue_opportunity: 1200 } } },
+      roi: { label: "9. ROI Reporting", path: "/api/agents/roi-reporting", payload: { action: "monthly_report", orgId: "BENOIT_ORG_ID", agentId: "ROI_AGENT_ID", metrics: { leads_generated: 14, hours_saved: 18, recovered_revenue: 900, subscription_price: 490 } } }
+    };
+
+    const token = document.querySelector("#token");
+    const agent = document.querySelector("#agent");
+    const payload = document.querySelector("#payload");
+    const output = document.querySelector("#output");
+    const status = document.querySelector("#status");
+
+    Object.entries(agents).forEach(([key, value]) => {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = value.label;
+      agent.appendChild(option);
+    });
+
+    function setPayload(key) {
+      payload.value = JSON.stringify(agents[key].payload, null, 2);
+    }
+
+    agent.addEventListener("change", () => setPayload(agent.value));
+    setPayload("founder");
+
+    document.querySelectorAll("[data-example]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const map = { lead: "acquisition", money: "relance", onboarding: "onboarding", dashboard: "coach" };
+        agent.value = map[button.dataset.example];
+        setPayload(agent.value);
+      });
+    });
+
     document.querySelector("#send").addEventListener("click", async () => {
-      status.textContent = "Génération..."; output.textContent = "";
+      status.textContent = "Appel en cours...";
+      output.textContent = "";
       try {
-        const response = await fetch("/api/agents/founder", { method: "POST", headers: { "Content-Type": "application/json", "x-autoflow-token": token.value }, body: JSON.stringify({ mode: mode.value, message: message.value }) });
-        const data = await response.json(); if (!response.ok) throw new Error(data.error || "Erreur inconnue");
-        output.textContent = data.reply; status.textContent = "Terminé";
-      } catch (error) { output.textContent = error.message; status.textContent = "Erreur"; }
+        const body = JSON.parse(payload.value);
+        const response = await fetch(agents[agent.value].path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-autoflow-token": token.value },
+          body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Erreur inconnue");
+        output.textContent = JSON.stringify(data, null, 2);
+        status.textContent = "Terminé";
+      } catch (error) {
+        output.textContent = error.message;
+        status.textContent = "Erreur";
+      }
     });
   </script>
 </body>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ben&Fit — Dashboard Patron</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #f6f5f2;
+    --surface: #ffffff;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --text: #1a1a1a;
+    --muted: #6b6e7a;
+    --orange: #f26419;
+    --orange-bg: #fff3ec;
+    --green: #3ecf8e;
+    --green-bg: #edfaf4;
+    --blue: #185FA5;
+    --blue-bg: #edf4fc;
+    --red: #e24b4a;
+    --red-bg: #fdf0f0;
+    --amber: #BA7517;
+    --amber-bg: #fef6e4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+  .topbar-logo span { color: var(--orange); }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .status-dot {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .topbar-date { font-size: 12px; color: var(--muted); }
+
+  /* ── LAYOUT ── */
+  .main { padding: 28px 32px; max-width: 1200px; margin: 0 auto; }
+
+  /* ── SECTION HEADER ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    margin-top: 28px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── METRIC CARDS ── */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative; overflow: hidden;
+  }
+  .metric-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  .metric-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; line-height: 1;
+    color: var(--text);
+  }
+  .metric-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .metric-delta { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .up { color: #3B6D11; } .dn { color: var(--red); }
+
+  /* ── GRID 2 COLS ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .card-badge {
+    font-size: 10px; font-weight: 500;
+    padding: 3px 10px; border-radius: 99px;
+  }
+  .card-body { padding: 16px 20px; }
+
+  /* ── LEAD ROW ── */
+  .lead-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .lead-row:last-child { border-bottom: none; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500; flex-shrink: 0;
+  }
+  .lead-info { flex: 1; min-width: 0; }
+  .lead-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .lead-src { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .score { font-size: 12px; font-weight: 600; }
+  .badge {
+    font-size: 10px; font-weight: 500;
+    padding: 3px 9px; border-radius: 99px;
+  }
+  .badge-hot { background: var(--amber-bg); color: var(--amber); }
+  .badge-warm { background: var(--blue-bg); color: var(--blue); }
+  .badge-cold { background: #f0f0f0; color: var(--muted); }
+
+  /* ── TASK ROW ── */
+  .task-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .task-row:last-child { border-bottom: none; }
+  .task-prio { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .task-title { font-size: 13px; color: var(--text); line-height: 1.4; }
+  .task-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── RELANCE ROW ── */
+  .relance-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .relance-row:last-child { border-bottom: none; }
+  .relance-label { flex: 1; font-size: 13px; color: var(--text); }
+  .relance-count { font-size: 12px; color: var(--muted); }
+  .relance-amount { font-size: 13px; font-weight: 500; color: #3B6D11; }
+
+  /* ── PROGRESS ── */
+  .progress { height: 4px; background: var(--border); border-radius: 99px; margin-top: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; }
+
+  /* ── COPILOT ── */
+  .copilot {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 3px solid var(--orange);
+  }
+  .copilot-title {
+    font-size: 13px; font-weight: 500; color: var(--text);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .copilot-line {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; color: var(--text); padding: 5px 0;
+  }
+  .copilot-line .icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .hl { font-weight: 500; color: var(--orange); }
+  .warn { font-weight: 500; color: var(--amber); }
+
+  /* ── BTN ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    background: var(--orange);
+    color: #fff; border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 14px; border-radius: 6px;
+    font-size: 12px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--orange); color: var(--orange); }
+
+  /* ── LOADING ── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px; color: var(--muted); font-size: 13px;
+  }
+
+  /* ── CHART ── */
+  .chart-wrap { position: relative; width: 100%; height: 160px; }
+
+  @media (max-width: 768px) {
+    .main { padding: 20px 16px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .topbar { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Ben<span>&</span>Fit</div>
+  <div class="topbar-right">
+    <div class="status-dot"><div class="dot"></div> 3 agents actifs</div>
+    <div class="topbar-date" id="currentDate"></div>
+  </div>
+</div>
+
+<div class="main" id="app">
+  <div class="loading">Chargement du dashboard...</div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG — remplacer avec les vraies valeurs
+// ─────────────────────────────────────────────
+const SUPABASE_URL = 'VOTRE_SUPABASE_URL';
+const SUPABASE_KEY = 'VOTRE_SUPABASE_ANON_KEY';
+const ORG_ID = 'VOTRE_DEFAULT_ORG_ID';
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', {
+  weekday: 'long', day: 'numeric', month: 'long'
+});
+
+// ─────────────────────────────────────────────
+// FETCH DATA
+// ─────────────────────────────────────────────
+async function loadDashboard() {
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+
+  const [leadsRes, tasksRes, eventsRes, convRes] = await Promise.all([
+    sb.from('leads').select('*').eq('org_id', ORG_ID).order('created_at', { ascending: false }),
+    sb.from('tasks').select('*').eq('org_id', ORG_ID).not('status', 'in', '("done","cancelled")').order('priority', { ascending: true }),
+    sb.from('events').select('*').eq('org_id', ORG_ID).gte('created_at', weekAgo).order('created_at', { ascending: false }),
+    sb.from('conversations').select('*').eq('org_id', ORG_ID).order('updated_at', { ascending: false }).limit(10),
+  ]);
+
+  const leads = leadsRes.data || [];
+  const tasks = tasksRes.data || [];
+  const events = eventsRes.data || [];
+  const convs = convRes.data || [];
+
+  // Stats calculées
+  const newLeads = leads.filter(l => new Date(l.created_at) > new Date(weekAgo)).length;
+  const hotLeads = leads.filter(l => l.score >= 70 && l.stage !== 'won' && l.stage !== 'lost');
+  const proposals = leads.filter(l => l.stage === 'proposal');
+  const inactifs = leads.filter(l => l.stage === 'won' && new Date(l.last_contact_at) < new Date(Date.now() - 14 * 86400000));
+  const packLeads = leads.filter(l => {
+    const total = parseInt(l.enriched_data?.pack_sessions_total || 0);
+    const used = parseInt(l.enriched_data?.pack_sessions_used || 0);
+    return total > 0 && (total - used) <= 2;
+  });
+
+  const totalAtStake = proposals.length * 490 + inactifs.length * 150 + packLeads.length * 600;
+  const hoursaved = Math.round(events.length * 0.18 * 10) / 10;
+
+  // Activité par jour pour le graphique
+  const days = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const commData = Array(7).fill(0);
+  const acqData = Array(7).fill(0);
+  const relanceData = Array(7).fill(0);
+  events.forEach(e => {
+    const d = new Date(e.created_at).getDay();
+    const i = d === 0 ? 6 : d - 1;
+    if (e.type?.includes('message')) commData[i]++;
+    else if (e.type?.includes('lead')) acqData[i]++;
+    else if (e.type?.includes('relance')) relanceData[i]++;
+  });
+
+  render({ leads, hotLeads, tasks, events, convs, newLeads, totalAtStake, hoursaved, proposals, inactifs, packLeads, days, commData, acqData, relanceData });
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function render({ leads, hotLeads, tasks, events, convs, newLeads, totalAtStake, hoursaved, proposals, inactifs, packLeads, days, commData, acqData, relanceData }) {
+  document.getElementById('app').innerHTML = `
+    <div class="section-label">Cette semaine</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--blue-bg);color:var(--blue)">👥</div>
+        <div class="metric-val">${newLeads}</div>
+        <div class="metric-label">Nouveaux prospects</div>
+        <div class="metric-delta up">↑ depuis 7 jours</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--amber-bg);color:var(--amber)">🔥</div>
+        <div class="metric-val">${hotLeads.length}</div>
+        <div class="metric-label">Prospects chauds</div>
+        <div class="metric-delta" style="color:var(--muted)">score ≥ 70</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--green-bg);color:#3B6D11">💰</div>
+        <div class="metric-val">${totalAtStake.toLocaleString('fr-FR')}€</div>
+        <div class="metric-label">Chiffre récupérable</div>
+        <div class="metric-delta" style="color:var(--muted)">${proposals.length} devis + ${inactifs.length} inactifs</div>
+      </div>
+      <div class="metric">
+        <div class="metric-icon" style="background:var(--orange-bg);color:var(--orange)">⏱</div>
+        <div class="metric-val">${hoursaved}h</div>
+        <div class="metric-label">Temps gagné</div>
+        <div class="metric-delta up">↑ automatisé</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">Leads & Relances</div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔥 Leads chauds</div>
+          <span class="card-badge" style="background:var(--amber-bg);color:var(--amber)">${hotLeads.length} à traiter</span>
+        </div>
+        <div class="card-body">
+          ${hotLeads.slice(0,4).map(l => `
+            <div class="lead-row">
+              <div class="avatar" style="background:${l.score>=80?'var(--amber-bg)':'var(--blue-bg)'};color:${l.score>=80?'var(--amber)':'var(--blue)'}">
+                ${(l.full_name||'??').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}
+              </div>
+              <div class="lead-info">
+                <div class="lead-name">${l.full_name || l.email}</div>
+                <div class="lead-src">${l.source || 'Direct'} · ${l.pain_points?.[0] || 'Objectif non précisé'}</div>
+              </div>
+              <div class="score" style="color:${l.score>=70?'#3B6D11':l.score>=50?'var(--blue)':'var(--muted)'}">${l.score}/100</div>
+              <span class="badge ${l.score>=70?'badge-hot':l.score>=50?'badge-warm':'badge-cold'}">${l.score>=70?'Chaud':l.score>=50?'Tiède':'Froid'}</span>
+            </div>
+          `).join('') || '<div style="color:var(--muted);font-size:13px;padding:12px 0">Aucun lead chaud cette semaine</div>'}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💰 Argent qui dort</div>
+          <span class="card-badge" style="background:var(--green-bg);color:#3B6D11">${totalAtStake.toLocaleString('fr-FR')}€</span>
+        </div>
+        <div class="card-body">
+          <div class="relance-row">
+            <span style="font-size:16px">📋</span>
+            <span class="relance-label">Devis non signés</span>
+            <span class="relance-count">${proposals.length} dossiers</span>
+            <span class="relance-amount">+${(proposals.length * 490).toLocaleString('fr-FR')}€</span>
+          </div>
+          <div class="progress"><div class="progress-fill" style="width:${Math.min(proposals.length*20,100)}%;background:#EF9F27"></div></div>
+          <div class="relance-row" style="margin-top:8px">
+            <span style="font-size:16px">💤</span>
+            <span class="relance-label">Clients inactifs</span>
+            <span class="relance-count">${inactifs.length} clients</span>
+            <span class="relance-amount">+${(inactifs.length * 150).toLocaleString('fr-FR')}€</span>
+          </div>
+          <div class="progress"><div class="progress-fill" style="width:${Math.min(inactifs.length*15,100)}%;background:var(--blue)"></div></div>
+          <div class="relance-row" style="margin-top:8px">
+            <span style="font-size:16px">📦</span>
+            <span class="relance-label">Packs à renouveler</span>
+            <span class="relance-count">${packLeads.length} packs</span>
+            <span class="relance-amount">+${(packLeads.length * 600).toLocaleString('fr-FR')}€</span>
+          </div>
+          <div class="progress"><div class="progress-fill" style="width:${Math.min(packLeads.length*25,100)}%;background:#3B6D11"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">Tâches & Activité</div>
+    <div class="grid3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">✅ Tâches prioritaires</div>
+          <span class="card-badge" style="background:var(--red-bg);color:var(--red)">${tasks.filter(t=>t.priority==='urgent').length} urgentes</span>
+        </div>
+        <div class="card-body">
+          ${tasks.slice(0,5).map(t => `
+            <div class="task-row">
+              <div class="task-prio" style="background:${t.priority==='urgent'?'var(--red)':t.priority==='high'?'var(--amber)':t.priority==='medium'?'var(--blue)':'#ccc'}"></div>
+              <div>
+                <div class="task-title">${t.title}</div>
+                <div class="task-meta">${t.auto_generated ? 'Auto-généré' : 'Manuel'} · ${t.due_date ? new Date(t.due_date).toLocaleDateString('fr-FR') : 'Sans échéance'}</div>
+              </div>
+            </div>
+          `).join('') || '<div style="color:var(--muted);font-size:13px;padding:12px 0">Aucune tâche en attente 🎉</div>'}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">📊 Agents cette semaine</div></div>
+        <div class="card-body">
+          <div class="chart-wrap"><canvas id="agentChart" role="img" aria-label="Activité agents 7 jours">Activité des agents AutoFlow sur 7 jours.</canvas></div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:11px;color:var(--muted)">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:var(--blue);display:inline-block"></span>Communication</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#639922;display:inline-block"></span>Acquisition</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:#EF9F27;display:inline-block"></span>Relance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">Ton copilote</div>
+    <div class="copilot">
+      <div class="copilot-title">🤖 Récap AutoFlow — ${new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'})}</div>
+      <div class="copilot-line"><span class="icon">✅</span><span><span class="hl">${newLeads} nouveaux prospects</span> traités automatiquement cette semaine</span></div>
+      <div class="copilot-line"><span class="icon">✅</span><span><span class="hl">${events.length} actions</span> exécutées par tes agents — ${hoursaved}h économisées</span></div>
+      <div class="copilot-line"><span class="icon">💰</span><span><span class="hl">${totalAtStake.toLocaleString('fr-FR')}€ récupérables</span> identifiés — ${proposals.length} devis + ${inactifs.length} inactifs + ${packLeads.length} packs</span></div>
+      ${hotLeads.length > 0 ? `<div class="copilot-line"><span class="icon">⚠️</span><span><span class="warn">Action prioritaire :</span> ${hotLeads[0].full_name || hotLeads[0].email} — score ${hotLeads[0].score}/100 — à contacter aujourd'hui</span></div>` : ''}
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" onclick="window.location.reload()">🔄 Actualiser</button>
+        <a href="mailto:${hotLeads[0]?.email || ''}" class="btn" style="text-decoration:none">📧 Contacter lead chaud</a>
+      </div>
+    </div>
+  `;
+
+  // Graphique agents
+  new Chart(document.getElementById('agentChart'), {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [
+        { label: 'Communication', data: commData, backgroundColor: '#185FA5', borderRadius: 3 },
+        { label: 'Acquisition', data: acqData, backgroundColor: '#639922', borderRadius: 3 },
+        { label: 'Relance', data: relanceData, backgroundColor: '#EF9F27', borderRadius: 3 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index' } },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { stacked: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 }, stepSize: 2 } }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// DÉMARRER
+// ─────────────────────────────────────────────
+loadDashboard().catch(err => {
+  document.getElementById('app').innerHTML = `
+    <div style="padding:40px;text-align:center;color:#999">
+      <div style="font-size:32px;margin-bottom:16px">⚙️</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:8px">Dashboard en cours de configuration</div>
+      <div style="font-size:13px">Remplace VOTRE_SUPABASE_URL et VOTRE_SUPABASE_ANON_KEY dans le fichier</div>
+    </div>`;
+});
+
+// Auto-refresh toutes les 5 minutes
+setInterval(loadDashboard, 5 * 60 * 1000);
+</script>
+</body>
+</html>
