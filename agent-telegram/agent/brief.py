@@ -25,6 +25,42 @@ messages non lus). 6 lignes max, regroupe si besoin.
 N'invente rien : si une rubrique est vide, dis-le en quelques mots ou saute-la."""
 
 
+ORAL_PROMPT = """Fais mon brief du matin, mais pour une NOTE VOCALE d'1 à 2 minutes.
+1. Appelle daily_brief_data, puis cherche sur le web la fête du jour et 4-5 actus importantes \
+des dernières 24 h (monde, France, sport).
+2. Rédige un texte fait pour être écouté : comme une amie qui te briefe, tutoiement, phrases \
+courtes qui s'enchaînent, aucun émoji, aucune liste, aucun lien, aucun symbole. Écris les \
+heures en toutes lettres (« 18 heures 30 »). Ordre : bonjour + date + fête du jour, \
+rendez-vous, tâches importantes, points coaching s'il y en a, anniversaires, actus en \
+une phrase chacune, puis une phrase d'élan pour finir.
+3. Réponds UNIQUEMENT avec ce texte, sans titre ni commentaire, et n'appelle pas send_voice_note."""
+
+FORMATS = {"texte": "texte", "text": "texte", "écrit": "texte", "ecrit": "texte",
+           "vocal": "vocal", "audio": "vocal", "voix": "vocal", "oral": "vocal",
+           "deux": "les deux", "les deux": "les deux", "both": "les deux", "tout": "les deux"}
+
+
+def parse_format(raw: str | None, default: str = "texte") -> str:
+    raw = (raw or "").strip().lower()
+    return FORMATS.get(raw, FORMATS.get(raw.split()[-1], default) if raw else default)
+
+
+async def run(chat_id: int, fmt: str, send_text) -> None:
+    """Produit le brief au format demandé et l'envoie (send_text : coroutine (chat_id, texte))."""
+    from . import voice
+    from .brain import think
+
+    if fmt == "vocal":
+        oral = await think(chat_id, ORAL_PROMPT, use_history=False)
+        if not await voice.send(chat_id, oral, caption="☀️ Brief du matin"):
+            await send_text(chat_id, "(La note vocale a échoué, voici le brief en texte.)\n\n" + oral)
+        return
+    text = await think(chat_id, PROMPT, use_history=False)
+    await send_text(chat_id, text)
+    if fmt == "les deux":
+        await voice.send(chat_id, text, caption="☀️ Brief du matin (version audio)")
+
+
 BILANS_NAME = "Bilans du week-end"
 BILANS_PROMPT = """Fais le point sur les bilans hebdo : appelle coaching_bilans_weekend.
 Rédige sans Markdown, court :

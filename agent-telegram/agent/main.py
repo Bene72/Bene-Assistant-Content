@@ -8,7 +8,7 @@ from telegram.constants import ChatAction
 from telegram.ext import (Application, CommandHandler, ContextTypes, MessageHandler,
                           filters)
 
-from . import brief, config, scheduler, storage
+from . import brief, config, scheduler, storage, voice
 from .brain import think
 
 logging.basicConfig(
@@ -56,7 +56,8 @@ async def cmd_start(update: Update, _: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"Salut {config.OWNER_NAME}, je suis en ligne.\n\n"
         "Écris-moi normalement. Commandes utiles :\n"
-        "/brief : ton brief du jour maintenant\n"
+        "/brief : ton brief du jour en texte\n"
+        "/brief vocal (ou /briefvocal) : en note vocale · /brief les deux : texte + vocal\n"
         "/bilans : qui a fait son bilan (vendredi → lundi)\n"
         "/taches : voir les tâches planifiées\n"
         "/reset : effacer l'historique de la conversation\n"
@@ -92,10 +93,35 @@ async def cmd_tasks(update: Update, _: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines))
 
 
-async def cmd_brief(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_brief(update: Update, context: ContextTypes.DEFAULT_TYPE, fmt: str | None = None):
     if not authorized(update):
         return await refuse(update)
-    await answer(update, context, brief.PROMPT, use_history=False)
+    fmt = fmt or brief.parse_format(" ".join(context.args or []), default="texte")
+    chat_id = update.effective_chat.id
+
+    async def send_text(cid, text):
+        for part in split(text):
+            await context.bot.send_message(cid, part, disable_web_page_preview=True)
+
+    action = ChatAction.RECORD_VOICE if fmt == "vocal" else ChatAction.TYPING
+
+    async def keep_busy():
+        while True:
+            await context.bot.send_chat_action(chat_id, action)
+            await asyncio.sleep(4)
+
+    busy = asyncio.create_task(keep_busy())
+    try:
+        await brief.run(chat_id, fmt, send_text)
+    except Exception as e:
+        log.exception("erreur brief")
+        await update.message.reply_text(f"Oups, le brief a échoué : {type(e).__name__}: {e}")
+    finally:
+        busy.cancel()
+
+
+async def cmd_brief_vocal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await cmd_brief(update, context, fmt="vocal")
 
 
 async def cmd_bilans(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -138,7 +164,12 @@ async def post_init(app: Application):
         for part in split(text):
             await app.bot.send_message(chat_id, part, disable_web_page_preview=True)
 
+    async def send_voice(chat_id: int, path, caption: str = ""):
+        with open(path, "rb") as f:
+            await app.bot.send_voice(chat_id, voice=f, caption=caption or None, filename="brief.mp3")
+
     scheduler.set_sender(send)
+    voice.set_sender(send_voice)
     brief.ensure_daily_task()
     scheduler.start()
     for uid in config.ALLOWED_USER_IDS:
@@ -171,6 +202,7 @@ def main():
     app.add_handler(CommandHandler("taches", cmd_tasks))
     app.add_handler(CommandHandler("brief", cmd_brief))
     app.add_handler(CommandHandler("bilans", cmd_bilans))
+    app.add_handler(CommandHandler("briefvocal", cmd_brief_vocal))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
     log.info("Agent en ligne. Ctrl+C pour arrêter.")
     app.run_polling(drop_pending_updates=True)

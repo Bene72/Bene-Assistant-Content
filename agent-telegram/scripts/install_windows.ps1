@@ -45,7 +45,11 @@ if (-not (Test-Path ".env")) {
     Write-Host "Fichier .env cree." -ForegroundColor Green
 }
 
-& (Join-Path $PSScriptRoot "connexion_claude.ps1")
+if (Select-String -Path ".env" -Pattern '^CLAUDE_CODE_OAUTH_TOKEN=\s*sk-ant-' -Quiet) {
+    Write-Host "Deja connecte a ton compte Claude." -ForegroundColor Green
+} else {
+    & (Join-Path $PSScriptRoot "connexion_claude.ps1")
+}
 
 Write-Host ""
 Write-Host "Derniere etape : colle le token de ton bot Telegram dans .env (il s'ouvre dans le Bloc-notes)," -ForegroundColor Cyan

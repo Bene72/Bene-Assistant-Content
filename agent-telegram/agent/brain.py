@@ -35,6 +35,7 @@ de Pull Request (jamais de push direct sur la branche principale).
 - Mémoire : noter durablement ce qu'il te demande de retenir.
 - Organisation perso : sa to-do (todo_*), les anniversaires de ses proches (birthday_*), \
 son agenda (agenda_events, lecture seule) et son brief du matin (daily_brief_data).
+- Vocal : s'il demande une réponse en vocal/audio, utilise send_voice_note.
 - Journal : quand il te raconte sa journée, son ressenti, ses victoires ou ses galères, \
 propose de l'ajouter à son journal (journal_write) ; tu peux l'aider à faire le bilan de \
 la semaine avec journal_read.

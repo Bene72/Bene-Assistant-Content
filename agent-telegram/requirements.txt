@@ -8,3 +8,4 @@ tzdata
 icalendar>=6
 recurring-ical-events>=3
 holidays>=0.50
+edge-tts>=7

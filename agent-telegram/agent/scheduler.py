@@ -28,6 +28,14 @@ async def _run_task(task_id: int):
     if not task or not task["enabled"]:
         return
     log.info("tâche %s : %s", task_id, task["name"])
+    from . import brief
+    if task["name"] == brief.NAME and _send:
+        try:
+            await brief.run(task["chat_id"], brief.parse_format(config.BRIEF_FORMAT), _send)
+        except Exception as e:
+            log.exception("échec du brief")
+            await _send(task["chat_id"], f"Le brief a échoué : {e}")
+        return
     prompt = (
         f"[Tâche automatique « {task['name']} »] {task['prompt']}\n"
         "Exécute-la maintenant et rédige directement le message final à envoyer."

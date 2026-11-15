@@ -7,6 +7,8 @@ if not exist ".venv\Scripts\python.exe" (
     pause
     exit /b 1
 )
+echo Verification des dependances...
+".venv\Scripts\python.exe" -m pip install -q -r requirements.txt --disable-pip-version-check
 :loop
 ".venv\Scripts\python.exe" -m agent.main
 if errorlevel 2 (

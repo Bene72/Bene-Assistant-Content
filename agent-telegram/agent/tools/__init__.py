@@ -61,4 +61,4 @@ async def run(name: str, args: dict, ctx: dict) -> tuple[str, bool]:
 
 
 # Chargement des compétences
-from . import notes, schedule, web, coaching, github, agenda, personal  # noqa: E402,F401
+from . import notes, schedule, web, coaching, github, agenda, personal, vocal  # noqa: E402,F401

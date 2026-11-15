@@ -53,7 +53,7 @@ C'est prêt. Seul toi peux lui parler.
 Chaque jour à 7h30 (réglable avec `BRIEF_TIME` dans `.env`), l'agent t'envoie :
 ☀️ la date, la fête du jour et les jours fériés · 📅 tes rendez-vous · ✅ tes tâches (en retard, du jour) · 🎂 les anniversaires des 7 prochains jours · 🌍 5 actus · 💬 une phrase d'élan.
 
-Tape `/brief` pour l'avoir tout de suite.
+Tape `/brief` pour l'avoir tout de suite en texte, `/brief vocal` (ou `/briefvocal`) en note vocale, `/brief les deux` pour les deux. Pour le brief automatique, choisis avec `BRIEF_FORMAT=texte`, `vocal` ou `les deux` dans `.env`. Tu peux aussi demander n'importe quelle réponse « en vocal ».
 
 Pour le remplir, parle-lui normalement :
 - « Rappelle-moi d'appeler le comptable jeudi » : ajouté à la to-do

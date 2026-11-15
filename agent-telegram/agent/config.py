@@ -70,6 +70,12 @@ def _calendars(raw: str) -> dict[str, str]:
 CALENDARS = _calendars(_get("CALENDARS"))
 # Heure du brief du matin (HH:MM). Vide = pas de brief automatique.
 BRIEF_TIME = _get("BRIEF_TIME", "07:30")
+# Format du brief automatique : texte, vocal ou les deux
+BRIEF_FORMAT = _get("BRIEF_FORMAT", "texte").lower()
+# Voix des notes vocales (voix Microsoft Edge). Autres voix FR : fr-FR-VivienneMultilingualNeural,
+# fr-FR-EloiseNeural (féminines), fr-FR-HenriNeural (masculine)
+TTS_VOICE = _get("TTS_VOICE", "fr-FR-DeniseNeural")
+TTS_RATE = _get("TTS_RATE", "+5%")
 # Récap des bilans du week-end (cron, heure de Paris). Défaut : lundi 20h. Vide = désactivé.
 BILANS_CRON = _get("BILANS_CRON", "0 20 * * mon")
 
