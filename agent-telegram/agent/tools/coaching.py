@@ -3,6 +3,8 @@
 Aucune fonction ici n'écrit ni ne supprime de données : les données clients
 restent intactes quoi que l'agent fasse.
 """
+import re
+
 import httpx
 
 from .. import config
@@ -17,7 +19,12 @@ def _headers():
     return {"apikey": k, "Authorization": f"Bearer {k}"}
 
 
+_TABLE = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
+
+
 async def _get(path: str, params=None, extra_headers=None):  # params : dict ou liste de tuples
+    if path and not _TABLE.match(path):  # empêche de sortir de /rest/v1/ (ex. ../auth/v1/admin)
+        raise ValueError(f"nom de table invalide : {path!r}")
     async with httpx.AsyncClient(timeout=30) as c:
         r = await c.get(f"{config.SUPABASE_URL}/rest/v1/{path}", params=params,
                         headers={**_headers(), **(extra_headers or {})})
@@ -57,6 +64,7 @@ async def coaching_list_tables(ctx):
       ["table"], enabled=_enabled)
 async def coaching_query(ctx, table: str, select: str = "*", filters: dict | None = None,
                          order: str | None = None, limit: int = 50, count_only: bool = False):
+    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
     params = {"select": select}
     params.update(filters or {})
     if order:
@@ -184,6 +192,7 @@ async def coaching_overview(ctx):
       {"name": {"type": "string", "description": "Nom ou partie du nom de l'athlète"}},
       ["name"], enabled=_enabled)
 async def coaching_athlete(ctx, name: str):
+    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
     found = _ok(await _rows("profiles", [("select", "*"), ("role", "eq.client"),
                                          ("full_name", f"ilike.*{name.strip()}*")]))
     if not found:
@@ -256,6 +265,7 @@ def _scores(b: dict) -> dict:
       {"friday": {"type": "string", "description": "Vendredi de début AAAA-MM-JJ (optionnel)"}},
       enabled=_enabled)
 async def coaching_bilans_weekend(ctx, friday: str | None = None):
+    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
     if friday:
         start = dt.date.fromisoformat(friday)
         end = start + dt.timedelta(days=3)
@@ -310,6 +320,7 @@ async def coaching_bilans_weekend(ctx, friday: str | None = None):
        "week_start": {"type": "string", "description": "Lundi de la semaine AAAA-MM-JJ (optionnel)"}},
       ["name"], enabled=_enabled)
 async def coaching_bilan(ctx, name: str, week_start: str | None = None):
+    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
     found = _ok(await _rows("profiles", [("select", "*"), ("role", "eq.client"),
                                          ("full_name", f"ilike.*{name.strip()}*")]))
     if not found:

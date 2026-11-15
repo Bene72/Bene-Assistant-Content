@@ -45,6 +45,11 @@ CREATE TABLE IF NOT EXISTS journal (
     ts REAL NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -204,3 +209,31 @@ def read_journal(start: str, end: str) -> list[dict]:
         rows = c.execute("SELECT day, content FROM journal WHERE day BETWEEN ? AND ? ORDER BY day, id",
                          (start, end)).fetchall()
     return [dict(r) for r in rows]
+
+
+# --- Méta & sauvegarde ---------------------------------------------------------------
+def get_meta(key: str) -> str | None:
+    with db() as c:
+        r = c.execute("SELECT value FROM meta WHERE key=?", (key,)).fetchone()
+    return r["value"] if r else None
+
+
+def set_meta(key: str, value: str):
+    with db() as c:
+        c.execute("INSERT INTO meta(key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                  (key, value))
+
+
+def backup(keep: int = 7):
+    """Une copie de la base par jour dans data/backups (journal, to-do, notes…), 7 jours gardés."""
+    folder = config.DATA_DIR / "backups"
+    folder.mkdir(exist_ok=True)
+    target = folder / f"agent-{time.strftime('%Y-%m-%d')}.db"
+    if not target.exists() and config.DB_PATH.exists():
+        src, dst = sqlite3.connect(config.DB_PATH), sqlite3.connect(target)
+        with dst:
+            src.backup(dst)
+        src.close()
+        dst.close()
+    for old in sorted(folder.glob("agent-*.db"))[:-keep]:
+        old.unlink()

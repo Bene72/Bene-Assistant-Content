@@ -76,6 +76,13 @@ BRIEF_FORMAT = _get("BRIEF_FORMAT", "texte").lower()
 # fr-FR-EloiseNeural (féminines), fr-FR-HenriNeural (masculine)
 TTS_VOICE = _get("TTS_VOICE", "fr-FR-DeniseNeural")
 TTS_RATE = _get("TTS_RATE", "+5%")
+# Autoriser l'envoi de textes contenant des données clients au service vocal Microsoft
+TTS_CLIENT_DATA = _get("TTS_CLIENT_DATA", "false").lower() in ("1", "true", "yes", "oui")
+# Modèles par usage (vide = MODEL). Ex. Haiku au quotidien, Sonnet pour les réponses aux bilans.
+MODEL_BRIEF = _get("MODEL_BRIEF") or MODEL
+MODEL_COACH = _get("MODEL_COACH") or MODEL
+# Si le PC était éteint à l'heure du brief, l'envoyer au démarrage jusqu'à cette heure (HH:MM)
+BRIEF_CATCHUP_UNTIL = _get("BRIEF_CATCHUP_UNTIL", "12:00")
 # Récap des bilans du week-end (cron, heure de Paris). Défaut : lundi 20h. Vide = désactivé.
 BILANS_CRON = _get("BILANS_CRON", "0 20 * * mon")
 

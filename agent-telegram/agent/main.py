@@ -2,20 +2,22 @@
 import asyncio
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import (Application, CommandHandler, ContextTypes, MessageHandler,
                           filters)
 
-from . import brief, config, scheduler, storage, voice
+from . import brief, config, confirm, diag, scheduler, storage, voice
 from .brain import think
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s : %(message)s",
     level=logging.INFO,
     handlers=[logging.StreamHandler(sys.stdout),
-              logging.FileHandler(config.DATA_DIR / "agent.log", encoding="utf-8")],
+              RotatingFileHandler(config.DATA_DIR / "agent.log", maxBytes=2_000_000, backupCount=3,
+                                  encoding="utf-8")],
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
 log = logging.getLogger("main")
@@ -35,7 +37,10 @@ def split(text: str) -> list[str]:
 
 
 def authorized(update: Update) -> bool:
-    return update.effective_user is not None and update.effective_user.id in config.ALLOWED_USER_IDS
+    """Uniquement Bene, et uniquement en conversation privée (jamais dans un groupe)."""
+    return (update.effective_user is not None
+            and update.effective_user.id in config.ALLOWED_USER_IDS
+            and update.effective_chat is not None and update.effective_chat.type == "private")
 
 
 async def refuse(update: Update):
@@ -59,6 +64,8 @@ async def cmd_start(update: Update, _: ContextTypes.DEFAULT_TYPE):
         "/brief : ton brief du jour en texte\n"
         "/brief vocal (ou /briefvocal) : en note vocale · /brief les deux : texte + vocal\n"
         "/bilans : qui a fait son bilan (vendredi → lundi)\n"
+        "/reponse Prénom : réponse prête à envoyer à son dernier bilan\n"
+        "/diag : vérifier que tout est bien connecté\n"
         "/taches : voir les tâches planifiées\n"
         "/reset : effacer l'historique de la conversation\n"
         "/id : afficher ton identifiant Telegram"
@@ -130,6 +137,33 @@ async def cmd_bilans(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await answer(update, context, brief.BILANS_PROMPT)
 
 
+async def cmd_reponse(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    name = " ".join(context.args or []).strip()
+    if not name:
+        return await update.message.reply_text("Dis-moi pour qui : /reponse Prénom")
+    await answer(update, context, f"Prépare-moi la réponse au dernier bilan de {name}.", model=config.MODEL_COACH)
+
+
+async def cmd_diag(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    await update.message.reply_text(await diag.run())
+
+
+async def cmd_ok(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    await update.message.reply_text(await confirm.execute(update.effective_chat.id), disable_web_page_preview=True)
+
+
+async def cmd_non(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    await update.message.reply_text(confirm.cancel(update.effective_chat.id))
+
+
 async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return await refuse(update)
@@ -139,7 +173,8 @@ async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await answer(update, context, text)
 
 
-async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, use_history: bool = True):
+async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, use_history: bool = True,
+                 model: str | None = None):
     chat_id = update.effective_chat.id
 
     async def keep_typing():
@@ -149,7 +184,7 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, 
 
     typing = asyncio.create_task(keep_typing())
     try:
-        reply = await think(chat_id, text, use_history=use_history)
+        reply = await think(chat_id, text, use_history=use_history, model=model)
     except Exception as e:
         log.exception("erreur")
         reply = f"Oups, une erreur : {type(e).__name__}: {e}"
@@ -170,8 +205,14 @@ async def post_init(app: Application):
 
     scheduler.set_sender(send)
     voice.set_sender(send_voice)
+    confirm.set_sender(send)
     brief.ensure_daily_task()
     scheduler.start()
+    if brief.missed_today():  # PC éteint à l'heure du brief : on le rattrape
+        log.info("brief du matin manqué : rattrapage")
+        task = next((t for t in storage.list_tasks() if t["name"] == brief.NAME), None)
+        if task:
+            asyncio.create_task(scheduler._run_task(task["id"]))
     for uid in config.ALLOWED_USER_IDS:
         try:
             await app.bot.send_message(uid, "✅ Agent Ben&Fit démarré.")
@@ -189,6 +230,10 @@ def main():
         sys.exit(2)
 
     storage.init()
+    try:
+        storage.backup()
+    except Exception:
+        log.exception("sauvegarde impossible")
     from . import tools
     active = [t.name for t in tools.REGISTRY.values() if t.enabled()]
     log.info("mode %s | modèle %s | compétences : %s", config.AUTH_MODE, config.MODEL, ", ".join(active))
@@ -203,6 +248,10 @@ def main():
     app.add_handler(CommandHandler("brief", cmd_brief))
     app.add_handler(CommandHandler("bilans", cmd_bilans))
     app.add_handler(CommandHandler("briefvocal", cmd_brief_vocal))
+    app.add_handler(CommandHandler("reponse", cmd_reponse))
+    app.add_handler(CommandHandler("diag", cmd_diag))
+    app.add_handler(CommandHandler("ok", cmd_ok))
+    app.add_handler(CommandHandler("non", cmd_non))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
     log.info("Agent en ligne. Ctrl+C pour arrêter.")
     app.run_polling(drop_pending_updates=True)

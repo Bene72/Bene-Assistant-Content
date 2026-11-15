@@ -51,11 +51,11 @@ async def run(chat_id: int, fmt: str, send_text) -> None:
     from .brain import think
 
     if fmt == "vocal":
-        oral = await think(chat_id, ORAL_PROMPT, use_history=False)
+        oral = await think(chat_id, ORAL_PROMPT, use_history=False, model=config.MODEL_BRIEF)
         if not await voice.send(chat_id, oral, caption="☀️ Brief du matin"):
             await send_text(chat_id, "(La note vocale a échoué, voici le brief en texte.)\n\n" + oral)
         return
-    text = await think(chat_id, PROMPT, use_history=False)
+    text = await think(chat_id, PROMPT, use_history=False, model=config.MODEL_BRIEF)
     await send_text(chat_id, text)
     if fmt == "les deux":
         await voice.send(chat_id, text, caption="☀️ Brief du matin (version audio)")
@@ -101,3 +101,29 @@ def _ensure(name: str, cron: str, prompt: str):
             storage.delete_task(t["id"])
         storage.add_task(name, cron, prompt, uid)
         log.info("« %s » programmé (%s) pour %s", name, cron, uid)
+
+
+def _today() -> str:
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo(config.TIMEZONE)).strftime("%Y-%m-%d")
+
+
+def mark_sent():
+    storage.set_meta("last_auto_brief", _today())
+
+
+def missed_today() -> bool:
+    """Vrai si le brief automatique n'est pas parti aujourd'hui alors que l'heure est passée
+    (PC éteint ou en veille à ce moment-là) et qu'il est encore temps de l'envoyer."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    if not config.BRIEF_TIME or not config.BRIEF_CATCHUP_UNTIL:
+        return False
+    now = datetime.now(ZoneInfo(config.TIMEZONE)).strftime("%H:%M")
+    try:
+        start = "%02d:%02d" % tuple(int(x) for x in config.BRIEF_TIME.split(":"))
+        end = "%02d:%02d" % tuple(int(x) for x in config.BRIEF_CATCHUP_UNTIL.split(":"))
+    except ValueError:
+        return False
+    return start < now <= end and storage.get_meta("last_auto_brief") != _today()

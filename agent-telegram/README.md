@@ -114,7 +114,7 @@ Relance `start.bat` après chaque modification du `.env`.
 - « Propose une PR qui corrige la faute de frappe dans le README de Track-your-progress »
 - « Retiens que Wissam a une compétition le 12 décembre »
 
-Commandes : `/brief` (brief du jour), `/bilans` (bilans du week-end), `/taches` (tâches planifiées), `/reset` (effacer la conversation), `/id`.
+Commandes : `/brief` (brief du jour), `/bilans` (bilans du week-end), `/reponse Prénom`, `/diag`, `/ok` et `/non`, `/taches` (tâches planifiées), `/reset` (effacer la conversation), `/id`.
 
 ---
 
@@ -154,6 +154,12 @@ Pour ajouter une compétence : crée un fichier dans `agent/tools/`, décore une
 
 ## Sécurité
 
-- Ne partage jamais le fichier `.env`.
-- Seuls les identifiants Telegram listés dans `ALLOWED_USER_IDS` sont servis.
-- Données clients : lecture seule. Code : uniquement via Pull Request, que tu valides toi-même.
+- Ne partage jamais le fichier `.env`. Seul ton identifiant Telegram est servi, et seulement en conversation privée.
+- Données clients : lecture seule. L'agent ne peut interroger que des tables de ton dashboard, rien d'autre dans Supabase.
+- Tout ce qui écrit à l'extérieur (issue ou Pull Request GitHub) attend ta confirmation : l'agent t'envoie un résumé exact, tu réponds `/ok` ou `/non`.
+- Les textes venant d'ailleurs (bilans, pages web, agenda) sont traités comme des données, jamais comme des ordres. Dans un message où des données clients ont été lues, l'agent ne peut plus ouvrir de page web ni envoyer de vocal : rien ne peut sortir par ce biais.
+- La lecture de pages web refuse les adresses locales (ta box, ton PC).
+- La voix passe par un service Microsoft externe : par défaut, aucun texte contenant des données clients n'y est envoyé (`TTS_CLIENT_DATA`).
+- Sauvegarde : une copie quotidienne de `data/agent.db` (journal, to-do, notes) dans `data/backups`, 7 jours gardés.
+- `/diag` vérifie toutes les connexions sans consommer ton quota.
+- Si le PC était éteint à 7h30, le brief part au démarrage (jusqu'à midi, réglable avec `BRIEF_CATCHUP_UNTIL`).

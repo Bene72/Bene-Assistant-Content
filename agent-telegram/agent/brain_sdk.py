@@ -14,7 +14,8 @@ from .brain import _system
 
 log = logging.getLogger("brain_sdk")
 SERVER = "benfit"
-BUILTIN = ["WebSearch", "WebFetch"] if config.WEB_SEARCH else []
+# WebFetch volontairement absent : la lecture de pages passe par fetch_page, qui est contrôlé
+BUILTIN = ["WebSearch"] if config.WEB_SEARCH else []
 
 
 def _server(ctx: dict):
@@ -25,7 +26,7 @@ def _server(ctx: dict):
 
         def make(name):
             async def handler(args):
-                log.info("outil %s %s", name, args)
+                log.info("outil %s %s", name, str(args)[:200])
                 out, is_error = await tools.run(name, dict(args or {}), ctx)
                 return {"content": [{"type": "text", "text": out}], "is_error": is_error}
             return handler
@@ -46,11 +47,12 @@ def _prompt(chat_id: int, user_text: str, use_history: bool) -> str:
             f"Nouveau message : {user_text}")
 
 
-async def think_sdk(chat_id: int, user_text: str, use_history: bool = True) -> str:
+async def think_sdk(chat_id: int, user_text: str, use_history: bool = True,
+                    model: str | None = None) -> str:
     server, tool_names = _server({"chat_id": chat_id})
     options = ClaudeAgentOptions(
         system_prompt=_system()[0]["text"],
-        model=config.MODEL,
+        model=model or config.MODEL,
         mcp_servers={SERVER: server},
         tools=BUILTIN,                         # aucun accès aux fichiers ni au terminal
         allowed_tools=BUILTIN + tool_names,

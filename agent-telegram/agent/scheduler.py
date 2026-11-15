@@ -31,6 +31,7 @@ async def _run_task(task_id: int):
     from . import brief
     if task["name"] == brief.NAME and _send:
         try:
+            brief.mark_sent()
             await brief.run(task["chat_id"], brief.parse_format(config.BRIEF_FORMAT), _send)
         except Exception as e:
             log.exception("échec du brief")
