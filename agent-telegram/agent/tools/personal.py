@@ -144,6 +144,8 @@ async def daily_brief_data(ctx):
             }
         except Exception as e:
             data["coaching"] = f"indisponible : {e}"
+    else:
+        data["coaching"] = "dashboard non connecté (SUPABASE_URL et SUPABASE_SERVICE_KEY vides dans .env)"
     yesterday = (today - dt.timedelta(days=1)).isoformat()
     data["journal_hier"] = storage.read_journal(yesterday, yesterday)
     return data
