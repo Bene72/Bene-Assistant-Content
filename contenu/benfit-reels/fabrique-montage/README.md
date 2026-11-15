@@ -4,8 +4,8 @@ Les scripts qui ont produit le Reel « Les 4 qualités / Si je devais tout recom
 À réutiliser pour les prochains Reels : même DA, mêmes animations.
 
 ## Où sont les fichiers vidéo
-- **Rushs** : Release GitHub « rushs » du dépôt Bene72/Bene-site (pour l’instant).
-- **Bibliothèque** (GIFs, b-roll, images) : Release GitHub « Bibliothèque » du dépôt Bene72/Bene-site (pour l’instant).
+- **Rushs** : Release GitHub « rushs » de ce dépôt.
+- **Bibliothèque** (GIFs, b-roll, images) : dossier `contenu/bibliotheque/` de ce dépôt.
 - Les vidéos ne vont jamais dans le code (limite GitHub 100 Mo et site plus lourd).
 
 ## Les étapes (dans l'ordre)
