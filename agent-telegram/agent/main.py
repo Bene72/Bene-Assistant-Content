@@ -57,6 +57,7 @@ async def cmd_start(update: Update, _: ContextTypes.DEFAULT_TYPE):
         f"Salut {config.OWNER_NAME}, je suis en ligne.\n\n"
         "Écris-moi normalement. Commandes utiles :\n"
         "/brief : ton brief du jour maintenant\n"
+        "/bilans : qui a fait son bilan (vendredi → lundi)\n"
         "/taches : voir les tâches planifiées\n"
         "/reset : effacer l'historique de la conversation\n"
         "/id : afficher ton identifiant Telegram"
@@ -95,6 +96,12 @@ async def cmd_brief(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return await refuse(update)
     await answer(update, context, brief.PROMPT, use_history=False)
+
+
+async def cmd_bilans(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    await answer(update, context, brief.BILANS_PROMPT)
 
 
 async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -163,6 +170,7 @@ def main():
     app.add_handler(CommandHandler("reset", cmd_reset))
     app.add_handler(CommandHandler("taches", cmd_tasks))
     app.add_handler(CommandHandler("brief", cmd_brief))
+    app.add_handler(CommandHandler("bilans", cmd_bilans))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
     log.info("Agent en ligne. Ctrl+C pour arrêter.")
     app.run_polling(drop_pending_updates=True)

@@ -25,24 +25,43 @@ messages non lus). 6 lignes max, regroupe si besoin.
 N'invente rien : si une rubrique est vide, dis-le en quelques mots ou saute-la."""
 
 
+BILANS_NAME = "Bilans du week-end"
+BILANS_PROMPT = """Fais le point sur les bilans hebdo : appelle coaching_bilans_weekend.
+Rédige sans Markdown, court :
+📋 Bilans du [vendredi] au [lundi]
+✅ Faits (X/Y) : une ligne par athlète avec quand, ses scores en bref et, s'il y en a, le \
+signal à surveiller (douleur, moral bas, sommeil en chute, diète ou training en difficulté).
+⏳ Pas encore faits : les noms.
+Termine par : « Dis-moi "réponse pour [prénom]" et je te prépare le message. »"""
+
+
 def ensure_daily_task():
-    """Crée (ou met à jour) la tâche quotidienne pour chaque utilisateur autorisé."""
-    if not config.BRIEF_TIME or not config.ALLOWED_USER_IDS:
+    """Crée (ou met à jour) les tâches automatiques pour chaque utilisateur autorisé."""
+    if not config.ALLOWED_USER_IDS:
         return
-    try:
-        hh, mm = (int(x) for x in config.BRIEF_TIME.split(":"))
-        cron = f"{mm} {hh} * * *"
-        scheduler.parse_cron(cron)
-    except Exception:
-        log.error("BRIEF_TIME invalide (%s), format attendu HH:MM", config.BRIEF_TIME)
-        return
-    existing = {t["chat_id"]: t for t in storage.list_tasks() if t["name"] == NAME}
+    if config.BRIEF_TIME:
+        try:
+            hh, mm = (int(x) for x in config.BRIEF_TIME.split(":"))
+            _ensure(NAME, f"{mm} {hh} * * *", PROMPT)
+        except Exception:
+            log.error("BRIEF_TIME invalide (%s), format attendu HH:MM", config.BRIEF_TIME)
+    if config.BILANS_CRON and config.SUPABASE_URL:
+        try:
+            _ensure(BILANS_NAME, config.BILANS_CRON, BILANS_PROMPT)
+        except Exception:
+            log.error("BILANS_CRON invalide (%s)", config.BILANS_CRON)
+
+
+def _ensure(name: str, cron: str, prompt: str):
+    scheduler.parse_cron(cron)
+    NAME_ = name
+    existing = {t["chat_id"]: t for t in storage.list_tasks() if t["name"] == NAME_}
     for uid in config.ALLOWED_USER_IDS:
         t = existing.get(uid)
-        if t and t["cron"] == cron and t["prompt"] == PROMPT:
+        if t and t["cron"] == cron and t["prompt"] == prompt:
             continue
         if t:
             scheduler.unschedule(t["id"])
             storage.delete_task(t["id"])
-        storage.add_task(NAME, cron, PROMPT, uid)
-        log.info("brief du matin programmé à %s pour %s", config.BRIEF_TIME, uid)
+        storage.add_task(name, cron, prompt, uid)
+        log.info("« %s » programmé (%s) pour %s", name, cron, uid)

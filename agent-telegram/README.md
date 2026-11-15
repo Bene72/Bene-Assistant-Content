@@ -73,6 +73,14 @@ CALENDARS=Perso=https://...ics, Pro=https://...ics
 ```
 Garde ces liens secrets : quiconque les a peut lire l'agenda.
 
+## Bilans des athlètes
+
+- `/bilans` : qui a fait son bilan entre vendredi et lundi (scores et signaux à surveiller), et qui ne l'a pas encore fait. Le récap arrive aussi tout seul le lundi à 20h (`BILANS_CRON` dans `.env`).
+- « Réponse pour Wissam » / « prépare-moi une réponse pour Léa » : l'agent lit son dernier bilan, le compare aux précédents, regarde ses séances, puis rédige le message prêt à copier-coller, comme si c'était toi.
+- « Analyse le bilan de Wissam » : analyse détaillée (faits, hypothèses, priorités).
+
+La posture de coach (ton, règles de rédaction, sécurité) est dans `agent/prompts/coach.md` : tu peux la modifier librement avec le Bloc-notes, puis relancer l'agent.
+
 ## Ajouter les compétences Coaching et Dev
 
 **Coaching (ton dashboard Ben-Fit)** : l'agent lit directement la base Supabase de l'app ben-and-fit.vercel.app. Récupère les 2 valeurs que l'app utilise déjà :
@@ -106,7 +114,7 @@ Relance `start.bat` après chaque modification du `.env`.
 - « Propose une PR qui corrige la faute de frappe dans le README de Track-your-progress »
 - « Retiens que Wissam a une compétition le 12 décembre »
 
-Commandes : `/brief` (brief du jour), `/taches` (tâches planifiées), `/reset` (effacer la conversation), `/id`.
+Commandes : `/brief` (brief du jour), `/bilans` (bilans du week-end), `/taches` (tâches planifiées), `/reset` (effacer la conversation), `/id`.
 
 ---
 

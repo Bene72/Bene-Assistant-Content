@@ -212,3 +212,136 @@ async def coaching_athlete(ctx, name: str):
             "bilans_recents": bilans, "programme_en_cours": workouts, "logs_recents": logs,
             "mesures": measures, "objectifs": goals, "nutrition": nutri,
             "taches_ouvertes": tasks, "messages_recents": msgs}
+
+
+# --- Bilans hebdo -------------------------------------------------------------------
+BILAN_FIELDS = ["sommeil", "moral", "assiduite_diete", "assiduite_training", "neat"]
+
+
+def _filled(b: dict) -> bool:
+    """Un bilan est « fait » si l'athlète a rempli au moins un score ou une note."""
+    keys = [f"{f}_score" for f in BILAN_FIELDS] + [f"{f}_note" for f in BILAN_FIELDS] + \
+        ["autre_note", "problemes_diete_note", "problemes_training_note"]
+    return any(b.get(k) not in (None, "") for k in keys)
+
+
+def _local(ts: str | None):
+    if not ts:
+        return None
+    d = dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=dt.timezone.utc)
+    return d.astimezone(ZoneInfo(config.TIMEZONE))
+
+
+def _bilan_time(b: dict):
+    """Moment où le bilan a été rempli : updated_at si dispo, sinon created_at."""
+    return _local(b.get("updated_at")) or _local(b.get("created_at"))
+
+
+def bilan_window(today: dt.date) -> tuple[dt.date, dt.date]:
+    """Fenêtre vendredi -> lundi la plus récente (en cours si on est entre vendredi et lundi)."""
+    friday = today - dt.timedelta(days=(today.weekday() - 4) % 7)
+    return friday, friday + dt.timedelta(days=3)
+
+
+def _scores(b: dict) -> dict:
+    return {f: b.get(f"{f}_score") for f in BILAN_FIELDS if b.get(f"{f}_score") is not None}
+
+
+@tool("coaching_bilans_weekend",
+      "Qui a fait son bilan hebdo entre vendredi et lundi (fenêtre la plus récente, ou celle "
+      "commençant au vendredi indiqué). Donne pour chaque athlète actif : fait / pas fait, quand, "
+      "scores, et les notes importantes.",
+      {"friday": {"type": "string", "description": "Vendredi de début AAAA-MM-JJ (optionnel)"}},
+      enabled=_enabled)
+async def coaching_bilans_weekend(ctx, friday: str | None = None):
+    if friday:
+        start = dt.date.fromisoformat(friday)
+        end = start + dt.timedelta(days=3)
+    else:
+        start, end = bilan_window(_today())
+    since = (start - dt.timedelta(days=7)).isoformat()
+    clients, bilans = await asyncio.gather(
+        _rows("profiles", [("select", "id,full_name,email"), ("role", "eq.client"), ("archived", "not.is.true")]),
+        _rows("bilans", [("select", "*"), ("or", f"(created_at.gte.{since},updated_at.gte.{since})"),
+                         ("order", "created_at.desc"), ("limit", "1000")]),
+    )
+    if not _ok(bilans) and _errs(bilans):  # pas de colonne updated_at : on se rabat sur created_at
+        bilans = await _rows("bilans", [("select", "*"), ("created_at", f"gte.{since}"),
+                                        ("order", "created_at.desc"), ("limit", "1000")])
+    names = {c["id"]: c.get("full_name") or c.get("email") or c["id"][:8] for c in _ok(clients)}
+    # sans updated_at, on accepte aussi un bilan rattaché à la semaine du vendredi ou au lundi suivant
+    weeks = {(start - dt.timedelta(days=4)).isoformat(), end.isoformat()}
+    faits, manquants = [], []
+    for cid, name in sorted(names.items(), key=lambda x: x[1].lower()):
+        found = None
+        for b in _ok(bilans):
+            t = _bilan_time(b)
+            in_window = t and start <= t.date() <= end
+            by_week = "updated_at" not in b and (b.get("week_start") or "")[:10] in weeks
+            if b.get("client_id") == cid and _filled(b) and (in_window or by_week):
+                found = (b, t if in_window else None)
+                break
+        if found:
+            b, t = found
+            notes = {k: b[k] for k in ("problemes_training_note", "problemes_diete_note", "autre_note")
+                     if b.get(k)}
+            if t:
+                jour = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][t.weekday()]
+                quand = f"{jour} {t:%d/%m %H:%M}"
+            else:
+                quand = f"bilan de la semaine du {b.get('week_start')}"
+            faits.append({"athlete": name, "rempli_le": quand,
+                          "scores": _scores(b), **notes})
+        else:
+            manquants.append(name)
+    return {"fenetre": f"du vendredi {start:%d/%m} au lundi {end:%d/%m}",
+            "en_cours": start <= _today() <= end,
+            "bilans_faits": faits, "pas_encore_fait": manquants,
+            "donnees_indisponibles": _errs(clients, bilans)}
+
+
+@tool("coaching_bilan",
+      "Bilan hebdo complet d'un athlète (le dernier rempli, ou celui d'une semaine donnée) avec son "
+      "contexte : 2 bilans précédents pour la tendance, programme en cours, séances des 14 derniers "
+      "jours, mesures récentes, objectifs. À utiliser pour analyser un bilan ou préparer la réponse.",
+      {"name": {"type": "string", "description": "Nom ou partie du nom de l'athlète"},
+       "week_start": {"type": "string", "description": "Lundi de la semaine AAAA-MM-JJ (optionnel)"}},
+      ["name"], enabled=_enabled)
+async def coaching_bilan(ctx, name: str, week_start: str | None = None):
+    found = _ok(await _rows("profiles", [("select", "*"), ("role", "eq.client"),
+                                         ("full_name", f"ilike.*{name.strip()}*")]))
+    if not found:
+        return f"Aucun athlète trouvé pour « {name} »."
+    if len(found) > 1:
+        return {"plusieurs_resultats": [f.get("full_name") for f in found]}
+    p, cid = found[0], found[0]["id"]
+    d14 = (_today() - dt.timedelta(days=14)).isoformat()
+    bilans, workouts, logs, measures, goals = await asyncio.gather(
+        _rows("bilans", [("select", "*"), ("client_id", f"eq.{cid}"), ("order", "week_start.desc"), ("limit", "8")]),
+        _rows("workouts", [("select", "name,day_of_week,notes"), ("client_id", f"eq.{cid}"),
+                           ("is_archived", "not.is.true")]),
+        _rows("workout_logs", [("select", "*"), ("client_id", f"eq.{cid}"), ("logged_at", f"gte.{d14}"),
+                               ("order", "logged_at.desc"), ("limit", "60")]),
+        _rows("measures", [("select", "*"), ("client_id", f"eq.{cid}"), ("order", "date.desc"), ("limit", "4")]),
+        _rows("goals", [("select", "*"), ("client_id", f"eq.{cid}")]),
+    )
+    filled = [b for b in _ok(bilans) if _filled(b)]
+    if week_start:
+        filled = [b for b in filled if (b.get("week_start") or "")[:10] <= week_start] or filled
+    if not filled:
+        return f"Aucun bilan rempli trouvé pour {p.get('full_name')}."
+    clean = lambda b: {k: v for k, v in b.items() if k not in ("id", "client_id", "coach_id") and v not in (None, "")}  # noqa: E731
+    seance_days = sorted({(l.get("logged_at") or "")[:10] for l in _ok(logs)} - {""})
+    return {
+        "athlete": {"nom": p.get("full_name"), "programme": p.get("current_program"),
+                    "note_coach": p.get("coach_note"), "debut_engagement": p.get("engagement_start"),
+                    "fin_engagement": p.get("engagement_end")},
+        "bilan": clean(filled[0]),
+        "bilans_precedents_scores": [{"semaine": b.get("week_start"), **_scores(b)} for b in filled[1:3]],
+        "programme_en_cours": workouts,
+        "jours_entraines_14j": seance_days,
+        "logs_14j": _ok(logs)[:30],
+        "mesures": measures, "objectifs": goals,
+    }

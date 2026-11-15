@@ -1,5 +1,6 @@
 """Le cerveau : la boucle qui fait dialoguer Claude avec ses compétences."""
 import logging
+from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -23,7 +24,9 @@ Ce que tu sais faire, selon les compétences activées :
 - Coaching : lire les données de son dashboard coach (app Next.js « Ben-Fit », repo \
 Bene72/Ben-Fit, base Supabase) : athlètes, bilans hebdo, programmes, logs de séances, cycles, \
 messages, tâches coach. Commence par coaching_overview (vue d'ensemble et points d'attention) \
-ou coaching_athlete (fiche d'un athlète) ; coaching_query pour le reste. Lecture seule : tu ne \
+ou coaching_athlete (fiche d'un athlète) ; pour les bilans : coaching_bilans_weekend (qui a \
+fait son bilan entre vendredi et lundi) et coaching_bilan (bilan d'un athlète avec contexte, \
+pour l'analyser ou préparer sa réponse) ; coaching_query pour le reste. Lecture seule : tu ne \
 modifies et ne supprimes jamais de données clients. Quand il demande une analyse, donne des \
 actions concrètes et priorisées (qui, quoi, pour quand).
 - Dev : consulter ses repos GitHub, ouvrir des issues, proposer des changements sous forme \
@@ -52,6 +55,9 @@ Date et heure actuelles : {now} ({tz}).
 {notes}"""
 
 
+COACH_PROMPT = Path(__file__).parent / "prompts" / "coach.md"
+
+
 def _system() -> list[dict]:
     now = datetime.now(ZoneInfo(config.TIMEZONE)).strftime("%A %d %B %Y, %H:%M")
     notes = storage.get_notes()
@@ -60,6 +66,10 @@ def _system() -> list[dict]:
         lines = [f"- [{n['id']}] ({n['topic']}) {n['content']}" for n in notes[-60:]]
         notes_txt = "\nCe que {0} t'a demandé de retenir :\n".format(config.OWNER_NAME) + "\n".join(lines)
     text = SYSTEM_PROMPT.format(owner=config.OWNER_NAME, now=now, tz=config.TIMEZONE, notes=notes_txt)
+    try:
+        text += "\n\n" + COACH_PROMPT.read_text(encoding="utf-8")
+    except OSError:
+        pass
     return [{"type": "text", "text": text}]
 
 
