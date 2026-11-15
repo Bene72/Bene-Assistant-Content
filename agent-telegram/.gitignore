@@ -1,4 +1,5 @@
 .env
+.env.avant
 data/
 .venv/
 __pycache__/

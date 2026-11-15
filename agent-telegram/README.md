@@ -152,6 +152,10 @@ agent/
 
 Pour ajouter une compétence : crée un fichier dans `agent/tools/`, décore une fonction avec `@tool(...)`, et ajoute l'import en bas de `agent/tools/__init__.py`.
 
+## Changer une clé plus tard
+
+Double-clique sur **`modifier_cle.bat`** : il affiche la liste des clés (Telegram, Claude, Supabase, agenda, modèle, heure du brief…), tu choisis un numéro, tu colles la nouvelle valeur. Le reste du fichier `.env` n'est pas touché et une copie de l'ancien est gardée dans `.env.avant`. Relance `start.bat` ensuite.
+
 ## Sécurité
 
 - Ne partage jamais le fichier `.env`. Seul ton identifiant Telegram est servi, et seulement en conversation privée.
