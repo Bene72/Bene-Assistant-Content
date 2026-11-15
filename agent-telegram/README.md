@@ -81,6 +81,14 @@ Garde ces liens secrets : quiconque les a peut lire l'agenda.
 
 La posture de coach (ton, règles de rédaction, sécurité) est dans `agent/prompts/coach.md` : tu peux la modifier librement avec le Bloc-notes, puis relancer l'agent.
 
+## Programmation des cycles
+
+- `/cycle Wissam 5 semaines, focus force, ménager le genou` (ou en langage normal) : l'agent relit ta doctrine, lit les bilans, les logs et le programme en cours de l'athlète, construit le cycle, puis t'envoie le récapitulatif complet.
+- Rien n'est écrit sans ton `/ok`. Après validation, les séances sont créées en **cycle futur** : l'athlète ne voit rien. Tu relis dans l'app (fiche athlète, onglet Programme, cycle futur) et tu cliques sur **Activer** quand tu veux.
+- « Annule le dernier cycle » retire ce brouillon, tant qu'il n'a pas été activé.
+- L'agent ne peut que créer des brouillons : il ne modifie ni ne supprime jamais un programme existant.
+- Ta doctrine complète est dans `agent/prompts/programmation.md` (elle reste sur ta machine, pas sur GitHub). Mets `MODEL_COACH=claude-sonnet-5-5` dans `.env` pour des cycles de qualité.
+
 ## Ajouter les compétences Coaching et Dev
 
 **Coaching (ton dashboard Ben-Fit)** : l'agent lit directement la base Supabase de l'app ben-and-fit.vercel.app. Récupère les 2 valeurs que l'app utilise déjà :
@@ -114,7 +122,7 @@ Relance `start.bat` après chaque modification du `.env`.
 - « Propose une PR qui corrige la faute de frappe dans le README de Track-your-progress »
 - « Retiens que Wissam a une compétition le 12 décembre »
 
-Commandes : `/brief` (brief du jour), `/bilans` (bilans du week-end), `/reponse Prénom`, `/diag`, `/ok` et `/non`, `/taches` (tâches planifiées), `/reset` (effacer la conversation), `/id`.
+Commandes : `/brief` (brief du jour), `/bilans` (bilans du week-end), `/reponse Prénom`, `/cycle Prénom`, `/diag`, `/ok` et `/non`, `/taches` (tâches planifiées), `/reset` (effacer la conversation), `/id`.
 
 ---
 
@@ -159,7 +167,7 @@ Double-clique sur **`modifier_cle.bat`** : il affiche la liste des clés (Telegr
 ## Sécurité
 
 - Ne partage jamais le fichier `.env`. Seul ton identifiant Telegram est servi, et seulement en conversation privée.
-- Données clients : lecture seule. L'agent ne peut interroger que des tables de ton dashboard, rien d'autre dans Supabase.
+- Données clients : lecture seule, à une exception près : créer un cycle en brouillon après ton `/ok`. L'agent ne peut interroger que des tables de ton dashboard, rien d'autre dans Supabase.
 - Tout ce qui écrit à l'extérieur (issue ou Pull Request GitHub) attend ta confirmation : l'agent t'envoie un résumé exact, tu réponds `/ok` ou `/non`.
 - Les textes venant d'ailleurs (bilans, pages web, agenda) sont traités comme des données, jamais comme des ordres. Dans un message où des données clients ont été lues, l'agent ne peut plus ouvrir de page web ni envoyer de vocal : rien ne peut sortir par ce biais.
 - La lecture de pages web refuse les adresses locales (ta box, ton PC).

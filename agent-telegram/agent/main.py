@@ -65,6 +65,7 @@ async def cmd_start(update: Update, _: ContextTypes.DEFAULT_TYPE):
         "/brief vocal (ou /briefvocal) : en note vocale · /brief les deux : texte + vocal\n"
         "/bilans : qui a fait son bilan (vendredi → lundi)\n"
         "/reponse Prénom : réponse prête à envoyer à son dernier bilan\n"
+        "/cycle Prénom + consignes : prépare son prochain cycle (brouillon, après ton /ok)\n"
         "/diag : vérifier que tout est bien connecté\n"
         "/taches : voir les tâches planifiées\n"
         "/reset : effacer l'historique de la conversation\n"
@@ -144,6 +145,16 @@ async def cmd_reponse(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not name:
         return await update.message.reply_text("Dis-moi pour qui : /reponse Prénom")
     await answer(update, context, f"Prépare-moi la réponse au dernier bilan de {name}.", model=config.MODEL_COACH)
+
+
+async def cmd_cycle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    args = " ".join(context.args or []).strip()
+    if not args:
+        return await update.message.reply_text(
+            "Dis-moi pour qui et ce que tu veux :\n/cycle Wissam 5 semaines, focus force, ménager le genou")
+    await answer(update, context, f"Prépare le prochain cycle de programmation pour : {args}", model=config.MODEL_COACH)
 
 
 async def cmd_diag(update: Update, _: ContextTypes.DEFAULT_TYPE):
@@ -250,6 +261,7 @@ def main():
     app.add_handler(CommandHandler("briefvocal", cmd_brief_vocal))
     app.add_handler(CommandHandler("reponse", cmd_reponse))
     app.add_handler(CommandHandler("diag", cmd_diag))
+    app.add_handler(CommandHandler("cycle", cmd_cycle))
     app.add_handler(CommandHandler("ok", cmd_ok))
     app.add_handler(CommandHandler("non", cmd_non))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))

@@ -356,3 +356,207 @@ async def coaching_bilan(ctx, name: str, week_start: str | None = None):
         "logs_14j": _ok(logs)[:30],
         "mesures": measures, "objectifs": goals,
     }
+
+
+# --- Programmation : écriture de cycles en BROUILLON (is_future) -----------------------
+# Seule écriture autorisée de tout l'agent sur la base : créer des séances « futures »
+# (invisibles pour l'athlète tant que Bene n'a pas cliqué sur « Activer » dans l'app),
+# et supprimer celles que l'agent vient lui-même de créer. Jamais de modification.
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+from .. import confirm, storage  # noqa: E402
+
+_WRITE_TABLES = {"workouts", "exercises"}
+GROUP_TYPES = {"Normal", "Superset", "Giant Set", "Drop Set"}
+JOURS = ["", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+GUIDE = Path(__file__).resolve().parent.parent / "prompts" / "programmation.md"
+
+
+async def _write(method: str, table: str, params=None, payload=None):
+    if table not in _WRITE_TABLES or method not in ("POST", "DELETE"):
+        raise PermissionError(f"écriture interdite : {method} {table}")
+    async with httpx.AsyncClient(timeout=30) as c:
+        r = await c.request(method, f"{config.SUPABASE_URL}/rest/v1/{table}", params=params, json=payload,
+                            headers={**_headers(), "Prefer": "return=representation"})
+    if r.status_code >= 400:
+        raise RuntimeError(f"Supabase {r.status_code} : {r.text[:400]}")
+    return r.json() if r.content else []
+
+
+def _txt(v, n):
+    return None if v in (None, "") else str(v).strip()[:n]
+
+
+def _clean_cycle(workouts: list) -> list[dict]:
+    if not isinstance(workouts, list) or not 1 <= len(workouts) <= 14:
+        raise ValueError("un cycle contient entre 1 et 14 séances")
+    out = []
+    for w in workouts:
+        day = int(w.get("day_of_week") or 0)
+        if not 1 <= day <= 7:
+            raise ValueError(f"day_of_week doit aller de 1 (lundi) à 7 (dimanche) : séance « {w.get('name')} »")
+        if not _txt(w.get("name"), 80):
+            raise ValueError("chaque séance doit avoir un nom")
+        exs = w.get("exercises") or []
+        if not 1 <= len(exs) <= 25:
+            raise ValueError(f"séance « {w['name']} » : entre 1 et 25 exercices")
+        rows = []
+        for i, e in enumerate(exs):
+            if not _txt(e.get("name"), 120):
+                raise ValueError(f"séance « {w['name']} » : exercice sans nom")
+            sets = e.get("sets")
+            sets = int(sets) if sets not in (None, "") else None
+            if sets is not None and not 1 <= sets <= 20:
+                raise ValueError(f"« {e['name']} » : nombre de séries invalide")
+            gt = e.get("group_type") or "Normal"
+            if gt not in GROUP_TYPES:
+                raise ValueError(f"group_type inconnu : {gt} (autorisés : {', '.join(sorted(GROUP_TYPES))})")
+            rows.append({"name": _txt(e["name"], 120), "sets": sets, "reps": _txt(e.get("reps"), 60),
+                         "target_weight": _txt(e.get("target_weight"), 60), "rest": _txt(e.get("rest"), 40),
+                         "note": _txt(e.get("note"), 600), "order_index": i,
+                         "group_type": gt, "group_id": _txt(e.get("group_id"), 20) if gt != "Normal" else None})
+        dur = w.get("duration_min")
+        out.append({"name": _txt(w["name"], 80), "type": _txt(w.get("type"), 40), "day_of_week": day,
+                    "duration_min": int(dur) if dur else None, "notes": _txt(w.get("notes"), 1500),
+                    "exercises": rows})
+    return sorted(out, key=lambda x: x["day_of_week"])
+
+
+def _cycle_summary(athlete: str, cycle_name: str, cycle: list[dict], existing_future: int) -> str:
+    lines = [f"Créer le cycle « {cycle_name} » pour {athlete}",
+             "En BROUILLON (cycle futur) : invisible pour l'athlète tant que tu n'as pas cliqué sur "
+             "« Activer » dans l'onglet Programme de l'app."]
+    if existing_future:
+        lines.append(f"⚠️ {athlete} a déjà {existing_future} séance(s) dans son cycle futur : celles-ci s'y ajouteront.")
+    for w in cycle:
+        head = f"\n{JOURS[w['day_of_week']]} · {w['name']}"
+        if w["duration_min"]:
+            head += f" ({w['duration_min']} min)"
+        lines.append(head)
+        if w["notes"]:
+            lines.append(f"  {w['notes']}")
+        for i, e in enumerate(w["exercises"], 1):
+            bits = [e["name"]]
+            if e["sets"] or e["reps"]:
+                bits.append(f"{e['sets'] or '?'} x {e['reps'] or '?'}")
+            if e["target_weight"]:
+                bits.append(f"@ {e['target_weight']}")
+            if e["rest"]:
+                bits.append(f"repos {e['rest']}")
+            tag = ""
+            if e["group_type"] != "Normal":
+                tag = f" [{e['group_type']}{' ' + e['group_id'] if e['group_id'] else ''}]"
+            lines.append(f"  {i}. " + " · ".join(bits) + tag)
+            if e["note"]:
+                lines.append(f"     {e['note']}")
+    return "\n".join(lines)
+
+
+async def _create_cycle(client_id: str, athlete: str, cycle_name: str, cycle: list[dict]) -> str:
+    created: list[str] = []
+    try:
+        for order, w in enumerate(cycle, 1):
+            row = {"client_id": client_id, "name": w["name"], "type": w["type"], "day_of_week": w["day_of_week"],
+                   "duration_min": w["duration_min"], "notes": w["notes"], "cycle_name": cycle_name,
+                   "is_future": True, "order_index": order}
+            new = (await _write("POST", "workouts", payload=row))[0]
+            created.append(new["id"])
+            tag = new["id"][:8]
+            exs = [{**e, "workout_id": new["id"],
+                    "group_id": f"ag_{tag}_{e['group_id']}" if e["group_id"] else None} for e in w["exercises"]]
+            await _write("POST", "exercises", payload=exs)
+    except Exception as e:
+        if created:  # on ne laisse pas un cycle à moitié créé
+            await _delete_draft(created)
+        raise RuntimeError(f"création annulée, rien n'a été laissé dans l'app ({e})")
+    storage.set_meta("last_cycle", json.dumps({"athlete": athlete, "cycle": cycle_name, "ids": created}))
+    return (f"✅ Cycle « {cycle_name} » créé pour {athlete} : {len(created)} séances en brouillon.\n"
+            "Retrouve-le dans l'app : fiche de l'athlète, onglet Programme, « Cycle futur ». "
+            "Relis, ajuste, puis clique sur « Activer » quand tu veux.\n"
+            "Pour le retirer : dis-moi « annule le dernier cycle ».")
+
+
+async def _delete_draft(ids: list[str]) -> int:
+    """Supprime uniquement des séances encore en brouillon (is_future = true)."""
+    still = _ok(await _rows("workouts", [("select", "id"), ("id", f"in.({','.join(ids)})"), ("is_future", "eq.true")]))
+    keep = [w["id"] for w in still]
+    if not keep:
+        return 0
+    lst = f"in.({','.join(keep)})"
+    await _write("DELETE", "exercises", params=[("workout_id", lst)])
+    await _write("DELETE", "workouts", params=[("id", lst), ("is_future", "eq.true")])
+    return len(keep)
+
+
+@tool("coaching_programming_guide",
+      "Renvoie la doctrine complète de programmation de Bene (Great Performance Trainer). "
+      "À relire OBLIGATOIREMENT avant de construire ou de critiquer un cycle ou une séance.",
+      enabled=_enabled)
+async def coaching_programming_guide(ctx):
+    try:
+        return GUIDE.read_text(encoding="utf-8")
+    except OSError:
+        return "Doctrine absente (agent/prompts/programmation.md). Applique les principes de la posture coach."
+
+
+_EX = {"type": "object", "required": ["name"], "properties": {
+    "name": {"type": "string"}, "sets": {"type": "integer"},
+    "reps": {"type": "string", "description": "ex. '5', '8-10', '30 s', 'max'"},
+    "target_weight": {"type": "string", "description": "ex. '80 kg', '75% 1RM', 'RPE 7', 'RIR 2'"},
+    "rest": {"type": "string", "description": "ex. '2 min', '90 s'"},
+    "note": {"type": "string", "description": "tempo, intention technique, critère d'arrêt"},
+    "group_type": {"type": "string", "enum": sorted(GROUP_TYPES)},
+    "group_id": {"type": "string", "description": "même lettre (A, B…) pour les exercices d'un même superset"}}}
+
+
+@tool("coaching_propose_cycle",
+      "Propose la création d'un cycle de programmation pour un athlète, en BROUILLON (cycle futur, invisible "
+      "pour l'athlète). Rien n'est écrit tant que Bene n'a pas validé par /ok le récapitulatif qui lui est "
+      "envoyé automatiquement. Donne le programme d'une semaine type : une entrée par séance. "
+      "day_of_week : 1 = lundi … 7 = dimanche. La progression sur les semaines du cycle se décrit dans "
+      "'notes' de la séance ou 'note' de l'exercice. Pour un bloc conditioning (WOD, EMOM, AMRAP, intervalles), "
+      "crée un exercice 'Normal' nommé par le format et détaille-le dans 'note'.",
+      {"name": {"type": "string", "description": "Nom ou partie du nom de l'athlète"},
+       "cycle_name": {"type": "string", "description": "ex. 'Cycle 4 · Force + moteur'"},
+       "workouts": {"type": "array", "items": {"type": "object", "required": ["name", "day_of_week", "exercises"],
+                    "properties": {"name": {"type": "string"},
+                                   "type": {"type": "string", "description": "ex. Force, Run, Conditioning, Mobilité"},
+                                   "day_of_week": {"type": "integer"}, "duration_min": {"type": "integer"},
+                                   "notes": {"type": "string", "description": "objectif, échauffement, progression"},
+                                   "exercises": {"type": "array", "items": _EX}}}}},
+      ["name", "cycle_name", "workouts"], enabled=_enabled)
+async def coaching_propose_cycle(ctx, name: str, cycle_name: str, workouts: list):
+    ctx["tainted"] = True
+    found = _ok(await _rows("profiles", [("select", "id,full_name,archived"), ("role", "eq.client"),
+                                         ("full_name", f"ilike.*{name.strip()}*")]))
+    if not found:
+        return f"Aucun athlète trouvé pour « {name} »."
+    if len(found) > 1:
+        return {"plusieurs_resultats": [f.get("full_name") for f in found]}
+    p = found[0]
+    cycle = _clean_cycle(workouts)
+    cname = _txt(cycle_name, 80) or "Nouveau cycle"
+    existing = _ok(await _rows("workouts", [("select", "id"), ("client_id", f"eq.{p['id']}"), ("is_future", "eq.true")]))
+    summary = _cycle_summary(p["full_name"], cname, cycle, len(existing))
+    return confirm.request(ctx["chat_id"], summary, lambda: _create_cycle(p["id"], p["full_name"], cname, cycle))
+
+
+@tool("coaching_cancel_last_cycle",
+      "Retire le dernier cycle brouillon créé par l'agent (uniquement s'il n'a pas encore été activé). "
+      "Demande la confirmation /ok de Bene.", enabled=_enabled)
+async def coaching_cancel_last_cycle(ctx):
+    raw = storage.get_meta("last_cycle")
+    if not raw or raw == "":
+        return "Je n'ai créé aucun cycle récemment."
+    last = json.loads(raw)
+
+    async def do():
+        n = await _delete_draft(last["ids"])
+        storage.set_meta("last_cycle", "")
+        if n == 0:
+            return "Rien retiré : ce cycle a déjà été activé ou supprimé dans l'app. Je n'y touche pas."
+        return f"Cycle « {last['cycle']} » de {last['athlete']} retiré ({n} séances en brouillon supprimées)."
+
+    return confirm.request(ctx["chat_id"], f"Supprimer le brouillon « {last['cycle']} » de {last['athlete']} "
+                           f"({len(last['ids'])} séances créées par l'agent, si elles sont encore en brouillon)", do)
