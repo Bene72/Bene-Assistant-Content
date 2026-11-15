@@ -1,4 +1,12 @@
+# Secrets et fichiers locaux
+.env
+.env.*
+!.env.example
 node_modules/
-.vercel/
+__pycache__/
+*.pyc
 .DS_Store
 *.log
+# Fichiers de travail lourds (vidéos de rendu, environnements)
+contenu/**/work/
+mp311/
