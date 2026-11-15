@@ -388,21 +388,52 @@ def _txt(v, n):
     return None if v in (None, "") else str(v).strip()[:n]
 
 
+BLOCK_FORMATS = ["For Time", "AMRAP", "EMOM", "Tabata", "RFT", "Death By"]
+WORKOUT_TYPES = ["Push", "Pull", "Legs", "Full Body", "Upper", "Lower", "Core", "Cardio", "WOD", "Autre"]
+
+
 def _clean_cycle(workouts: list) -> list[dict]:
+    """Valide le cycle et le convertit au format exact de l'app (lignes de la table exercises)."""
     if not isinstance(workouts, list) or not 1 <= len(workouts) <= 14:
         raise ValueError("un cycle contient entre 1 et 14 séances")
     out = []
     for w in workouts:
-        day = int(w.get("day_of_week") or 0)
-        if not 1 <= day <= 7:
-            raise ValueError(f"day_of_week doit aller de 1 (lundi) à 7 (dimanche) : séance « {w.get('name')} »")
-        if not _txt(w.get("name"), 80):
+        day = w.get("day_of_week")
+        day = int(day) if day not in (None, "", 0) else None
+        if day is not None and not 1 <= day <= 7:
+            raise ValueError(f"day_of_week : 1 (lundi) à 7 (dimanche), ou vide : séance « {w.get('name')} »")
+        if not _txt(w.get("name"), 120):
             raise ValueError("chaque séance doit avoir un nom")
-        exs = w.get("exercises") or []
-        if not 1 <= len(exs) <= 25:
-            raise ValueError(f"séance « {w['name']} » : entre 1 et 25 exercices")
-        rows = []
-        for i, e in enumerate(exs):
+        items = w.get("exercises") or []
+        if not items:
+            raise ValueError(f"séance « {w['name']} » : aucun exercice")
+        rows, display, nblock = [], [], 0
+        for e in items:
+            blk = e.get("block")
+            if blk:  # WOD / EMOM / AMRAP… : un « Workout Block » de l'app
+                fmt = blk.get("format") or "For Time"
+                if fmt not in BLOCK_FORMATS:
+                    raise ValueError(f"format de bloc inconnu : {fmt} (autorisés : {', '.join(BLOCK_FORMATS)})")
+                moves = [_txt(m, 120) for m in (blk.get("movements") or []) if _txt(m, 120)]
+                if not 1 <= len(moves) <= 12:
+                    raise ValueError(f"bloc {fmt} de « {w['name']} » : entre 1 et 12 mouvements")
+                rounds = blk.get("rounds")
+                rounds = int(rounds) if rounds not in (None, "") else None
+                if rounds is not None and not 1 <= rounds <= 60:
+                    raise ValueError(f"bloc {fmt} : nombre de rounds invalide")
+                rest = _txt(blk.get("rest"), 40) or ""
+                meta = {"type": fmt, "rounds": "" if rounds is None else str(rounds),
+                        "cap": _txt(blk.get("cap"), 20) or "", "rest": rest,
+                        "objective": _txt(blk.get("objective"), 300) or "",
+                        "coachNote": _txt(blk.get("coach_note"), 800) or "", "uiVersion": 2}
+                nblock += 1
+                for i, m in enumerate(moves):
+                    rows.append({"name": m, "sets": rounds or 1, "reps": "", "target_weight": "",
+                                 "rest": rest if i == len(moves) - 1 else "0s",
+                                 "note": json.dumps(meta, ensure_ascii=False) if i == 0 else "",
+                                 "group_type": "Workout Block", "group_id": f"b{nblock}"})
+                display.append({"block": meta, "movements": moves})
+                continue
             if not _txt(e.get("name"), 120):
                 raise ValueError(f"séance « {w['name']} » : exercice sans nom")
             sets = e.get("sets")
@@ -411,16 +442,23 @@ def _clean_cycle(workouts: list) -> list[dict]:
                 raise ValueError(f"« {e['name']} » : nombre de séries invalide")
             gt = e.get("group_type") or "Normal"
             if gt not in GROUP_TYPES:
-                raise ValueError(f"group_type inconnu : {gt} (autorisés : {', '.join(sorted(GROUP_TYPES))})")
-            rows.append({"name": _txt(e["name"], 120), "sets": sets, "reps": _txt(e.get("reps"), 60),
-                         "target_weight": _txt(e.get("target_weight"), 60), "rest": _txt(e.get("rest"), 40),
-                         "note": _txt(e.get("note"), 600), "order_index": i,
-                         "group_type": gt, "group_id": _txt(e.get("group_id"), 20) if gt != "Normal" else None})
+                raise ValueError(f"group_type inconnu : {gt} (autorisés : {', '.join(sorted(GROUP_TYPES))} ; "
+                                 "pour un WOD/EMOM/AMRAP utilise un 'block')")
+            row = {"name": _txt(e["name"], 120), "sets": sets, "reps": _txt(e.get("reps"), 60),
+                   "target_weight": _txt(e.get("target_weight"), 60), "rest": _txt(e.get("rest"), 40),
+                   "note": _txt(e.get("note"), 600), "group_type": gt,
+                   "group_id": _txt(e.get("group_id"), 20) if gt != "Normal" else None}
+            rows.append(row)
+            display.append(row)
+        if len(rows) > 45:
+            raise ValueError(f"séance « {w['name']} » : trop de lignes ({len(rows)}), simplifie")
+        for i, r in enumerate(rows):
+            r["order_index"] = i
         dur = w.get("duration_min")
-        out.append({"name": _txt(w["name"], 80), "type": _txt(w.get("type"), 40), "day_of_week": day,
-                    "duration_min": int(dur) if dur else None, "notes": _txt(w.get("notes"), 1500),
-                    "exercises": rows})
-    return sorted(out, key=lambda x: x["day_of_week"])
+        out.append({"name": _txt(w["name"], 120), "type": _txt(w.get("type"), 40), "day_of_week": day,
+                    "duration_min": int(dur) if dur else None, "notes": _txt(w.get("notes"), 4000),
+                    "exercises": rows, "display": display})
+    return out
 
 
 def _cycle_summary(athlete: str, cycle_name: str, cycle: list[dict], existing_future: int) -> str:
@@ -429,14 +467,33 @@ def _cycle_summary(athlete: str, cycle_name: str, cycle: list[dict], existing_fu
              "« Activer » dans l'onglet Programme de l'app."]
     if existing_future:
         lines.append(f"⚠️ {athlete} a déjà {existing_future} séance(s) dans son cycle futur : celles-ci s'y ajouteront.")
-    for w in cycle:
-        head = f"\n{JOURS[w['day_of_week']]} · {w['name']}"
+    for n, w in enumerate(cycle, 1):
+        label = JOURS[w["day_of_week"]] if w["day_of_week"] else f"Séance {n}"
+        head = f"\n{w['name']}" if w["name"].lower().startswith("séance") and not w["day_of_week"] else f"\n{label} · {w['name']}"
+        if w["type"]:
+            head += f" [{w['type']}]"
         if w["duration_min"]:
             head += f" ({w['duration_min']} min)"
         lines.append(head)
         if w["notes"]:
-            lines.append(f"  {w['notes']}")
-        for i, e in enumerate(w["exercises"], 1):
+            lines.append("  " + w["notes"].replace("\n", "\n  "))
+        for i, e in enumerate(w["display"], 1):
+            if "block" in e:
+                m = e["block"]
+                bits = [f"BLOC {m['type']}"]
+                if m["rounds"]:
+                    bits.append(f"{m['rounds']} rounds")
+                if m["cap"]:
+                    bits.append(f"{m['cap']} min")
+                if m["rest"]:
+                    bits.append(f"repos {m['rest']}")
+                lines.append(f"  {i}. " + " · ".join(bits))
+                lines += [f"       - {mv}" for mv in e["movements"]]
+                if m["objective"]:
+                    lines.append(f"     Objectif : {m['objective']}")
+                if m["coachNote"]:
+                    lines.append(f"     {m['coachNote']}")
+                continue
             bits = [e["name"]]
             if e["sets"] or e["reps"]:
                 bits.append(f"{e['sets'] or '?'} x {e['reps'] or '?'}")
@@ -456,7 +513,7 @@ def _cycle_summary(athlete: str, cycle_name: str, cycle: list[dict], existing_fu
 async def _create_cycle(client_id: str, athlete: str, cycle_name: str, cycle: list[dict]) -> str:
     created: list[str] = []
     try:
-        for order, w in enumerate(cycle, 1):
+        for order, w in enumerate(cycle):
             row = {"client_id": client_id, "name": w["name"], "type": w["type"], "day_of_week": w["day_of_week"],
                    "duration_min": w["duration_min"], "notes": w["notes"], "cycle_name": cycle_name,
                    "is_future": True, "order_index": order}
@@ -464,7 +521,8 @@ async def _create_cycle(client_id: str, athlete: str, cycle_name: str, cycle: li
             created.append(new["id"])
             tag = new["id"][:8]
             exs = [{**e, "workout_id": new["id"],
-                    "group_id": f"ag_{tag}_{e['group_id']}" if e["group_id"] else None} for e in w["exercises"]]
+                    "group_id": (f"{'wb' if e['group_type'] == 'Workout Block' else 'ag'}_{tag}_{e['group_id']}"
+                                 if e["group_id"] else None)} for e in w["exercises"]]
             await _write("POST", "exercises", payload=exs)
     except Exception as e:
         if created:  # on ne laisse pas un cycle à moitié créé
@@ -500,30 +558,48 @@ async def coaching_programming_guide(ctx):
         return "Doctrine absente (agent/prompts/programmation.md). Applique les principes de la posture coach."
 
 
-_EX = {"type": "object", "required": ["name"], "properties": {
+_EX = {"type": "object", "description": "Soit un exercice classique (name, sets, reps…), soit un bloc {block: …}",
+       "properties": {
     "name": {"type": "string"}, "sets": {"type": "integer"},
-    "reps": {"type": "string", "description": "ex. '5', '8-10', '30 s', 'max'"},
-    "target_weight": {"type": "string", "description": "ex. '80 kg', '75% 1RM', 'RPE 7', 'RIR 2'"},
-    "rest": {"type": "string", "description": "ex. '2 min', '90 s'"},
+    "reps": {"type": "string", "description": "ex. '5', '8-10', '3/côté', '20 s', '10 m'"},
+    "target_weight": {"type": "string", "description": "ex. '80 kg', '82-85 %', 'RPE 8', 'RIR 2'"},
+    "rest": {"type": "string", "description": "ex. '120s', '60-90s', '2 min 30'"},
     "note": {"type": "string", "description": "tempo, intention technique, critère d'arrêt"},
     "group_type": {"type": "string", "enum": sorted(GROUP_TYPES)},
-    "group_id": {"type": "string", "description": "même lettre (A, B…) pour les exercices d'un même superset"}}}
+    "group_id": {"type": "string", "description": "même lettre (A, B…) pour les exercices enchaînés d'un même superset / giant set"},
+    "block": {"type": "object", "required": ["format", "movements"],
+              "description": "Bloc conditioning affiché comme « Workout Block » dans l'app (score et chrono côté athlète)",
+              "properties": {
+                  "format": {"type": "string", "enum": BLOCK_FORMATS,
+                             "description": "For Time / RFT (rounds for time) : au chrono. AMRAP : max de tours dans le temps 'cap'. "
+                                            "EMOM : une tâche par minute pendant 'cap' minutes. Tabata : 20 s / 10 s. Death By : +1 rep par minute."},
+                  "rounds": {"type": "integer", "description": "nombre de tours (For Time, RFT) ; vide pour AMRAP"},
+                  "cap": {"type": "string", "description": "durée ou time cap en minutes, ex. '12'"},
+                  "rest": {"type": "string", "description": "repos entre les tours ou après le bloc, ex. '90s'"},
+                  "objective": {"type": "string", "description": "stimulus visé, ex. 'vitesse constante sur les 3 rounds'"},
+                  "coach_note": {"type": "string"},
+                  "movements": {"type": "array", "items": {"type": "string"},
+                                "description": "une ligne par mouvement, quantité incluse : '8 DB thrusters', '15 cal row', '20 s battle rope'"}}}}}
 
 
 @tool("coaching_propose_cycle",
       "Propose la création d'un cycle de programmation pour un athlète, en BROUILLON (cycle futur, invisible "
       "pour l'athlète). Rien n'est écrit tant que Bene n'a pas validé par /ok le récapitulatif qui lui est "
-      "envoyé automatiquement. Donne le programme d'une semaine type : une entrée par séance. "
-      "day_of_week : 1 = lundi … 7 = dimanche. La progression sur les semaines du cycle se décrit dans "
-      "'notes' de la séance ou 'note' de l'exercice. Pour un bloc conditioning (WOD, EMOM, AMRAP, intervalles), "
-      "crée un exercice 'Normal' nommé par le format et détaille-le dans 'note'.",
+      "envoyé automatiquement. Une entrée par séance, dans l'ordre du cycle. Choisis la bonne structure : "
+      "exercice classique pour la force, la puissance, la technique ; Superset / Giant Set (même group_id) "
+      "pour des exercices enchaînés avec repos après le groupe ; 'block' pour tout conditioning : "
+      "For Time, RFT, AMRAP, EMOM, Tabata, Death By, et aussi les circuits d'activation ou finishers enchaînés. "
+      "Ne mets jamais un WOD dans une simple note. 'notes' de la séance : durée, priorité, intention, "
+      "échauffement. Mets la progression semaine par semaine et les indicateurs de suivi dans les notes "
+      "de la dernière séance, comme le fait Bene.",
       {"name": {"type": "string", "description": "Nom ou partie du nom de l'athlète"},
-       "cycle_name": {"type": "string", "description": "ex. 'Cycle 4 · Force + moteur'"},
-       "workouts": {"type": "array", "items": {"type": "object", "required": ["name", "day_of_week", "exercises"],
-                    "properties": {"name": {"type": "string"},
-                                   "type": {"type": "string", "description": "ex. Force, Run, Conditioning, Mobilité"},
-                                   "day_of_week": {"type": "integer"}, "duration_min": {"type": "integer"},
-                                   "notes": {"type": "string", "description": "objectif, échauffement, progression"},
+       "cycle_name": {"type": "string", "description": "ex. 'Judo — Force, Puissance & Endurance spécifique'"},
+       "workouts": {"type": "array", "items": {"type": "object", "required": ["name", "exercises"],
+                    "properties": {"name": {"type": "string", "description": "ex. 'Séance 1 — Force maximale + puissance latérale'"},
+                                   "type": {"type": "string", "enum": WORKOUT_TYPES},
+                                   "day_of_week": {"type": "integer", "description": "1 = lundi … 7 = dimanche. Laisse vide si les séances sont numérotées sans jour fixe."},
+                                   "duration_min": {"type": "integer"},
+                                   "notes": {"type": "string"},
                                    "exercises": {"type": "array", "items": _EX}}}}},
       ["name", "cycle_name", "workouts"], enabled=_enabled)
 async def coaching_propose_cycle(ctx, name: str, cycle_name: str, workouts: list):

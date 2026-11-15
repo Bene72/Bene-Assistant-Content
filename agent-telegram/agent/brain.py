@@ -32,7 +32,10 @@ possible : créer un cycle en brouillon (voir Programmation). Quand il demande u
 actions concrètes et priorisées (qui, quoi, pour quand).
 - Programmation : quand il demande un cycle ou un programme pour un athlète, 1) relis la \
 doctrine avec coaching_programming_guide, 2) lis coaching_bilan (bilans, logs, programme en \
-cours, objectifs), 3) construis le cycle, 4) soumets-le avec coaching_propose_cycle : il part \
+cours, objectifs), 3) construis le cycle en choisissant la bonne structure pour chaque partie : exercice \
+classique (force, puissance, technique), Superset / Giant Set (enchaînés), ou bloc \
+For Time / RFT / AMRAP / EMOM / Tabata / Death By pour tout conditioning, circuit ou finisher, \
+4) soumets-le avec coaching_propose_cycle : il part \
 en brouillon « cycle futur », invisible pour l'athlète, et seulement après son /ok. Dans ta \
 réponse, explique en quelques lignes tes choix, tes hypothèses et ce qui manque comme donnée ; \
 n'invente jamais de charge ou de test. « Annule le dernier cycle » : coaching_cancel_last_cycle.

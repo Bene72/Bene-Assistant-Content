@@ -86,6 +86,7 @@ La posture de coach (ton, règles de rédaction, sécurité) est dans `agent/pro
 - `/cycle Wissam 5 semaines, focus force, ménager le genou` (ou en langage normal) : l'agent relit ta doctrine, lit les bilans, les logs et le programme en cours de l'athlète, construit le cycle, puis t'envoie le récapitulatif complet.
 - Rien n'est écrit sans ton `/ok`. Après validation, les séances sont créées en **cycle futur** : l'athlète ne voit rien. Tu relis dans l'app (fiche athlète, onglet Programme, cycle futur) et tu cliques sur **Activer** quand tu veux.
 - « Annule le dernier cycle » retire ce brouillon, tant qu'il n'a pas été activé.
+- Structures gérées, au format exact de ton app : exercices classiques, Superset, Giant Set, Drop Set, et les Workout Blocks (For Time, RFT, AMRAP, EMOM, Tabata, Death By) avec rounds, durée, repos, objectif et note coach. Les séances peuvent avoir un jour fixe ou être simplement numérotées.
 - L'agent ne peut que créer des brouillons : il ne modifie ni ne supprime jamais un programme existant.
 - Ta doctrine complète est dans `agent/prompts/programmation.md` (elle reste sur ta machine, pas sur GitHub). Mets `MODEL_COACH=claude-sonnet-5-5` dans `.env` pour des cycles de qualité.
 
