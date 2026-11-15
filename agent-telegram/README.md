@@ -1,0 +1,151 @@
+# Agent Ben&Fit
+
+Ton assistant personnel, propulsé par Claude, à qui tu parles sur Telegram.
+Un seul agent, plusieurs compétences :
+
+| Compétence | Ce qu'il fait | À configurer |
+|---|---|---|
+| Discussion + recherche web | Répond, cherche sur le web, lit des pages | rien |
+| Mémoire | Retient ce que tu lui demandes (« retiens que… ») | rien |
+| Automatisations | Tâches récurrentes envoyées sur Telegram | rien |
+| Coaching | Lit ton dashboard Supabase (athlètes, cycles, workouts). **Lecture seule** | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` |
+| Dev | Lit tes repos, crée des issues, propose du code via Pull Request (jamais de push direct sur main) | `GITHUB_TOKEN` |
+
+Les compétences non configurées sont simplement désactivées.
+
+---
+
+## Coût : 0 € en plus
+
+L'agent utilise **ton abonnement Claude** (via Claude Code, inclus dans l'installation). Ce qu'il consomme est pris sur le même quota que tes discussions avec Claude. Si tu atteins la limite, il te le dit et refonctionne quand le quota se recharge.
+
+Usage strictement perso : toi seul lui parles. Si un jour d'autres personnes (athlètes) doivent lui parler, passe en mode clé API (`AUTH_MODE=api` dans `.env`).
+
+## Installation sur Windows (10 minutes)
+
+### 1. Crée ton bot Telegram
+1. Dans Telegram, ouvre **@BotFather**, envoie `/newbot`.
+2. Choisis un nom (ex. *Ben&Fit Agent*) et un identifiant finissant par `bot`.
+3. Garde le token qu'il te donne (`123456:ABC…`).
+
+### 2. Installe
+1. Dézippe le dossier où tu veux (ex. `Documents\benfit-agent`).
+2. Double-clique sur **`install.bat`**. Il installe Python si besoin, puis les dépendances (quelques minutes, Claude Code pèse ~400 Mo).
+   (Si Windows affiche « Windows a protégé votre ordinateur » : *Informations complémentaires* > *Exécuter quand même*.)
+3. **Connexion à ton compte Claude** : ton navigateur s'ouvre, connecte-toi et autorise. Un jeton `sk-ant-oat…` s'affiche dans la fenêtre : copie-le et colle-le quand on te le demande (clic droit = coller). Il est enregistré automatiquement.
+   (Si ça rate, relance juste `connexion_claude.bat`.)
+4. Le Bloc-notes s'ouvre sur `.env` : colle le token Telegram à la ligne `TELEGRAM_BOT_TOKEN=`, enregistre.
+
+### 3. Lance
+
+1. Double-clique sur **`start.bat`**. Une fenêtre noire s'ouvre : l'agent tourne tant qu'elle est ouverte.
+2. Dans Telegram, ouvre ton bot et écris `/start`. Il te répond ton **identifiant Telegram**.
+3. Colle cet identifiant dans `.env` à la ligne `ALLOWED_USER_IDS=`, enregistre, ferme la fenêtre noire et relance `start.bat`.
+
+C'est prêt. Seul toi peux lui parler.
+
+**Lancement automatique au démarrage de Windows** : double-clique sur `demarrage_auto_windows.bat` (relance-le pour désactiver).
+
+---
+
+## Brief du matin et journal
+
+Chaque jour à 7h30 (réglable avec `BRIEF_TIME` dans `.env`), l'agent t'envoie :
+☀️ la date, la fête du jour et les jours fériés · 📅 tes rendez-vous · ✅ tes tâches (en retard, du jour) · 🎂 les anniversaires des 7 prochains jours · 🌍 5 actus · 💬 une phrase d'élan.
+
+Tape `/brief` pour l'avoir tout de suite.
+
+Pour le remplir, parle-lui normalement :
+- « Rappelle-moi d'appeler le comptable jeudi » : ajouté à la to-do
+- « C'est fait pour le comptable » : coché
+- « L'anniversaire de ma mère c'est le 14 mars 1968 » : enregistré, rappelé chaque année avec son âge
+- Le soir : « Journée solide, PR au squat, mais crevé » : il te propose de l'ajouter à ton journal. « Fais-moi le bilan de ma semaine » : il relit ton journal.
+
+### Brancher ton agenda (lecture seule)
+
+**Google Agenda** (sur ordinateur) : calendar.google.com > roue dentée > *Paramètres* > clique sur ton agenda à gauche > section *Intégrer l'agenda* > copie l'**Adresse secrète au format iCal**.
+**iPhone / iCloud** : app Calendrier > *Calendriers* > (i) à côté de l'agenda > active *Calendrier public* > partage le lien (remplace `webcal://` par `https://`, l'agent le fait aussi tout seul).
+**Outlook** : *Paramètres* > *Calendrier* > *Calendriers partagés* > *Publier un calendrier* > lien ICS.
+
+Colle le ou les liens dans `.env` :
+```
+CALENDARS=Perso=https://...ics, Pro=https://...ics
+```
+Garde ces liens secrets : quiconque les a peut lire l'agenda.
+
+## Ajouter les compétences Coaching et Dev
+
+**Coaching (ton dashboard Ben-Fit)** : l'agent lit directement la base Supabase de l'app ben-and-fit.vercel.app. Récupère les 2 valeurs que l'app utilise déjà :
+- Dans **Vercel** > projet > *Settings* > *Environment Variables* : `NEXT_PUBLIC_SUPABASE_URL` va dans `SUPABASE_URL`, et `SUPABASE_SERVICE_ROLE_KEY` va dans `SUPABASE_SERVICE_KEY`.
+- Ou dans **Supabase** > *Project Settings* > *API* : *Project URL* et la clé *service_role*.
+
+Ce qu'il sait faire : vue cockpit de tous les athlètes actifs (séances 7/28 j, dernier bilan, fin d'engagement, fin de cycle, messages non lus, tâches coach) avec les points d'attention, et fiche complète d'un athlète (bilans, programme, logs, mesures, objectifs, nutrition, messages). Les points d'attention apparaissent aussi dans le brief du matin.
+
+⚠️ Ton repo Ben-Fit est public : ne mets jamais la clé service_role dans le code, seulement dans ce `.env`.
+
+L'agent ne peut que **lire** : aucune fonction d'écriture ou de suppression n'existe dans son code.
+
+**Dev (GitHub)** : github.com > *Settings* > *Developer settings* > *Personal access tokens* > *Fine-grained tokens* > *Generate new token* :
+- *Repository access* : les repos que tu veux lui confier
+- *Permissions* : **Contents**, **Issues**, **Pull requests** en *Read and write*
+- Colle le token dans `GITHUB_TOKEN`
+
+Relance `start.bat` après chaque modification du `.env`.
+
+---
+
+## Exemples de demandes
+
+- « Qu'est-ce que j'ai à faire côté clients cette semaine ? »
+- « Analyse le dernier bilan de Wissam et dis-moi quoi ajuster dans sa prog »
+- « Qui ne s'est pas entraîné depuis une semaine ? »
+- « Regarde le README de Ben-Fit : quelles migrations restent à appliquer ? »
+- « Chaque lundi à 8h, envoie-moi les cycles qui se terminent dans 14 jours et les engagements qui expirent ce mois-ci »
+- « Tous les jours à 7h30, une veille de 5 actus sur la préparation physique et l'haltérophilie »
+- « Dans Ben-Fit, regarde pourquoi le panneau Prochains suivis est vide et ouvre une issue »
+- « Propose une PR qui corrige la faute de frappe dans le README de Track-your-progress »
+- « Retiens que Wissam a une compétition le 12 décembre »
+
+Commandes : `/brief` (brief du jour), `/taches` (tâches planifiées), `/reset` (effacer la conversation), `/id`.
+
+---
+
+## Passer sur Raspberry Pi
+
+1. Pi 5 (8 Go) avec Raspberry Pi OS 64 bits, connecté à Internet.
+2. Copie le dossier sur le Pi (clé USB ou `scp`), **avec ton fichier `.env` et le dossier `data/`** (mémoire et tâches). Le `.env` contient déjà ta connexion Claude : rien à refaire.
+3. Dans un terminal sur le Pi :
+   ```bash
+   cd benfit-agent
+   bash scripts/install_pi.sh
+   ```
+4. Arrête l'agent sur ton PC (sinon deux agents se disputeront le même bot).
+
+Il tourne ensuite 24/7 et redémarre tout seul. Logs : `journalctl -u benfit-agent -f`.
+
+---
+
+## Structure
+
+```
+agent/
+  main.py        bot Telegram
+  brain.py       consignes de l'agent + mode clé API
+  brain_sdk.py   mode abonnement (Claude Code)
+  scheduler.py   tâches récurrentes
+  storage.py     base SQLite (data/agent.db)
+  tools/         une compétence = un fichier
+    coaching.py  Supabase (lecture seule)
+    github.py    GitHub
+    web.py       lecture de pages
+    notes.py     mémoire
+    schedule.py  automatisations
+```
+
+Pour ajouter une compétence : crée un fichier dans `agent/tools/`, décore une fonction avec `@tool(...)`, et ajoute l'import en bas de `agent/tools/__init__.py`.
+
+## Sécurité
+
+- Ne partage jamais le fichier `.env`.
+- Seuls les identifiants Telegram listés dans `ALLOWED_USER_IDS` sont servis.
+- Données clients : lecture seule. Code : uniquement via Pull Request, que tu valides toi-même.

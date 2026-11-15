@@ -1,0 +1,10 @@
+claude-agent-sdk>=0.2.170
+anthropic>=0.69
+python-telegram-bot>=21,<23
+apscheduler>=3.10,<4
+httpx>=0.27
+python-dotenv>=1.0
+tzdata
+icalendar>=6
+recurring-ical-events>=3
+holidays>=0.50
