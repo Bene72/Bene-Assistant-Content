@@ -5,9 +5,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(ROOT / ".env")
+# Deux bots possibles sur le même code : "coach" (.env, dossier data) et "box" (.env.box, data-box)
+PROFILE = (os.getenv("AGENT_PROFILE") or "coach").strip().lower()
+ENV_FILE = ROOT / (".env" if PROFILE == "coach" else f".env.{PROFILE}")
+load_dotenv(ENV_FILE)
 
-DATA_DIR = ROOT / "data"
+DATA_DIR = ROOT / ("data" if PROFILE == "coach" else f"data-{PROFILE}")
 DATA_DIR.mkdir(exist_ok=True)
 DB_PATH = DATA_DIR / "agent.db"
 
@@ -68,8 +71,12 @@ def _calendars(raw: str) -> dict[str, str]:
 
 
 CALENDARS = _calendars(_get("CALENDARS"))
+# BoxLog (app de la salle), lecture seule — utilisé par le profil "box"
+BOX_SUPABASE_URL = _get("BOX_SUPABASE_URL").rstrip("/")
+BOX_SUPABASE_KEY = _get("BOX_SUPABASE_KEY")
+BOX_ID = _get("BOX_ID")
 # Heure du brief du matin (HH:MM). Vide = pas de brief automatique.
-BRIEF_TIME = _get("BRIEF_TIME", "07:30")
+BRIEF_TIME = _get("BRIEF_TIME", "07:30") if PROFILE == "coach" else ""
 # Format du brief automatique : texte, vocal ou les deux
 BRIEF_FORMAT = _get("BRIEF_FORMAT", "texte").lower()
 # Voix des notes vocales (voix Microsoft Edge). Autres voix FR : fr-FR-VivienneMultilingualNeural,
@@ -95,5 +102,5 @@ def check() -> list[str]:
     if AUTH_MODE == "api" and not ANTHROPIC_API_KEY:
         problems.append("ANTHROPIC_API_KEY manquant dans .env")
     if not TELEGRAM_BOT_TOKEN:
-        problems.append("TELEGRAM_BOT_TOKEN manquant dans .env")
+        problems.append(f"TELEGRAM_BOT_TOKEN manquant dans {ENV_FILE.name}")
     return problems

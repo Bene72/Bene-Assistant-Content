@@ -9,6 +9,7 @@ if not exist ".venv\Scripts\python.exe" (
 )
 echo Verification des dependances...
 ".venv\Scripts\python.exe" -m pip install -q -r requirements.txt --disable-pip-version-check
+if exist ".env.box" start "Bot BoxLog" /min "%~dp0start_box.bat"
 :loop
 ".venv\Scripts\python.exe" -m agent.main
 if errorlevel 2 (

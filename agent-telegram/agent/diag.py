@@ -12,6 +12,20 @@ async def run() -> str:
 
     add(bool(config.CLAUDE_CODE_OAUTH_TOKEN or config.ANTHROPIC_API_KEY), "Jeton Claude présent")
 
+    if config.PROFILE == "box":
+        if config.BOX_SUPABASE_URL and config.BOX_SUPABASE_KEY:
+            try:
+                from .tools.box import _get as bget
+                wods = await bget("wods", [("select", "wod_date"), ("order", "wod_date.desc"), ("limit", "1")])
+                progs = await bget("programs", [("select", "id"), ("status", "eq.active")])
+                add(True, "BoxLog", f"dernier WOD le {wods[0]['wod_date'] if wods else '—'}, "
+                                    f"{len(progs)} programme(s) actif(s)")
+            except Exception as e:
+                add(False, "BoxLog", str(e)[:150])
+        else:
+            add(False, "BoxLog non configuré (BOX_SUPABASE_URL / BOX_SUPABASE_KEY)")
+        return "\n".join(lines)
+
     if config.SUPABASE_URL and config.SUPABASE_SERVICE_KEY:
         try:
             from .tools.coaching import _get

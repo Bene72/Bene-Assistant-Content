@@ -58,6 +58,19 @@ async def refuse(update: Update):
 async def cmd_start(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return await refuse(update)
+    if config.PROFILE == "box":
+        return await update.message.reply_text(
+            f"Salut {config.OWNER_NAME}, ici le bot de la salle (BoxLog), en lecture seule.\n\n"
+            "Écris-moi normalement, par exemple :\n"
+            "- qu'est-ce qu'on a fait ces 3 dernières semaines ?\n"
+            "- c'est quand la dernière fois qu'on a fait des thrusters ?\n"
+            "- propose-moi le WOD de jeudi sans doublon avec la semaine\n\n"
+            "/prog : résumé des 3 dernières semaines\n"
+            "/prog 6 : sur 6 semaines\n"
+            "/mouvement snatch : historique d'un mouvement\n"
+            "/diag : vérifier la connexion\n"
+            "/reset : effacer l'historique de la conversation"
+        )
     await update.message.reply_text(
         f"Salut {config.OWNER_NAME}, je suis en ligne.\n\n"
         "Écris-moi normalement. Commandes utiles :\n"
@@ -71,6 +84,28 @@ async def cmd_start(update: Update, _: ContextTypes.DEFAULT_TYPE):
         "/reset : effacer l'historique de la conversation\n"
         "/id : afficher ton identifiant Telegram"
     )
+
+
+async def cmd_prog(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    arg = (context.args or ["3"])[0]
+    weeks = max(1, min(int(arg), 16)) if arg.isdigit() else 3
+    await answer(update, context,
+                 f"Fais-moi le point sur la programmation de la salle des {weeks} dernières semaines "
+                 f"(box_programming sur {weeks * 7} jours) : ce qu'on a fait semaine par semaine en très "
+                 "condensé, les mouvements et formats les plus utilisés, ce qui manque, et les doublons à "
+                 "éviter pour la suite.", model=config.MODEL_COACH)
+
+
+async def cmd_mouvement(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    q = " ".join(context.args or []).strip()
+    if not q:
+        return await update.message.reply_text("Dis-moi lequel : /mouvement thruster")
+    await answer(update, context, f"Historique du mouvement « {q} » à la salle (box_search_movement, 12 semaines) : "
+                 "dernière fois, fréquence, dans quels formats.")
 
 
 async def cmd_id(update: Update, _: ContextTypes.DEFAULT_TYPE):
@@ -217,7 +252,8 @@ async def post_init(app: Application):
     scheduler.set_sender(send)
     voice.set_sender(send_voice)
     confirm.set_sender(send)
-    brief.ensure_daily_task()
+    if config.PROFILE == "coach":
+        brief.ensure_daily_task()
     scheduler.start()
     if brief.missed_today():  # PC éteint à l'heure du brief : on le rattrape
         log.info("brief du matin manqué : rattrapage")
@@ -226,7 +262,7 @@ async def post_init(app: Application):
             asyncio.create_task(scheduler._run_task(task["id"]))
     for uid in config.ALLOWED_USER_IDS:
         try:
-            await app.bot.send_message(uid, "✅ Agent Ben&Fit démarré.")
+            await app.bot.send_message(uid, "✅ Bot BoxLog démarré." if config.PROFILE == "box" else "✅ Agent Ben&Fit démarré.")
         except Exception:
             pass  # l'utilisateur n'a pas encore écrit au bot
 
@@ -237,7 +273,7 @@ def main():
         print("\nConfiguration incomplète :")
         for p in problems:
             print(" -", p)
-        print("\nOuvre le fichier .env, complète-le, puis relance.\n")
+        print(f"\nOuvre le fichier {config.ENV_FILE.name}, complète-le, puis relance.\n")
         sys.exit(2)
 
     storage.init()
@@ -255,6 +291,13 @@ def main():
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("id", cmd_id))
     app.add_handler(CommandHandler("reset", cmd_reset))
+    if config.PROFILE == "box":
+        app.add_handler(CommandHandler("prog", cmd_prog))
+        app.add_handler(CommandHandler("mouvement", cmd_mouvement))
+        app.add_handler(CommandHandler("diag", cmd_diag))
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
+        log.info("Bot BoxLog en ligne. Ctrl+C pour arrêter.")
+        return app.run_polling(drop_pending_updates=True)
     app.add_handler(CommandHandler("taches", cmd_tasks))
     app.add_handler(CommandHandler("brief", cmd_brief))
     app.add_handler(CommandHandler("bilans", cmd_bilans))

@@ -161,6 +161,16 @@ agent/
 
 Pour ajouter une compétence : crée un fichier dans `agent/tools/`, décore une fonction avec `@tool(...)`, et ajoute l'import en bas de `agent/tools/__init__.py`.
 
+## Deuxième bot : la salle (BoxLog)
+
+Un bot Telegram séparé, sur le même code, pour la programmation de ta salle. Il lit BoxLog en **lecture seule** : il ne peut rien créer ni modifier dans l'app. Il ne connaît pas tes clients de coaching, et l'agent principal ne connaît pas BoxLog.
+
+- « Qu'est-ce qu'on a fait ces 3 dernières semaines ? » ou `/prog` (`/prog 6` pour 6 semaines) : résumé, mouvements et formats les plus utilisés, ce qui manque, doublons à éviter.
+- « C'est quand la dernière fois qu'on a fait des thrusters ? » ou `/mouvement thruster`.
+- « Propose le WOD de jeudi sans doublon avec la semaine » : il regarde l'historique, relit ta doctrine, et rédige la séance dans la conversation.
+
+Installation : crée un nouveau bot chez @BotFather, puis double-clique sur **`installer_bot_boxlog.bat`** et colle les 3 valeurs demandées (token du bot, adresse et clé Supabase de BoxLog). Relance `start.bat` : il démarre les deux bots (le second dans une fenêtre réduite « Bot BoxLog »).
+
 ## Changer une clé plus tard
 
 Double-clique sur **`modifier_cle.bat`** : il affiche la liste des clés (Telegram, Claude, Supabase, agenda, modèle, heure du brief…), tu choisis un numéro, tu colles la nouvelle valeur. Le reste du fichier `.env` n'est pas touché et une copie de l'ancien est gardée dans `.env.avant`. Relance `start.bat` ensuite.
