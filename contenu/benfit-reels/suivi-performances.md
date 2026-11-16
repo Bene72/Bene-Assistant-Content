@@ -1,0 +1,66 @@
+# Suivi des performances — Reels BEN&FIT
+
+Objectif : **apprendre de chaque publication**, pas seulement regarder les vues.
+Cycle : **01 Analyser → 02 Formuler une hypothèse → 03 Tester → 04 Ajuster.**
+
+Les chiffres sont relevés dans Instagram → Reel → « Voir les statistiques », **à 48 h (J+2) et à 7 jours (J+7)**.
+Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusion.
+
+## Tableau récapitulatif (relevé J+7)
+
+| # | Reel | Pilier | DA | Durée | Vues | Durée moy. visionnage | Partages | Enregistrements | Commentaires | Visites profil | Abonnés gagnés | DM reçus |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Zone 2 | RUN | v1 (ancienne DA) | – | – | – | – | – | – | – | – | – |
+| 2 | Difficultés aux tractions | BUILD / MOVE | v1 (ancienne DA) | – | – | – | – | – | – | – | – | – |
+| 3 | Les 4 qualités (« si je devais tout recommencer ») | Les 4 piliers | **v2 naturelle** | 1 min 44 | – | – | – | – | – | – | – | – |
+
+> « – » = à remplir. Indicateurs les plus importants, dans l'ordre : **durée moyenne de visionnage**, **partages**, **enregistrements**, **abonnés gagnés**. Les vues seules ne disent presque rien.
+
+---
+
+## Fiches par Reel
+
+### #1 — Zone 2
+- **Date de publication** : à compléter
+- **Sujet** : l'entraînement en zone 2 (endurance fondamentale)
+- **DA** : v1 (étalonnage coloré, animations Claude très présentes)
+- **Accroche** : à compléter
+- **Hypothèse testée** : – (Reel publié avant la mise en place du suivi : sert de point de comparaison)
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
+
+### #2 — Difficultés aux tractions
+- **Date de publication** : à compléter
+- **Sujet** : pourquoi on bloque aux tractions et comment progresser
+- **DA** : v1
+- **Accroche** : à compléter
+- **Hypothèse testée** : – (point de comparaison)
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
+
+### #3 — Les 4 qualités pour construire un athlète
+- **Date de publication** : à compléter (prêt le 16 nov. 2026)
+- **Sujet** : BUILD (force, masse, tendons) · RUN (cardio, zone 2, km progressifs) · PERFORM (haute intensité, haltéro) · MOVE (mobilité, séances spécifiques)
+- **DA** : **v2 naturelle** (étalonnage léger, polaroids, feutre, chiffres empilés) + moitié des animations v1 (accroche animée, barres km, carte mobilité ≠ souplesse, carte de fin) + GIFs réaction
+- **Durée** : 1 min 44
+- **Accroche** : « 4 choses que je ferais si je devais tout recommencer » (typographie animée)
+- **Question de fin / CTA** : « Laquelle de ces 4 qualités est ton plus gros point faible ? » → commentaires
+- **Musique** : son tendance Instagram ajouté à la publication
+- **Hypothèse testée** : *la DA naturelle retient mieux et génère plus de partages que la DA v1 (perçue comme « faite par l'IA »).*
+  - Comparer la durée moyenne de visionnage et les partages avec #1 et #2.
+  - Risque à surveiller : la durée (1 min 44) peut faire baisser la rétention, à regarder sur la courbe de décrochage.
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
+
+---
+
+## Hypothèses à tester ensuite
+- Accroche **question** vs **affirmation choc**.
+- Reel **≤ 60 s** vs **> 90 s** sur un même type de sujet.
+- Ouverture avec **titre qui s'enflamme** (« MYTHE N°1 » + chrono) vs typographie animée.
+- Sujet tiré des **questions reçues en DM** vs sujet choisi par Bene.
+
+## DM et commentaires (à noter, anonymisés)
+| Date | Reel d'origine | Question / objection reçue | Idée de contenu |
+|---|---|---|---|
+| – | – | – | – |
