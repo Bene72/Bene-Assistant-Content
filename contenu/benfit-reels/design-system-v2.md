@@ -3,6 +3,9 @@
 Objectif : garder l'identité BEN&FIT, mais un rendu de créateur, pas « généré ».
 Règle d'or : **le moins d'effets possible, et seulement des effets qui servent le discours.**
 
+✅ **Validé par Bene (16 nov. 2026)** : style naturel adopté pour tous les prochains Reels.
+On garde **environ la moitié des animations v1**, les plus fortes, mélangées au style naturel (voir plus bas).
+
 ## Ce qu'on garde (inchangé)
 - Sous-titres **Coda ExtraBold**, blancs, bords bleus, mots-clés dans un bloc bleu `#2E6BFF`.
 - Découpage en 2 lignes max, calé au mot près, au-dessus de la zone des boutons Instagram.
@@ -32,6 +35,15 @@ La qualité vient de la lumière au tournage (softbox 5600 K à 45°, touche ble
 - Volets bleus plein écran, dégradés, halos, lueurs.
 - Le même rebond (« pop ») sur chaque élément.
 - Plus d'un élément graphique à l'écran en même temps.
+
+## Animations v1 qu'on garde (≈ la moitié)
+- **Accroche en typographie animée** (mots qui arrivent un par un en très grand).
+- **Carte « barres qui montent »** pour les progressions chiffrées (ex. km par semaine 5 → 7 → 8 → 10) — Bene l'adore.
+- **Carte de comparaison** à deux étiquettes (ex. MOBILITÉ ≠ SOUPLESSE).
+- **Carte de fin** avec la question et les 4 piliers.
+- **Stickers GIF réaction** (let's go, oh yeah, corgi confus…).
+
+Abandonnées : volets bleus plein écran, barre de progression, écrans partagés type tableau de bord, jauges, pictogrammes vectoriels (bonhomme qui squatte), halo doré.
 
 ## Mouvement
 - Entrées simples : glissé court + fondu, ou coupe sèche. Pas de rebond.
