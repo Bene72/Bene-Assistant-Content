@@ -5,7 +5,7 @@ Tout ce qui sert à l’assistant et à la création de contenu BEN&FIT, au mêm
 | Dossier | Contenu |
 |---|---|
 | `agent-telegram/` | Agent Ben&Fit perso (bot Telegram + Claude). Voir son README. |
-| `contenu/benfit-reels/` | Reels Instagram : brief de post-production et `fabrique-montage/` (scripts du montage : transcription, coupes, étalonnage, sous-titres Coda, motion design, son). |
+| `contenu/benfit-reels/` | Reels Instagram : `design-system-v2.md` (règles du style « naturel »), brief de post-production et `fabrique-montage/` (scripts du montage : transcription, coupes, étalonnage, sous-titres Coda, motion design, son). |
 | `contenu/bibliotheque/` | GIFs, images et b-roll réutilisables (voir son README). |
 | `contenu/polices/` | Polices Coda et Anton (sous-titres et titres des Reels). |
 | `contenu/benfit-3d/` | Fabrique de clips d’athlète 3D BEN&FIT (scripts + exemple de l’arraché, référence de qualité). |
