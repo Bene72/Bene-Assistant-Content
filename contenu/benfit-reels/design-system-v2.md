@@ -45,6 +45,25 @@ La qualité vient de la lumière au tournage (softbox 5600 K à 45°, touche ble
 
 Abandonnées : volets bleus plein écran, barre de progression, écrans partagés type tableau de bord, jauges, pictogrammes vectoriels (bonhomme qui squatte), halo doré.
 
+## Cartes « interface » (ajout du 16 nov. 2026)
+Référence : Reels de Théo Parisi (Project Orange). Graphique mais « designé par un humain ».
+- **Une seule couleur d'accent** : le bleu BEN&FIT, rien d'autre.
+- **Des objets concrets** plutôt que des graphiques abstraits : fiche de séance dont les exercices se cochent, agenda de la semaine avec blocs d'entraînement, frise « aujourd'hui → 12 semaines », dossiers cochés, écran de l'app Track-your-progress, mur de photos d'athlètes (avec leur accord) + « + de X athlètes coachés ».
+- **Cartes en verre dépoli** (fond translucide, coins arrondis, ombre douce), posées dans le décor.
+- **Typographie mixte** pour les titres de cartes : mot en gras + mot en *italique serif* (« Les *séances* », « + de 30 / *athlètes coachés* »). Sous-titres : toujours Coda.
+- **Les éléments vivent dans le temps** : une carte apparaît, se range sur le côté et reste en fond pendant que la suivante arrive (on raconte une histoire).
+- **Mot géant ponctuel** sur la phrase forte (« *C'est* **la régularité.** »), une fois par Reel maximum.
+
+## Choix au montage
+Tous les formats ci-dessous sont autorisés. **Claude choisit au montage le plus pertinent pour chaque moment du discours** :
+- chiffre ou progression → chiffres empilés ou carte de barres ;
+- méthode, planning, organisation → carte interface (agenda, fiche de séance, frise) ;
+- notion ou mouvement concret → vraie vidéo en encart ou polaroid ;
+- comparaison (A ≠ B) → carte à deux étiquettes ;
+- moment drôle ou relâché → sticker GIF ;
+- phrase forte → mot géant ou punch-in.
+Règle : un seul élément à l'écran à la fois, 3 à 5 moments graphiques forts par Reel, et varier les formats d'un passage à l'autre.
+
 ## Mouvement
 - Entrées simples : glissé court + fondu, ou coupe sèche. Pas de rebond.
 - Légère inclinaison (−4° à +4°) et micro-bougé sur les encarts : ça fait « posé à la main ».
@@ -56,4 +75,4 @@ Abandonnées : volets bleus plein écran, barre de progression, écrans partagé
 - Bruitages : seulement sur 2–3 moments clés (entrée d'un encart, chiffre final).
 
 ## Formats à alterner dans une vidéo
-Plein cadre + sous-titres · encart flottant (vraie vidéo) · polaroid avec légende · chiffres empilés · sticker GIF réaction (sans personnage de film/animé).
+Plein cadre + sous-titres · encart flottant (vraie vidéo) · polaroid avec légende · chiffres empilés · carte de barres · carte interface (agenda, fiche, frise, mur d'athlètes) · mot géant · sticker GIF réaction (sans personnage de film/animé).
