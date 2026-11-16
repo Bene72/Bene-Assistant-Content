@@ -1,0 +1,54 @@
+"""Bruitages discrets (pas de musique : Bene ajoute un son tendance à la publication) + mixage voix -14 LUFS."""
+import json, sys, subprocess, numpy as np, wave
+SR = 48000
+DUR = float(sys.argv[1])
+rng = np.random.default_rng(7)
+N = int(DUR * SR)
+
+def write(path, x):
+    x = np.clip(x, -1, 1); y = (x * 32767).astype(np.int16)
+    w = wave.open(path, "wb"); w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(y.tobytes()); w.close()
+
+def bp_fast(x, lo, hi):
+    from numpy.fft import rfft, irfft, rfftfreq
+    X = rfft(x); f = rfftfreq(len(x), 1 / SR)
+    h = 1 / (1 + (lo / np.maximum(f, 1)) ** 4) ** 0.5 / (1 + (f / hi) ** 4) ** 0.5
+    return irfft(X * h, len(x))
+
+S = np.zeros((N, 2))
+def put(x, t, g, pan=0.0):
+    i = int(t * SR)
+    if i < 0 or i >= N: return
+    n = min(len(x), N - i)
+    S[i:i + n, 0] += g * x[:n] * (1 - pan); S[i:i + n, 1] += g * x[:n] * (1 + pan)
+
+def whoosh(d=0.45, lo=300, hi=6000, up=True):
+    n = int(d * SR); x = rng.standard_normal(n); tt = np.arange(n) / n
+    a = bp_fast(x, lo, lo * 4); b = bp_fast(x, hi / 4, hi); m = tt if up else 1 - tt
+    y = (a * (1 - m) + b * m) * np.sin(np.pi * tt) ** 1.5; return y / (np.abs(y).max() + 1e-9)
+
+def thump(f0=70, d=0.35):
+    n = int(d * SR); tt = np.arange(n) / SR
+    fr = f0 * (0.6 + 0.8 * np.exp(-tt / 0.05))
+    y = np.sin(2 * np.pi * np.cumsum(fr) / SR) * np.exp(-tt / 0.12)
+    nz = bp_fast(rng.standard_normal(n), 1500, 8000) * np.exp(-tt / 0.01)
+    y = y + 0.25 * nz / (np.abs(nz).max() + 1e-9); return y / np.abs(y).max()
+
+def tick():
+    n = int(0.05 * SR); tt = np.arange(n) / SR
+    y = np.sin(2 * np.pi * 1900 * tt) * np.exp(-tt / 0.008) + 0.5 * np.sin(2 * np.pi * 3100 * tt) * np.exp(-tt / 0.005)
+    return y / np.abs(y).max()
+
+for t, kind in json.load(open("/home/claude/work/events_cardio.json")):
+    if kind == "swoosh": put(whoosh(0.3, 600, 7000), t - 0.05, 0.10)
+    elif kind == "tick": put(tick(), t, 0.08)
+    elif kind == "hit": put(thump(80, 0.3), t, 0.24)
+    elif kind == "end": put(whoosh(0.6, 200, 6000), t - 0.2, 0.18); put(thump(55, 0.7), t + 0.2, 0.32)
+write("/home/claude/work/sfx_cardio.wav", S)
+
+fc = ("[0:a]aresample=48000,highpass=f=75,afftdn=nf=-28:nr=10,equalizer=f=3200:t=q:w=1.2:g=2,"
+      "acompressor=threshold=-21dB:ratio=3:attack=8:release=120:makeup=3,pan=stereo|c0=c0|c1=c0,apad[v];"
+      "[v][1:a]amix=inputs=2:duration=shortest:normalize=0,loudnorm=I=-14:TP=-1:LRA=9[o]")
+subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", "/home/claude/work/voice_raw_v2.wav", "-i", "/home/claude/work/sfx_cardio.wav",
+                "-filter_complex", fc, "-map", "[o]", "-ar", "48000", "-t", f"{DUR:.3f}", "/home/claude/work/mix_cardio.wav"], check=True)
+print("ok")
