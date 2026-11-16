@@ -10,9 +10,10 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 
 | # | Reel | Pilier | DA | Durée | Vues | Durée moy. visionnage | Partages | Enregistrements | Commentaires | Visites profil | Abonnés gagnés | DM reçus |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Zone 2 | RUN | v1 (ancienne DA) | – | – | – | – | – | – | – | – | – |
-| 2 | Difficultés aux tractions | BUILD / MOVE | v1 (ancienne DA) | – | – | – | – | – | – | – | – | – |
-| 3 | Les 4 qualités (« si je devais tout recommencer ») | Les 4 piliers | **v2 naturelle** | 1 min 44 | – | – | – | – | – | – | – | – |
+| 1 | Tu peux être fort et ne pas être en forme | BUILD / PERFORM | v1 (ancienne DA, très « IA ») | – | – | – | – | – | – | – | – | – |
+| 2 | Zone 2 | RUN | v1 (ancienne DA) | – | – | – | – | – | – | – | – | – |
+| 3 | Difficultés aux tractions | BUILD / MOVE | v1 (ancienne DA) | – | – | – | – | – | – | – | – | – |
+| 4 | Les 4 qualités (« si je devais tout recommencer ») | Les 4 piliers | **v2 naturelle** | 1 min 44 | – | – | – | – | – | – | – | – |
 
 > « – » = à remplir. Indicateurs les plus importants, dans l'ordre : **durée moyenne de visionnage**, **partages**, **enregistrements**, **abonnés gagnés**. Les vues seules ne disent presque rien.
 
@@ -20,7 +21,16 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 
 ## Fiches par Reel
 
-### #1 — Zone 2
+### #1 — Tu peux être fort et ne pas être en forme
+- **Date de publication** : à compléter (tout premier Reel monté avec Claude)
+- **Sujet** : être fort (force max) ≠ être en forme (condition physique globale)
+- **DA** : v1, la plus marquée « IA » (effets et animations très présents)
+- **Accroche** : à compléter
+- **Hypothèse testée** : – (point de comparaison de départ)
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
+
+### #2 — Zone 2
 - **Date de publication** : à compléter
 - **Sujet** : l'entraînement en zone 2 (endurance fondamentale)
 - **DA** : v1 (étalonnage coloré, animations Claude très présentes)
@@ -29,7 +39,7 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
 
-### #2 — Difficultés aux tractions
+### #3 — Difficultés aux tractions
 - **Date de publication** : à compléter
 - **Sujet** : pourquoi on bloque aux tractions et comment progresser
 - **DA** : v1
@@ -38,7 +48,7 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
 
-### #3 — Les 4 qualités pour construire un athlète
+### #4 — Les 4 qualités pour construire un athlète
 - **Date de publication** : à compléter (prêt le 16 nov. 2026)
 - **Sujet** : BUILD (force, masse, tendons) · RUN (cardio, zone 2, km progressifs) · PERFORM (haute intensité, haltéro) · MOVE (mobilité, séances spécifiques)
 - **DA** : **v2 naturelle** (étalonnage léger, polaroids, feutre, chiffres empilés) + moitié des animations v1 (accroche animée, barres km, carte mobilité ≠ souplesse, carte de fin) + GIFs réaction
@@ -47,7 +57,7 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 - **Question de fin / CTA** : « Laquelle de ces 4 qualités est ton plus gros point faible ? » → commentaires
 - **Musique** : son tendance Instagram ajouté à la publication
 - **Hypothèse testée** : *la DA naturelle retient mieux et génère plus de partages que la DA v1 (perçue comme « faite par l'IA »).*
-  - Comparer la durée moyenne de visionnage et les partages avec #1 et #2.
+  - Comparer la durée moyenne de visionnage et les partages avec #1, #2 et #3.
   - Risque à surveiller : la durée (1 min 44) peut faire baisser la rétention, à regarder sur la courbe de décrochage.
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
