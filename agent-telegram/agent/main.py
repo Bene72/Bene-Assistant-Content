@@ -1,5 +1,6 @@
 """Point d'entrée : lance le bot Telegram et le planificateur."""
 import asyncio
+import html
 import logging
 import sys
 from logging.handlers import RotatingFileHandler
@@ -34,6 +35,24 @@ def split(text: str) -> list[str]:
         text = text[cut:].lstrip("\n")
     parts.append(text)
     return parts
+
+
+def fmt(text: str) -> str:
+    """Mise en forme légère pour Telegram : une ligne qui commence par « ## » devient un titre en gras."""
+    out = []
+    for line in text.split("\n"):
+        safe = html.escape(line, quote=False)
+        out.append(f"<b>{safe[3:].strip()}</b>" if line.startswith("## ") else safe)
+    return "\n".join(out)
+
+
+async def send_text(bot, chat_id: int, text: str):
+    """Envoie un texte (découpé si besoin), avec titres en gras ; repli en texte brut si Telegram refuse."""
+    for part in split(text):
+        try:
+            await bot.send_message(chat_id, fmt(part), parse_mode="HTML", disable_web_page_preview=True)
+        except Exception:
+            await bot.send_message(chat_id, part.replace("## ", ""), disable_web_page_preview=True)
 
 
 def authorized(update: Update) -> bool:
@@ -142,9 +161,8 @@ async def cmd_brief(update: Update, context: ContextTypes.DEFAULT_TYPE, fmt: str
     fmt = fmt or brief.parse_format(" ".join(context.args or []), default="texte")
     chat_id = update.effective_chat.id
 
-    async def send_text(cid, text):
-        for part in split(text):
-            await context.bot.send_message(cid, part, disable_web_page_preview=True)
+    async def send_brief(cid, text):
+        await send_text(context.bot, cid, text)
 
     action = ChatAction.RECORD_VOICE if fmt == "vocal" else ChatAction.TYPING
 
@@ -155,7 +173,7 @@ async def cmd_brief(update: Update, context: ContextTypes.DEFAULT_TYPE, fmt: str
 
     busy = asyncio.create_task(keep_busy())
     try:
-        await brief.run(chat_id, fmt, send_text)
+        await brief.run(chat_id, fmt, send_brief)
     except Exception as e:
         log.exception("erreur brief")
         await update.message.reply_text(f"Oups, le brief a échoué : {type(e).__name__}: {e}")
@@ -236,14 +254,12 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, 
         reply = f"Oups, une erreur : {type(e).__name__}: {e}"
     finally:
         typing.cancel()
-    for part in split(reply):
-        await update.message.reply_text(part, disable_web_page_preview=True)
+    await send_text(context.bot, chat_id, reply)
 
 
 async def post_init(app: Application):
     async def send(chat_id: int, text: str):
-        for part in split(text):
-            await app.bot.send_message(chat_id, part, disable_web_page_preview=True)
+        await send_text(app.bot, chat_id, text)
 
     async def send_voice(chat_id: int, path, caption: str = ""):
         with open(path, "rb") as f:
