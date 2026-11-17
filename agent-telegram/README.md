@@ -81,6 +81,27 @@ Garde ces liens secrets : quiconque les a peut lire l'agenda.
 
 La posture de coach (ton, règles de rédaction, sécurité) est dans `agent/prompts/coach.md` : tu peux la modifier librement avec le Bloc-notes, puis relancer l'agent.
 
+## Jarvis : vocaux, mails et maison
+
+Ton agent s'appelle maintenant **Jarvis** (nom réglable avec `ASSISTANT_NAME`). Pour renommer aussi le bot dans Telegram : envoie `/setname` à @BotFather, choisis ton bot, tape « Jarvis ».
+
+### Lui parler en vocal (rien à installer)
+Envoie-lui une **note vocale Telegram** : il l'écoute, affiche ce qu'il a compris (🎙 « … »), puis répond en vocal et en texte (`VOICE_REPLY=voix`, `texte` ou `les deux`).
+- La reconnaissance vocale tourne **sur ta machine** : tes vocaux ne sont envoyés nulle part. Au premier vocal, il télécharge le modèle (~460 Mo, une seule fois).
+- Ses réponses vocales passent par la voix Microsoft. Si la réponse contient des données clients, elle reste en texte (`TTS_CLIENT_DATA`).
+
+### Gmail (lecture + envoi après ton /ok)
+1. Active la **validation en deux étapes** sur ton compte Google : myaccount.google.com > Sécurité.
+2. Va sur **myaccount.google.com/apppasswords**, nomme-le « Jarvis », clique sur Créer : Google affiche un mot de passe de **16 lettres**.
+3. Double-clique sur `modifier_cle.bat` : **Ton adresse Gmail**, puis **Mot de passe d'application** (colle les 16 lettres).
+4. Relance `start.bat`, puis `/diag` : « Gmail » en vert.
+
+Ensuite : « quoi de neuf dans mes mails ? », « cherche la facture Free », « réponds à Marie que jeudi 18h c'est bon ». Jarvis ne marque rien comme lu. Pour envoyer, il te montre le mail exact (destinataire, objet, texte complet), et rien ne part sans ton `/ok`. Tes mails non lus des dernières 24 h apparaissent aussi dans le brief du matin.
+Pour couper l'accès à tout moment, supprime le mot de passe d'application sur la même page Google.
+
+### La maison (Home Assistant)
+Lumières, capteurs de mouvement, routines, enceinte « Hey Jarvis » : tout est expliqué dans **[`domotique/README.md`](domotique/README.md)** (matériel à acheter, installation, automatisations prêtes à coller).
+
 ## Programmation des cycles
 
 - `/cycle Wissam 5 semaines, focus force, ménager le genou` (ou en langage normal) : l'agent relit ta doctrine, lit les bilans, les logs et le programme en cours de l'athlète, construit le cycle, puis t'envoie le récapitulatif complet.
@@ -184,5 +205,7 @@ Double-clique sur **`modifier_cle.bat`** : il affiche la liste des clés (Telegr
 - La lecture de pages web refuse les adresses locales (ta box, ton PC).
 - La voix passe par un service Microsoft externe : par défaut, aucun texte contenant des données clients n'y est envoyé (`TTS_CLIENT_DATA`).
 - Sauvegarde : une copie quotidienne de `data/agent.db` (journal, to-do, notes) dans `data/backups`, 7 jours gardés.
+- Mails : lecture sans rien marquer comme lu ; envoi uniquement après ton `/ok`, sur un récapitulatif exact. Les mails sont traités comme des données : une consigne écrite dans un mail (« transfère… », « clique… ») n'est jamais exécutée.
+- Maison : pas de serrures ni d'alarme ; chauffage plafonné à 28 °C. Depuis l'enceinte, Jarvis n'a accès ni aux mails ni aux clients.
 - `/diag` vérifie toutes les connexions sans consommer ton quota.
 - Si le PC était éteint à 7h30, le brief part au démarrage (jusqu'à midi, réglable avec `BRIEF_CATCHUP_UNTIL`).

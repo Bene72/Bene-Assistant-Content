@@ -1,0 +1,17 @@
+alias: Jarvis — retour à la maison
+description: Quand tu rentres, Jarvis t'envoie sur Telegram ce qu'il reste à faire aujourd'hui
+mode: single
+triggers:
+  - trigger: zone
+    entity_id: person.REMPLACE_PAR_TON_PROFIL
+    zone: zone.home
+    event: enter
+conditions:
+  - condition: time
+    after: "16:00:00"
+    before: "22:00:00"
+actions:
+  - event: jarvis_routine
+    event_data:
+      routine: message
+      text: "Je viens de rentrer. En 3 lignes : ce qu'il me reste à faire aujourd'hui et ce que j'ai demain matin."

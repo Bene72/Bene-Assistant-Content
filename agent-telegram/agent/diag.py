@@ -57,6 +57,35 @@ async def run() -> str:
     else:
         lines.append("➖ GitHub non configuré")
 
+    if config.GMAIL_ADDRESS and config.GMAIL_APP_PASSWORD:
+        try:
+            from . import mail
+            add(True, "Gmail", await mail.check())
+        except Exception as e:
+            add(False, "Gmail", f"{type(e).__name__} {str(e)[:120]}")
+    else:
+        lines.append("➖ Gmail non configuré")
+
+    from . import home
+    if home.enabled():
+        try:
+            info = await home.api("GET", "config")
+            n = len(await home.states())
+            add(True, "Home Assistant", f"{info.get('location_name', '')} · version {info.get('version', '?')} · {n} entités")
+            add(home.connected, "Routines maison (écoute)", "connectée" if home.connected else "pas encore connectée")
+        except Exception as e:
+            add(False, "Home Assistant", f"{type(e).__name__} {str(e)[:120]}")
+    else:
+        lines.append("➖ Home Assistant non configuré")
+
+    try:
+        import faster_whisper  # noqa: F401
+        from . import stt
+        add(True, "Écoute des vocaux (locale)",
+            f"modèle {config.STT_MODEL} " + ("prêt" if stt.is_downloaded() else "téléchargé au premier vocal"))
+    except Exception as e:
+        add(False, "Écoute des vocaux", f"{type(e).__name__} {str(e)[:100]}")
+
     try:
         from . import voice
         p = await voice.synthesize("Test de la voix.")

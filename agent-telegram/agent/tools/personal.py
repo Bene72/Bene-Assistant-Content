@@ -111,9 +111,11 @@ async def journal_read(ctx, start: str | None = None, end: str | None = None):
 @tool("daily_brief_data",
       "Rassemble en un appel les données perso du jour pour le brief : rendez-vous du jour et du "
       "lendemain, to-do (en retard, du jour, sans échéance), anniversaires (aujourd'hui et 7 jours), "
-      "jours fériés proches, l'entrée de journal d'hier et, si le dashboard est connecté, les "
-      "points d'attention coaching.")
-async def daily_brief_data(ctx):
+      "jours fériés proches, l'entrée de journal d'hier, les mails non lus si Gmail est connecté et, "
+      "si le dashboard est connecté, les points d'attention coaching. oral=true pour un brief vocal : "
+      "le coaching est alors réduit à un simple nombre (aucun nom d'athlète).",
+      {"oral": {"type": "boolean"}})
+async def daily_brief_data(ctx, oral: bool = False):
     today = _today()
     data = {"date": today.isoformat(), "jour": ["lundi", "mardi", "mercredi", "jeudi", "vendredi",
                                                 "samedi", "dimanche"][today.weekday()]}
@@ -136,16 +138,29 @@ async def daily_brief_data(ctx):
         from .coaching import overview
         try:
             ov = await overview()
-            data["coaching"] = {
-                "points_attention": ov["points_attention"],
-                "taches_coach_du_jour_ou_en_retard": [
-                    t for t in ov["taches_coach_ouvertes"]
-                    if t["en_retard"] or (t["echeance"] or "")[:10] == today.isoformat()],
-            }
         except Exception as e:
             data["coaching"] = f"indisponible : {e}"
+        else:
+            if oral:  # brief vocal : jamais de nom d'athlète vers le service vocal
+                data["coaching"] = {"nombre_points_attention": len(ov["points_attention"]),
+                                    "detail": "dans Telegram uniquement (brief vocal)"}
+            else:
+                ctx["client_data"] = ctx["tainted"] = True
+                data["coaching"] = {
+                    "points_attention": ov["points_attention"],
+                    "taches_coach_du_jour_ou_en_retard": [
+                        t for t in ov["taches_coach_ouvertes"]
+                        if t["en_retard"] or (t["echeance"] or "")[:10] == today.isoformat()],
+                }
     else:
         data["coaching"] = "dashboard non connecté (SUPABASE_URL et SUPABASE_SERVICE_KEY vides dans .env)"
+    if config.GMAIL_ADDRESS and config.GMAIL_APP_PASSWORD:
+        from .mail import unread_summary
+        try:
+            data["mails_non_lus_24h"] = await unread_summary()
+            ctx["tainted"] = True
+        except Exception as e:
+            data["mails_non_lus_24h"] = f"indisponible : {e}"
     yesterday = (today - dt.timedelta(days=1)).isoformat()
     data["journal_hier"] = storage.read_journal(yesterday, yesterday)
     return data

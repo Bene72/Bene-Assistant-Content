@@ -71,6 +71,22 @@ def _calendars(raw: str) -> dict[str, str]:
 
 
 CALENDARS = _calendars(_get("CALENDARS"))
+# Gmail (lecture + envoi après /ok) : adresse et mot de passe d'application Google (16 lettres)
+GMAIL_ADDRESS = _get("GMAIL_ADDRESS")
+GMAIL_APP_PASSWORD = _get("GMAIL_APP_PASSWORD")
+MAIL_FROM_NAME = _get("MAIL_FROM_NAME") or _get("OWNER_NAME", "Bene")
+MAIL_SIGNATURE = _get("MAIL_SIGNATURE")
+# Home Assistant (domotique) : adresse locale et jeton longue durée
+HA_URL = _get("HA_URL").rstrip("/")
+HA_TOKEN = _get("HA_TOKEN")
+# Enceinte par défaut pour les annonces (ex. assist_satellite.home_assistant_voice_salon)
+HA_SATELLITE = _get("HA_SATELLITE")
+HA_TTS_ENTITY = _get("HA_TTS_ENTITY")
+# Outils autorisés quand on parle à l'enceinte (n'importe qui à la maison peut parler)
+HOME_VOICE_TOOLS = [t.strip() for t in _get(
+    "HOME_VOICE_TOOLS", "home_status,home_control,agenda_events,todo_list,todo_add,birthday_list").split(",") if t.strip()]
+# Recopier sur Telegram les questions posées à l'enceinte et les réponses
+HOME_TRACE = _get("HOME_TRACE", "true").lower() in ("1", "true", "yes", "oui")
 # BoxLog (app de la salle), lecture seule — utilisé par le profil "box"
 BOX_SUPABASE_URL = _get("BOX_SUPABASE_URL").rstrip("/")
 BOX_SUPABASE_KEY = _get("BOX_SUPABASE_KEY")
@@ -83,6 +99,13 @@ BRIEF_FORMAT = _get("BRIEF_FORMAT", "texte").lower()
 # fr-FR-EloiseNeural (féminines), fr-FR-HenriNeural (masculine)
 TTS_VOICE = _get("TTS_VOICE", "fr-FR-DeniseNeural")
 TTS_RATE = _get("TTS_RATE", "+5%")
+# Nom de l'assistant (ex. Jarvis)
+ASSISTANT_NAME = _get("ASSISTANT_NAME", "Jarvis")
+# Reconnaissance vocale locale : tiny, base, small (défaut), medium. Plus gros = plus précis, plus lent.
+STT_MODEL = _get("STT_MODEL", "small")
+STT_LANGUAGE = _get("STT_LANGUAGE", "fr")
+# Quand tu envoies un vocal, réponse en : voix, texte, ou les deux
+VOICE_REPLY = _get("VOICE_REPLY", "les deux").lower()
 # Autoriser l'envoi de textes contenant des données clients au service vocal Microsoft
 TTS_CLIENT_DATA = _get("TTS_CLIENT_DATA", "false").lower() in ("1", "true", "yes", "oui")
 # Modèles par usage (vide = MODEL). Ex. Haiku au quotidien, Sonnet pour les réponses aux bilans.

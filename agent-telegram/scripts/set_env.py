@@ -12,6 +12,13 @@ CLES = [
     ("SUPABASE_URL", "URL du projet Supabase", "https://xxxx.supabase.co"),
     ("CALENDARS", "Agendas iCal (Nom=lien, Nom2=lien2)", "Perso=https://...basic.ics"),
     ("GITHUB_TOKEN", "Token GitHub (optionnel)", "github_pat_..."),
+    ("GMAIL_ADDRESS", "Ton adresse Gmail", "prenom.nom@gmail.com"),
+    ("GMAIL_APP_PASSWORD", "Mot de passe d'application Google (16 lettres)", "abcd efgh ijkl mnop"),
+    ("HA_URL", "Adresse de Home Assistant", "http://homeassistant.local:8123"),
+    ("HA_TOKEN", "Jeton longue durée Home Assistant", "eyJ..."),
+    ("HA_SATELLITE", "Enceinte par défaut (Home Assistant Voice)", "assist_satellite.home_assistant_voice_xxxx"),
+    ("ASSISTANT_NAME", "Nom de ton assistant", "Jarvis"),
+    ("VOICE_REPLY", "Quand tu envoies un vocal, réponse en : voix, texte ou les deux", "les deux"),
     ("MODEL", "Modèle (claude-haiku-5-5, claude-sonnet-5-5...)", "claude-haiku-5-5"),
     ("BRIEF_TIME", "Heure du brief du matin (HH:MM)", "07:30"),
     ("BRIEF_FORMAT", "Format du brief : texte, vocal ou les deux", "texte"),
@@ -78,6 +85,19 @@ def main():
     if cle == "CLAUDE_CODE_OAUTH_TOKEN" and not valeur.startswith("sk-ant-"):
         print("\n⚠️ Un jeton Claude commence par sk-ant-. Annulé.")
         return
+    if cle == "GMAIL_APP_PASSWORD":
+        valeur = valeur.replace(" ", "")
+        if len(valeur) != 16 or not valeur.isalpha():
+            print("\n⚠️ Un mot de passe d'application Google fait 16 lettres. Annulé.")
+            return
+    if cle == "GMAIL_ADDRESS" and "@" not in valeur:
+        print("\n⚠️ Adresse mail invalide. Annulé.")
+        return
+    if cle == "HA_URL":
+        valeur = valeur.rstrip("/")
+        if not valeur.startswith(("http://", "https://")):
+            print("\n⚠️ L'adresse doit commencer par http:// (ex. http://homeassistant.local:8123). Annulé.")
+            return
     if cle == "SUPABASE_URL" and not valeur.startswith("http"):
         print("\n⚠️ L'URL doit commencer par https://. Annulé.")
         return

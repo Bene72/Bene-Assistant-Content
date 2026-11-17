@@ -64,7 +64,7 @@ async def coaching_list_tables(ctx):
       ["table"], enabled=_enabled)
 async def coaching_query(ctx, table: str, select: str = "*", filters: dict | None = None,
                          order: str | None = None, limit: int = 50, count_only: bool = False):
-    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
+    ctx["tainted"] = ctx["client_data"] = True  # données clients lues : plus de sortie web ni de voix externe
     params = {"select": select}
     params.update(filters or {})
     if order:
@@ -192,7 +192,7 @@ async def coaching_overview(ctx):
       {"name": {"type": "string", "description": "Nom ou partie du nom de l'athlète"}},
       ["name"], enabled=_enabled)
 async def coaching_athlete(ctx, name: str):
-    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
+    ctx["tainted"] = ctx["client_data"] = True  # données clients lues : plus de sortie web ni de voix externe
     found = _ok(await _rows("profiles", [("select", "*"), ("role", "eq.client"),
                                          ("full_name", f"ilike.*{name.strip()}*")]))
     if not found:
@@ -265,7 +265,7 @@ def _scores(b: dict) -> dict:
       {"friday": {"type": "string", "description": "Vendredi de début AAAA-MM-JJ (optionnel)"}},
       enabled=_enabled)
 async def coaching_bilans_weekend(ctx, friday: str | None = None):
-    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
+    ctx["tainted"] = ctx["client_data"] = True  # données clients lues : plus de sortie web ni de voix externe
     if friday:
         start = dt.date.fromisoformat(friday)
         end = start + dt.timedelta(days=3)
@@ -320,7 +320,7 @@ async def coaching_bilans_weekend(ctx, friday: str | None = None):
        "week_start": {"type": "string", "description": "Lundi de la semaine AAAA-MM-JJ (optionnel)"}},
       ["name"], enabled=_enabled)
 async def coaching_bilan(ctx, name: str, week_start: str | None = None):
-    ctx["tainted"] = True  # données clients lues : plus de sortie web dans ce message
+    ctx["tainted"] = ctx["client_data"] = True  # données clients lues : plus de sortie web ni de voix externe
     found = _ok(await _rows("profiles", [("select", "*"), ("role", "eq.client"),
                                          ("full_name", f"ilike.*{name.strip()}*")]))
     if not found:
@@ -603,7 +603,7 @@ _EX = {"type": "object", "description": "Soit un exercice classique (name, sets,
                                    "exercises": {"type": "array", "items": _EX}}}}},
       ["name", "cycle_name", "workouts"], enabled=_enabled)
 async def coaching_propose_cycle(ctx, name: str, cycle_name: str, workouts: list):
-    ctx["tainted"] = True
+    ctx["tainted"] = ctx["client_data"] = True
     found = _ok(await _rows("profiles", [("select", "id,full_name,archived"), ("role", "eq.client"),
                                          ("full_name", f"ilike.*{name.strip()}*")]))
     if not found:

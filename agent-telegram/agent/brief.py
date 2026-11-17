@@ -26,12 +26,12 @@ N'invente rien : si une rubrique est vide, dis-le en quelques mots ou saute-la."
 
 
 ORAL_PROMPT = """Fais mon brief du matin, mais pour une NOTE VOCALE d'1 à 2 minutes.
-1. Appelle daily_brief_data, puis cherche sur le web la fête du jour et 4-5 actus importantes \
+1. Appelle daily_brief_data avec oral=true, puis cherche sur le web la fête du jour et 4-5 actus importantes \
 des dernières 24 h (monde, France, sport).
 2. Rédige un texte fait pour être écouté : comme une amie qui te briefe, tutoiement, phrases \
 courtes qui s'enchaînent, aucun émoji, aucune liste, aucun lien, aucun symbole. Écris les \
 heures en toutes lettres (« 18 heures 30 »). Ordre : bonjour + date + fête du jour, \
-rendez-vous, tâches importantes, points coaching s'il y en a, anniversaires, actus en \
+rendez-vous, tâches importantes, mails importants s'il y en a (expéditeur et sujet, sans lire leur contenu), le nombre de points coaching à voir dans Telegram, anniversaires, actus en \
 une phrase chacune, puis une phrase d'élan pour finir.
 3. Réponds UNIQUEMENT avec ce texte, sans titre ni commentaire, et n'appelle pas send_voice_note."""
 
@@ -51,14 +51,20 @@ async def run(chat_id: int, fmt: str, send_text) -> None:
     from .brain import think
 
     if fmt == "vocal":
-        oral = await think(chat_id, ORAL_PROMPT, use_history=False, model=config.MODEL_BRIEF)
-        if not await voice.send(chat_id, oral, caption="☀️ Brief du matin"):
+        ctx: dict = {}
+        oral = await think(chat_id, ORAL_PROMPT, ctx=ctx, use_history=False, model=config.MODEL_BRIEF)
+        if ctx.get("client_data") and not config.TTS_CLIENT_DATA:
+            await send_text(chat_id, "(Brief en texte : il contient des données clients.)\n\n" + oral)
+        elif not await voice.send(chat_id, oral, caption="☀️ Brief du matin"):
             await send_text(chat_id, "(La note vocale a échoué, voici le brief en texte.)\n\n" + oral)
         return
     text = await think(chat_id, PROMPT, use_history=False, model=config.MODEL_BRIEF)
     await send_text(chat_id, text)
     if fmt == "les deux":
-        await voice.send(chat_id, text, caption="☀️ Brief du matin (version audio)")
+        ctx = {}
+        oral = await think(chat_id, ORAL_PROMPT, ctx=ctx, use_history=False, model=config.MODEL_BRIEF)
+        if not (ctx.get("client_data") and not config.TTS_CLIENT_DATA):
+            await voice.send(chat_id, oral, caption="☀️ Brief du matin (version audio)")
 
 
 BILANS_NAME = "Bilans du week-end"
@@ -107,6 +113,10 @@ def _today() -> str:
     from datetime import datetime
     from zoneinfo import ZoneInfo
     return datetime.now(ZoneInfo(config.TIMEZONE)).strftime("%Y-%m-%d")
+
+
+def sent_today() -> bool:
+    return storage.get_meta("last_auto_brief") == _today()
 
 
 def mark_sent():

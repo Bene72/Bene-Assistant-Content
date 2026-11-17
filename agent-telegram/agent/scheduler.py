@@ -30,6 +30,9 @@ async def _run_task(task_id: int):
     log.info("tâche %s : %s", task_id, task["name"])
     from . import brief
     if task["name"] == brief.NAME and _send:
+        if brief.sent_today():  # déjà parti ce matin (routine au réveil)
+            log.info("brief déjà envoyé aujourd'hui")
+            return
         try:
             brief.mark_sent()
             await brief.run(task["chat_id"], brief.parse_format(config.BRIEF_FORMAT), _send)

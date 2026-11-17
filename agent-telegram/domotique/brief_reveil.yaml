@@ -1,0 +1,20 @@
+alias: Jarvis — brief au réveil
+description: Premier mouvement dans la cuisine le matin → brief du matin sur Telegram (une fois par jour)
+mode: single
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.REMPLACE_PAR_TON_CAPTEUR_CUISINE
+    to: "on"
+conditions:
+  - condition: time
+    after: "05:30:00"
+    before: "10:30:00"
+  - condition: template
+    value_template: >
+      {{ this.attributes.last_triggered is none
+         or as_local(this.attributes.last_triggered).date() < now().date() }}
+actions:
+  - event: jarvis_routine
+    event_data:
+      routine: brief
+      format: vocal

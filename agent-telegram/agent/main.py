@@ -10,7 +10,7 @@ from telegram.constants import ChatAction
 from telegram.ext import (Application, CommandHandler, ContextTypes, MessageHandler,
                           filters)
 
-from . import brief, config, confirm, diag, scheduler, storage, voice
+from . import brief, config, confirm, diag, home, routines, scheduler, storage, stt, voice
 from .brain import think
 
 logging.basicConfig(
@@ -91,8 +91,8 @@ async def cmd_start(update: Update, _: ContextTypes.DEFAULT_TYPE):
             "/reset : effacer l'historique de la conversation"
         )
     await update.message.reply_text(
-        f"Salut {config.OWNER_NAME}, je suis en ligne.\n\n"
-        "Écris-moi normalement. Commandes utiles :\n"
+        f"Salut {config.OWNER_NAME}, ici {config.ASSISTANT_NAME}.\n\n"
+        "Écris-moi ou envoie-moi un vocal. Commandes utiles :\n"
         "/brief : ton brief du jour en texte\n"
         "/brief vocal (ou /briefvocal) : en note vocale · /brief les deux : texte + vocal\n"
         "/bilans : qui a fait son bilan (vendredi → lundi)\n"
@@ -228,6 +228,42 @@ async def cmd_non(update: Update, _: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(confirm.cancel(update.effective_chat.id))
 
 
+SPOKEN = ("[Message vocal de {owner}, transcrit automatiquement : il peut y avoir des erreurs de "
+          "transcription, devine le sens.] {text}\n\n"
+          "Réponds comme à l'oral : naturel, phrases courtes, pas de liste, pas d'émoji, pas de lien, "
+          "pas de titre « ## ». Va droit au but.")
+
+
+async def on_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    chat_id = update.effective_chat.id
+    media = update.message.voice or update.message.audio
+    if media is None:
+        return
+    if media.file_size and media.file_size > 19_000_000:
+        return await update.message.reply_text("Vocal trop long pour moi (20 Mo max). Découpe-le en plusieurs.")
+    if not stt.is_downloaded():
+        await update.message.reply_text("🎙 Premier vocal : je télécharge la reconnaissance vocale "
+                                        "(~460 Mo, une seule fois). Ça peut prendre quelques minutes…")
+    await context.bot.send_chat_action(chat_id, ChatAction.TYPING)
+    tmp = config.DATA_DIR / f"vocal-{update.message.message_id}.oga"
+    try:
+        f = await media.get_file()
+        await f.download_to_drive(str(tmp))
+        text = await stt.transcribe(str(tmp))
+    except Exception as e:
+        log.exception("transcription")
+        return await update.message.reply_text(f"Je n'ai pas réussi à écouter ton vocal : {type(e).__name__}: {e}")
+    finally:
+        tmp.unlink(missing_ok=True)
+    if not text:
+        return await update.message.reply_text("Je n'ai rien entendu dans ce vocal.")
+    await update.message.reply_text(f"🎙 « {text} »")
+    await answer(update, context, SPOKEN.format(owner=config.OWNER_NAME, text=text), spoken=True,
+                 history_text=f"(vocal) {text}")
+
+
 async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return await refuse(update)
@@ -238,8 +274,9 @@ async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, use_history: bool = True,
-                 model: str | None = None):
+                 model: str | None = None, spoken: bool = False, history_text: str | None = None):
     chat_id = update.effective_chat.id
+    ctx: dict = {}
 
     async def keep_typing():
         while True:
@@ -248,12 +285,24 @@ async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, 
 
     typing = asyncio.create_task(keep_typing())
     try:
-        reply = await think(chat_id, text, use_history=use_history, model=model)
+        reply = await think(chat_id, text, ctx=ctx, use_history=use_history, model=model,
+                            history_text=history_text)
     except Exception as e:
         log.exception("erreur")
         reply = f"Oups, une erreur : {type(e).__name__}: {e}"
+        spoken = False
     finally:
         typing.cancel()
+    if spoken and config.VOICE_REPLY in ("voix", "vocal", "les deux"):
+        if ctx.get("client_data") and not config.TTS_CLIENT_DATA:
+            reply += "\n\n(Réponse en texte : elle contient des données clients, je ne les envoie pas au service vocal.)"
+        else:
+            await context.bot.send_chat_action(chat_id, ChatAction.RECORD_VOICE)
+            if await voice.send(chat_id, reply):
+                if config.VOICE_REPLY in ("voix", "vocal"):
+                    return
+            else:
+                reply += "\n\n(La réponse vocale a échoué.)"
     await send_text(context.bot, chat_id, reply)
 
 
@@ -263,11 +312,14 @@ async def post_init(app: Application):
 
     async def send_voice(chat_id: int, path, caption: str = ""):
         with open(path, "rb") as f:
-            await app.bot.send_voice(chat_id, voice=f, caption=caption or None, filename="brief.mp3")
+            await app.bot.send_voice(chat_id, voice=f, caption=caption or None, filename="jarvis.mp3")
 
     scheduler.set_sender(send)
     voice.set_sender(send_voice)
     confirm.set_sender(send)
+    routines.set_sender(send)
+    if config.PROFILE == "coach" and home.enabled():
+        app.bot_data["ha_listener"] = asyncio.create_task(home.listen(routines.handle))
     if config.PROFILE == "coach":
         brief.ensure_daily_task()
     scheduler.start()
@@ -278,7 +330,7 @@ async def post_init(app: Application):
             asyncio.create_task(scheduler._run_task(task["id"]))
     for uid in config.ALLOWED_USER_IDS:
         try:
-            await app.bot.send_message(uid, "✅ Bot BoxLog démarré." if config.PROFILE == "box" else "✅ Agent Ben&Fit démarré.")
+            await app.bot.send_message(uid, "✅ Bot BoxLog démarré." if config.PROFILE == "box" else f"✅ {config.ASSISTANT_NAME} démarré.")
         except Exception:
             pass  # l'utilisateur n'a pas encore écrit au bot
 
@@ -324,6 +376,7 @@ def main():
     app.add_handler(CommandHandler("ok", cmd_ok))
     app.add_handler(CommandHandler("non", cmd_non))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
+    app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))
     log.info("Agent en ligne. Ctrl+C pour arrêter.")
     app.run_polling(drop_pending_updates=True)
 

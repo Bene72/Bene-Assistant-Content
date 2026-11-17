@@ -1,0 +1,17 @@
+alias: Jarvis — question à l'enceinte
+description: « Hey Jarvis, dis-moi … » → Jarvis (Claude) répond à voix haute sur l'enceinte
+mode: parallel
+triggers:
+  - trigger: conversation
+    command:
+      - "dis-moi {question}"
+      - "dis moi {question}"
+      - "demande {question}"
+      - "question {question}"
+actions:
+  - event: jarvis_routine
+    event_data:
+      routine: question
+      text: "{{ trigger.slots.question }}"
+      satellite: "{{ trigger.device_id }}"
+  - set_conversation_response: "Je regarde."

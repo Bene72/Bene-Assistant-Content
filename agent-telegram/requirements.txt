@@ -9,3 +9,5 @@ icalendar>=6
 recurring-ical-events>=3
 holidays>=0.50
 edge-tts>=7
+faster-whisper>=1.1
+websockets>=15

@@ -11,7 +11,7 @@ from . import tool
       {"text": {"type": "string", "description": "Le texte à lire, rédigé pour l'oral"}}, ["text"])
 async def send_voice_note(ctx, text: str):
     from .. import config
-    if ctx.get("tainted") and not config.TTS_CLIENT_DATA:
+    if ctx.get("client_data") and not config.TTS_CLIENT_DATA:
         return ("Refusé : ce message contient des données clients et la voix passe par un service "
                 "Microsoft externe. Réponds en texte. (Bene peut l'autoriser avec TTS_CLIENT_DATA=true dans .env.)")
     ok = await voice.send(ctx["chat_id"], text)

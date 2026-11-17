@@ -36,11 +36,14 @@ def tool(name: str, description: str, properties: dict | None = None,
     return deco
 
 
-def definitions() -> list[dict]:
-    return [
-        {"name": t.name, "description": t.description, "input_schema": t.schema}
-        for t in REGISTRY.values() if t.enabled()
-    ]
+def available(allowed: set[str] | None = None) -> list[Tool]:
+    """Outils actifs ; si `allowed` est donné (canal restreint, ex. enceinte), seulement ceux-là."""
+    return [t for t in REGISTRY.values() if t.enabled() and (allowed is None or t.name in allowed)]
+
+
+def definitions(allowed: set[str] | None = None) -> list[dict]:
+    return [{"name": t.name, "description": t.description, "input_schema": t.schema}
+            for t in available(allowed)]
 
 
 async def run(name: str, args: dict, ctx: dict) -> tuple[str, bool]:
@@ -48,6 +51,9 @@ async def run(name: str, args: dict, ctx: dict) -> tuple[str, bool]:
     t = REGISTRY.get(name)
     if not t or not t.enabled():
         return f"Outil inconnu ou désactivé : {name}", True
+    allowed = ctx.get("allowed")
+    if allowed is not None and name not in allowed:
+        return f"Outil non autorisé sur ce canal : {name}", True
     try:
         result = await t.func(ctx=ctx, **args)
     except Exception as e:  # l'erreur est renvoyée à Claude qui peut corriger
@@ -66,4 +72,4 @@ from .. import config as _config  # noqa: E402
 if _config.PROFILE == "box":
     from . import notes, web, box  # noqa: E402,F401
 else:
-    from . import notes, schedule, web, coaching, github, agenda, personal, vocal  # noqa: E402,F401
+    from . import notes, schedule, web, coaching, github, agenda, personal, vocal, gmail, home  # noqa: E402,F401

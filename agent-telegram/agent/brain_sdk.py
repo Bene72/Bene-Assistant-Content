@@ -20,9 +20,7 @@ BUILTIN = ["WebSearch"] if config.WEB_SEARCH else []
 
 def _server(ctx: dict):
     sdk_tools = []
-    for t in tools.REGISTRY.values():
-        if not t.enabled():
-            continue
+    for t in tools.available(ctx.get("allowed")):
 
         def make(name):
             async def handler(args):
@@ -48,8 +46,9 @@ def _prompt(chat_id: int, user_text: str, use_history: bool) -> str:
 
 
 async def think_sdk(chat_id: int, user_text: str, use_history: bool = True,
-                    model: str | None = None) -> str:
-    server, tool_names = _server({"chat_id": chat_id})
+                    model: str | None = None, ctx: dict | None = None) -> str:
+    ctx = ctx if ctx is not None else {"chat_id": chat_id}
+    server, tool_names = _server(ctx)
     options = ClaudeAgentOptions(
         system_prompt=_system()[0]["text"],
         model=model or config.MODEL,
