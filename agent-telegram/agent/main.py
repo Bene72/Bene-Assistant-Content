@@ -10,7 +10,7 @@ from telegram.constants import ChatAction
 from telegram.ext import (Application, CommandHandler, ContextTypes, MessageHandler,
                           filters)
 
-from . import brief, config, confirm, diag, home, routines, scheduler, storage, stt, voice
+from . import birthday_import, brief, config, confirm, diag, home, routines, scheduler, storage, stt, voice
 from .brain import think
 
 logging.basicConfig(
@@ -264,6 +264,33 @@ async def on_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
                  history_text=f"(vocal) {text}")
 
 
+async def on_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Fichier .csv/.txt d'anniversaires : import direct, sans appel à Claude."""
+    if not authorized(update):
+        return await refuse(update)
+    doc = update.message.document
+    if doc is None:
+        return
+    name = (doc.file_name or "").lower()
+    if not name.endswith((".csv", ".txt")):
+        return await update.message.reply_text(
+            "Je sais importer un fichier .csv ou .txt d'anniversaires (une ligne : Nom;jour;mois).")
+    if doc.file_size and doc.file_size > birthday_import.MAX_BYTES:
+        return await update.message.reply_text("Fichier trop gros (500 Ko max).")
+    try:
+        f = await doc.get_file()
+        data = bytes(await f.download_as_bytearray())
+        try:
+            text = data.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            text = data.decode("cp1252", errors="replace")
+        res = birthday_import.import_text(text)
+    except Exception as e:
+        log.exception("import anniversaires")
+        return await update.message.reply_text(f"Import impossible : {type(e).__name__}: {e}")
+    await update.message.reply_text(birthday_import.summary(res))
+
+
 async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return await refuse(update)
@@ -377,6 +404,7 @@ def main():
     app.add_handler(CommandHandler("non", cmd_non))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))
+    app.add_handler(MessageHandler(filters.Document.ALL, on_document))
     log.info("Agent en ligne. Ctrl+C pour arrêter.")
     app.run_polling(drop_pending_updates=True)
 

@@ -6,3 +6,4 @@ __pycache__/
 agent/prompts/programmation.md
 .env.box
 data-box/
+anniversaires*.csv
