@@ -15,6 +15,7 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 | 3 | Difficultés aux tractions | BUILD / MOVE | v1 (ancienne DA) | – | – | – | – | – | – | – | – | – |
 | 4 | Les 4 qualités (« si je devais tout recommencer ») | Les 4 piliers | **v2 naturelle** | 1 min 44 | – | – | – | – | – | – | – | – |
 | 5 | Cardio et perte de muscle (« tu as peur de perdre du muscle ? ») | BUILD / RUN | **v2 naturelle** + cartes interface | 1 min 29 | – | – | – | – | – | – | – | – |
+| 6 | J'ai testé le bloc d'Apocalypse Training (collab, reel d'entraînement) | BUILD / PERFORM | **v2 naturelle**, sans parole | 34 s | – | – | – | – | – | – | – | – |
 
 > « – » = à remplir. Indicateurs les plus importants, dans l'ordre : **durée moyenne de visionnage**, **partages**, **enregistrements**, **abonnés gagnés**. Les vues seules ne disent presque rien.
 
@@ -74,6 +75,21 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 - **Hypothèse testée** : *une accroche sous forme de **question** qui reprend une peur de l'audience (« tu as peur de perdre du muscle ? ») retient mieux les 3 premières secondes qu'une accroche **affirmation** (#4 « 4 choses que je ferais… »).*
   - Comparer avec #4 : le % de spectateurs encore là après 3 s (courbe de rétention), la durée moyenne de visionnage et les commentaires (la question de fin appelle une réponse simple).
   - À observer en plus : les **cartes interface** (1re utilisation) font-elles monter les enregistrements ?
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
+
+### #6 — J'ai testé le bloc d'Apocalypse Training (collaboration)
+- **Date de publication** : à compléter (prêt le 17 nov. 2026)
+- **Format** : **1er Reel d'entraînement** (pas de face caméra explicatif, pas de sous-titres) : séances du « bloc test » programmé par Apocalypse Training, en co-branding BEN&FIT × Apocalypse Training
+- **Contenu** : 01 wall walk + handstand · 02 double KB press · 03 rowing KB · 04 tractions (strictes + kipping) · 05 complexe épaules aux disques
+- **DA** : v2 naturelle (étalonnage léger + grain). Plans courts (0,8 à 2 s), 2 ralentis (verrouillage KB, kipping), plans accélérés sur les transitions, punch-in à une coupe sur deux. Chips bleus numérotés 01–05 (nom de l'exercice seul, sans charge), logos des deux marques en intro (< 1 s), petits en coin ensuite, carte de fin co-brandée
+- **Durée** : 34 s
+- **Accroche** : handstand tenu + « J'AI TESTÉ LE BLOC / D'APOCALYPSE TRAINING » (Anton + chip bleu)
+- **Question de fin / CTA** : « Tu veux tester ce bloc ? » → « Écris BLOC en commentaire » + abonnement
+- **Son** : ambiance des rushs nettoyée (-14 LUFS) + whooshs discrets ; son tendance Instagram ajouté à la publication
+- **Hypothèse testée** : *un Reel d'entraînement court (≈ 30 s), sans parole et en collaboration, ramène plus de **visites de profil** et d'**abonnés gagnés** qu'un Reel explicatif face caméra (#4, #5), grâce à l'audience croisée du compte partenaire.*
+  - Comparer avec #4 et #5 : visites profil, abonnés gagnés, partages ; et le taux de vues complètes (durée moyenne / 34 s).
+  - À observer en plus : nombre de commentaires « BLOC » (intérêt réel pour un programme).
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
 
