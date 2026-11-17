@@ -137,23 +137,44 @@ def draw_title(ctx, T):
         ev("title", tc, "hit")
 
 # ---------------------------------------------------------------- chips d'exercice
-# (section, numéro, nom, x, y, ancre) — positions vérifiées sur les plans : jamais sur Bene ni sur la charge
-CHIPS = [(HSPU, "01", "WALL WALK + HANDSTAND", 70, 430, "l"),
-         (KB, "02", "DOUBLE KB PRESS", 1030, 1320, "r"),
-         (ROW, "03", "ROWING KB", 70, 430, "l"),
-         (PULL, "04", "TRACTIONS", 70, 1480, "l"),
-         (PLATE, "05", "COMPLEXE ÉPAULES", 1030, 1320, "r")]
+# Chaque chip : (début, fin, numéro, étiquette, lignes, x, y de la 1re ligne, ancre)
+# lignes : (texte, apparition, (début actif, fin actif)) — la ligne active est en bleu, l'autre en marine.
+# Positions vérifiées plan par plan : jamais sur Bene ni sur la charge.
+def seg_t(sec, k):  # début du k-ième plan d'une section
+    return [p for p in TL if p["sec"] == sec][k]["start"]
+CHIPS = [
+    (PULL[0], PULL[1], "01", "", [("STRICT PULL-UPS", PULL[0], (PULL[0], seg_t("pull", 1))),
+                                  ("+ BUTTERFLY CHEST TO BAR", seg_t("pull", 1), (seg_t("pull", 1), PULL[1]))], 60, 1420, "l"),
+    (HSPU[0], HSPU[1], "02", "", [("WALL WALKS", HSPU[0], (0, 99)),
+                                  ("+ WALL FACING HSPU", HSPU[0] + 0.25, (0, 99))], 60, 430, "l"),
+    (KB[0], KB[1], "03", "SUPERSET", [("KB PUSH PRESS", KB[0], (KB[0], KB[1])),
+                                      ("+ GORILLA ROW", KB[0] + 0.25, (ROW[0], ROW[1]))], 1030, 1250, "r"),
+    (ROW[0], ROW[1], "03", "SUPERSET", [("KB PUSH PRESS", ROW[0], (KB[0], KB[1])),
+                                        ("+ GORILLA ROW", ROW[0] + 0.1, (ROW[0], ROW[1]))], 60, 430, "l"),
+    (PLATE[0], PLATE[1], "04", "", [("COMPLEXE", PLATE[0], (0, 99)), ("ÉPAULES", PLATE[0] + 0.15, (0, 99))], 60, 1420, "l"),
+]
 def draw_chips(ctx, T):
-    for (t0, t1), num, name, x, y, anc in CHIPS:
-        t0 += 0.08; t1 = min(t1, END_T) - 0.25
-        a = win(T, t0, t1, 0.25, 0.2)
+    for t0, t1, num, tag, lines, x, y, anc in CHIPS:
+        t0b = t0 + 0.08; t1b = min(t1, END_T) - 0.2
+        a = win(T, t0b, t1b, 0.25, 0.2)
         if a <= 0: continue
-        dx = (1 - eo((T - t0) / 0.3)) * (-30 if anc == "l" else 30)
-        size = 48 if len(name) < 14 else 42
-        w, x0 = chip(ctx, name, x + dx, y, size, anchor=anc, alpha=a, wipe=eo((T - t0) / 0.3))
+        dx = (1 - eo((T - t0b) / 0.3)) * (-30 if anc == "l" else 30)
+        x0s = []
+        for i, (txt, ta, (aa, ab)) in enumerate(lines):
+            if T < ta: continue
+            k = eo((T - ta) / 0.3)
+            active = aa <= T < ab
+            w, x0 = chip(ctx, txt, x + dx, y + i * 74, 42, fill=BLUE if active else NAVY, anchor=anc,
+                         alpha=a * (1 if active else 0.92), wipe=k)
+            x0s.append((x0, w))
+            ev(("chip", num, txt, t0), ta, "swoosh")
+        x0, w = x0s[0]
         nx = x0 if anc == "l" else x0 + w
-        text(ctx, num, nx + dx, y - 62, 54, face=NUM, anchor=anc, alpha=a * eo((T - t0 - 0.1) / 0.25), stroke=STROKE, sw=8, shadow=0.35)
-        ev(("chip", num), t0, "swoosh")
+        ka = a * eo((T - t0b - 0.1) / 0.25)
+        adv = text(ctx, num, nx + dx, y - 64, 56, face=NUM, anchor=anc, alpha=ka, stroke=STROKE, sw=8, shadow=0.35)
+        if tag:
+            tx = nx + dx + adv + 16 if anc == "l" else nx + dx - adv - 16
+            text(ctx, tag, tx, y - 60, 34, face=NUM, anchor=anc, alpha=ka, stroke=STROKE, sw=6, shadow=0.35)
 
 # ---------------------------------------------------------------- logos discrets en coin
 def draw_corner(ctx, T):
@@ -164,26 +185,42 @@ def draw_corner(ctx, T):
     logo(ctx, L_APO, 990, 300, 84, a)
 
 # ---------------------------------------------------------------- carte de fin
+BONE = (0.90, 0.87, 0.80)
+_v = PImage.open("/home/claude/work/apo/volcan.png").convert("RGBA")
+VOLCAN = load_logo("/home/claude/work/apo/volcan.png")
 def draw_end(ctx, T):
+    """Carte de fin dans l'univers Apocalypse : noir, texte blanc / os, signature volcan."""
     if T < END_T: return
     u = T - END_T; a = eo(u / 0.3)
-    ctx.rectangle(0, 0, W, H); ctx.set_source_rgba(*NAVY, 0.80 * a); ctx.fill()
+    ctx.rectangle(0, 0, W, H); ctx.set_source_rgba(0.02, 0.02, 0.02, 0.86 * a); ctx.fill()
+    g = cairo.RadialGradient(540, 900, 300, 540, 900, 1250)
+    g.add_color_stop_rgba(0, 0, 0, 0, 0); g.add_color_stop_rgba(1, 0, 0, 0, 0.6)
+    ctx.set_source(g); ctx.paint_with_alpha(a)
     k = eo((u - 0.05) / 0.3)
     cobrand(ctx, 540, 480 + (1 - k) * 20, 210, k)
     k = (u - 0.35) / 0.3
-    if k > 0: text(ctx, "Tu veux tester", 540, 790 + (1 - eo(k)) * 30, 92, alpha=eo(k), stroke=STROKE, sw=8)
+    if k > 0: text(ctx, "TU VEUX TESTER", 540, 790 + (1 - eo(k)) * 30, 104, face=NUM, alpha=eo(k), shadow=0.5)
     k = (u - 0.55) / 0.3
     if k > 0:
-        text(ctx, "ce bloc ?", 540, 915 + (1 - eo(k)) * 30, 112, face=SERIF, italic=True, color=BLUE2, alpha=eo(k))
-        marker_path(ctx, underline_pts(345, 735, 985), (u - 0.8) / 0.45, 8, BLUE, 1)
+        text(ctx, "ce bloc ?", 540, 925 + (1 - eo(k)) * 30, 112, face=SERIF, italic=True, color=BONE, alpha=eo(k))
+        marker_path(ctx, underline_pts(345, 735, 995), (u - 0.8) / 0.45, 8, WHITE, 0.85)
     k = (u - 1.0) / 0.25
     if k > 0:
-        chip(ctx, "ÉCRIS « BLOC » EN COMMENTAIRE", 540, 1125, 48, anchor="c", alpha=eo(k), padx=24, pady=16, wipe=eo(k * 1.2))
+        ka = eo(k); size = 48; vs = 64; gap = 14
+        w1 = tw(ctx, "ÉCRIS", size); w2 = tw(ctx, "EN COMMENTAIRE", size)
+        wt = w1 + gap + vs + gap + w2; padx = 26; h = 92
+        x0 = 540 - wt / 2 - padx; y = 1135
+        ctx.save(); ctx.rectangle(x0, y - h / 2 - 2, (wt + 2 * padx) * eo(k * 1.2), h + 4); ctx.clip()
+        rrect(ctx, x0, y - h / 2, wt + 2 * padx, h, 10); ctx.set_source_rgba(*BONE, ka); ctx.fill()
+        text(ctx, "ÉCRIS", x0 + padx, y, size, color=(0.05, 0.05, 0.05), anchor="l", alpha=ka)
+        logo(ctx, VOLCAN, x0 + padx + w1 + gap + vs / 2, y - 2, vs, ka)
+        text(ctx, "EN COMMENTAIRE", x0 + padx + w1 + gap + vs + gap, y, size, color=(0.05, 0.05, 0.05), anchor="l", alpha=ka)
+        ctx.restore()
         ev("cta", END_T + 1.0, "tick")
     k = (u - 1.3) / 0.3
-    if k > 0: text(ctx, "+ abonne-toi pour la suite du bloc", 540, 1245, 44, alpha=eo(k))
+    if k > 0: text(ctx, "+ abonne-toi pour la suite du bloc", 540, 1255, 44, alpha=eo(k))
     k = (u - 1.6) / 0.3
-    if k > 0: text(ctx, "Programmation : Apocalypse Training", 540, 1350, 40, face=MARK, color=BLUE2, alpha=eo(k))
+    if k > 0: text(ctx, "Programmation : Apocalypse Training", 540, 1360, 40, face=MARK, color=BONE, alpha=eo(k))
     ev("end", END_T, "end")
 
 # ---------------------------------------------------------------- cadrage (punch-in)
