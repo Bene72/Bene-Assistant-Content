@@ -11,3 +11,7 @@ Nouveautés par rapport à « 4 qualités » :
 - `frost()` : carte en verre dépoli (fond flouté + voile marine + liseré blanc), titres en typographie mixte (`card_title`).
 - `check()` : case qui se coche, pour les fiches / checklists.
 - Mot géant en bas d'écran à la place des sous-titres, une fois par Reel.
+
+Miniatures (dossier `contenu/benfit-reels/miniatures/`) :
+- `thumb_cardio.py` → miniature « naturelle » (photo + étiquette papier manuscrite + CARDIO en bas). Photo d'entrée : `thumb_base.png` (capture recadrée 1080×1920, étalonnée).
+- `thumb_studio.py` → variante « studio » : Bene détouré (rembg, modèle u2net_human_seg téléchargé depuis les releases GitHub de danielgatis/rembg), fond marine sombre, contre-jour bleu #2E6BFF, titre géant derrière la tête. Entrée : `cutout_clean.png`.
