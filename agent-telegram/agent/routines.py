@@ -45,7 +45,7 @@ async def handle(data: dict):
         if brief.sent_today() or uid is None or _send is None:
             return
         brief.mark_sent()
-        await brief.run(uid, brief.parse_format(str(data.get("format") or config.BRIEF_FORMAT)), _send)
+        await brief.run_daily(uid, brief.parse_format(str(data.get("format") or config.BRIEF_FORMAT)), _send)
 
     elif routine == "question":
         if not text:

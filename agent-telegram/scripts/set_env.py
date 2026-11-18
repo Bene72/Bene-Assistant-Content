@@ -22,6 +22,7 @@ CLES = [
     ("MODEL", "Modèle (claude-haiku-5-5, claude-sonnet-5-5...)", "claude-haiku-5-5"),
     ("BRIEF_TIME", "Heure du brief du matin (HH:MM)", "07:30"),
     ("BRIEF_FORMAT", "Format du brief : texte, vocal ou les deux", "texte"),
+    ("CHRONIQUE_FORMAT", "Chronique philo après le brief : texte, vocal, les deux ou off", "les deux"),
 ]
 
 

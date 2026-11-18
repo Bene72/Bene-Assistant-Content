@@ -111,6 +111,9 @@ TTS_CLIENT_DATA = _get("TTS_CLIENT_DATA", "false").lower() in ("1", "true", "yes
 # Modèles par usage (vide = MODEL). Ex. Haiku au quotidien, Sonnet pour les réponses aux bilans.
 MODEL_BRIEF = _get("MODEL_BRIEF") or MODEL
 MODEL_COACH = _get("MODEL_COACH") or MODEL
+MODEL_CHRONIQUE = _get("MODEL_CHRONIQUE") or MODEL
+# Chronique philosophique après le brief : texte, vocal, les deux ou off
+CHRONIQUE_FORMAT = _get("CHRONIQUE_FORMAT", "les deux").lower()
 # Si le PC était éteint à l'heure du brief, l'envoyer au démarrage jusqu'à cette heure (HH:MM)
 BRIEF_CATCHUP_UNTIL = _get("BRIEF_CATCHUP_UNTIL", "12:00")
 # Récap des bilans du week-end (cron, heure de Paris). Défaut : lundi 20h. Vide = désactivé.

@@ -35,7 +35,7 @@ async def _run_task(task_id: int):
             return
         try:
             brief.mark_sent()
-            await brief.run(task["chat_id"], brief.parse_format(config.BRIEF_FORMAT), _send)
+            await brief.run_daily(task["chat_id"], brief.parse_format(config.BRIEF_FORMAT), _send)
         except Exception as e:
             log.exception("échec du brief")
             await _send(task["chat_id"], f"Le brief a échoué : {e}")

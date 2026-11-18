@@ -74,6 +74,13 @@ async def run(chat_id: int, fmt: str, send_text) -> None:
             await voice.send(chat_id, oral, caption="☀️ Brief du matin (version audio)")
 
 
+async def run_daily(chat_id: int, fmt: str, send_text) -> None:
+    """Point quotidien complet : le brief, puis la chronique du jour (une seule par jour)."""
+    from . import chronique
+    await run(chat_id, fmt, send_text)
+    await chronique.deliver(chat_id, send_text)
+
+
 BILANS_NAME = "Bilans du week-end"
 BILANS_PROMPT = """Fais le point sur les bilans hebdo : appelle coaching_bilans_weekend.
 Rédige sans Markdown, court :

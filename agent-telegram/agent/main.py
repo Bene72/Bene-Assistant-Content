@@ -173,7 +173,7 @@ async def cmd_brief(update: Update, context: ContextTypes.DEFAULT_TYPE, fmt: str
 
     busy = asyncio.create_task(keep_busy())
     try:
-        await brief.run(chat_id, fmt, send_brief)
+        await brief.run_daily(chat_id, fmt, send_brief)
     except Exception as e:
         log.exception("erreur brief")
         await update.message.reply_text(f"Oups, le brief a échoué : {type(e).__name__}: {e}")
@@ -197,6 +197,27 @@ async def cmd_bourse(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await refuse(update)
     extra = " ".join(context.args or []).strip()
     await answer(update, context, BOURSE_PROMPT + (f"\nPrécision : {extra}" if extra else ""))
+
+
+async def cmd_chronique(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/chronique : celle du jour (l'écrit si besoin) ; /chronique nouvelle : un épisode de plus."""
+    from . import chronique
+    if not authorized(update):
+        return await refuse(update)
+    if not chronique.enabled():
+        return await update.message.reply_text("Chronique désactivée (CHRONIQUE_FORMAT=off) ou "
+                                               "fichier agent/prompts/chronique.md manquant.")
+    chat_id = update.effective_chat.id
+    await context.bot.send_chat_action(chat_id, ChatAction.TYPING)
+
+    async def send(cid, text):
+        await send_text(context.bot, cid, text)
+
+    text = None if context.args else chronique.today_text()
+    if text:
+        await send(chat_id, "🎙️ " + text)
+    else:
+        await chronique.deliver(chat_id, send, force=True)
 
 
 async def cmd_bilans(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -411,6 +432,7 @@ def main():
     app.add_handler(CommandHandler("brief", cmd_brief))
     app.add_handler(CommandHandler("bilans", cmd_bilans))
     app.add_handler(CommandHandler("bourse", cmd_bourse))
+    app.add_handler(CommandHandler("chronique", cmd_chronique))
     app.add_handler(CommandHandler("briefvocal", cmd_brief_vocal))
     app.add_handler(CommandHandler("reponse", cmd_reponse))
     app.add_handler(CommandHandler("diag", cmd_diag))

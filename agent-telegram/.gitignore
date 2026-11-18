@@ -7,3 +7,4 @@ agent/prompts/programmation.md
 .env.box
 data-box/
 anniversaires*.csv
+agent/prompts/chronique.md
