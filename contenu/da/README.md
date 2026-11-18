@@ -31,6 +31,7 @@ Le rendu doit faire **« créateur humain », pas « IA »** : l'audience de Ben
 | [reels-face-camera.md](reels-face-camera.md) | Reels explicatifs face caméra (DA v2 « naturelle ») |
 | [reels-entrainement.md](reels-entrainement.md) | Reels d'entraînement dynamiques (séances, collabs) |
 | [miniatures.md](miniatures.md) | Miniatures des Reels (version naturelle et version studio) |
+| [publications-instagram.md](publications-instagram.md) | Ligne éditoriale, carrousels, offre à mettre en avant |
 | [carrousels-storytelling.md](carrousels-storytelling.md) | Carrousels « storytelling avec inserts » |
 | [carrousels-briefing.md](carrousels-briefing.md) | Carrousels « briefing éditorial » |
 | [animations-3d.md](animations-3d.md) | Clips d'athlète 3D (mouvements d'haltéro…) |

@@ -12,6 +12,10 @@ Une conversation par création (Reel, carrousel, miniature…). Il suffit d'écr
 Claude retrouve seul : la D.A dans `contenu/da/` (le cerveau des D.A), ses méthodes dans `contenu/methodes-claude/`, les scripts dans `contenu/benfit-reels/fabrique-montage/`.
 Version visuelle en ligne des D.A : design system « BEN&FIT » sur claude.ai → https://claude.ai/artifact/Syt3nTXWrzmtGJaMoSY3hk
 
+**Mettre à jour le cerveau des D.A depuis une autre conversation** : coller ce message dans la conversation concernée →
+« Résume tout ce qu'on a décidé dans cette conversation sur le style et le contenu (couleurs, formats, accroches qui marchent, ce que j'ai validé ou refusé) et ajoute-le dans la bonne fiche de `contenu/da/` du dépôt Bene72/Bene-Assistant-Content, via une PR que tu fusionnes toi-même. Mets aussi à jour le design system BEN&FIT en ligne si tu y as accès. »
+
+
 | Dossier | Contenu |
 |---|---|
 | `agent-telegram/` | Agent Ben&Fit perso (bot Telegram + Claude). Voir son README. |
