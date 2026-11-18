@@ -161,6 +161,11 @@ async def daily_brief_data(ctx, oral: bool = False):
             ctx["tainted"] = True
         except Exception as e:
             data["mails_non_lus_24h"] = f"indisponible : {e}"
+    from .bourse import brief_data as bourse_data
+    try:
+        data["bourse"] = await bourse_data(oral)
+    except Exception as e:
+        data["bourse"] = f"indisponible : {type(e).__name__}"
     yesterday = (today - dt.timedelta(days=1)).isoformat()
     data["journal_hier"] = storage.read_journal(yesterday, yesterday)
     return data

@@ -72,4 +72,4 @@ from .. import config as _config  # noqa: E402
 if _config.PROFILE == "box":
     from . import notes, web, box  # noqa: E402,F401
 else:
-    from . import notes, schedule, web, coaching, github, agenda, personal, vocal, gmail, home  # noqa: E402,F401
+    from . import notes, schedule, web, coaching, github, agenda, personal, vocal, gmail, home, bourse  # noqa: E402,F401

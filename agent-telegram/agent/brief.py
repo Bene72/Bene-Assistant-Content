@@ -9,7 +9,7 @@ NAME = "Brief du matin"
 PROMPT = """Fais mon brief du matin.
 1. Appelle daily_brief_data pour mes données perso.
 2. Cherche sur le web la fête du jour (saint du calendrier français) et les actus importantes \
-des dernières 24 h : 4 actus monde/France et 1 actu sport.
+des dernières 24 h : 4 actus monde/France, 1 actu sport et 1 actu économie/marchés.
 3. Rédige le brief dans cet ordre, court et lisible sur téléphone, sans Markdown :
 
 ☀️ [Jour date] + fête du jour (+ jour férié s'il y en a un)
@@ -19,6 +19,12 @@ des dernières 24 h : 4 actus monde/France et 1 actu sport.
 athlètes les plus importants (fin de cycle/engagement, athlètes sans séance, bilans manquants, \
 messages non lus). 6 lignes max, regroupe si besoin.
 🎂 Anniversaires : aujourd'hui en premier, puis ceux des 7 prochains jours (avec l'âge si connu).
+📈 Bourse & PEA : 1 ligne marchés (CAC 40, S&P 500, MSCI World, euro/dollar), puis mon \
+portefeuille (valeur, variation du jour, plus-value totale), les lignes qui ont bougé de plus de 2 %, \
+et un écart à la cible s'il dépasse 5 points. Ajoute 1 actu éco/marchés des dernières 24 h qui \
+compte pour MES positions (taux BCE/Fed, inflation, résultats, devises). Termine par « 💡 Piste : » \
+une seule piste de réflexion liée à ma stratégie (versement du mois, rééquilibrage, point à \
+creuser) ou « rien à faire, on reste le cap ». 6 lignes max.
 🌍 Le monde : 5 actus, une ligne chacune.
 💬 Une phrase d'élan pour la journée (pas niaise).
 
@@ -31,7 +37,8 @@ des dernières 24 h (monde, France, sport).
 2. Rédige un texte fait pour être écouté : comme une amie qui te briefe, tutoiement, phrases \
 courtes qui s'enchaînent, aucun émoji, aucune liste, aucun lien, aucun symbole. Écris les \
 heures en toutes lettres (« 18 heures 30 »). Ordre : bonjour + date + fête du jour, \
-rendez-vous, tâches importantes, mails importants s'il y en a (expéditeur et sujet, sans lire leur contenu), le nombre de points coaching à voir dans Telegram, anniversaires, actus en \
+rendez-vous, tâches importantes, mails importants s'il y en a (expéditeur et sujet, sans lire leur contenu), le nombre de points coaching à voir dans Telegram, la bourse en deux phrases (tendance des \
+marchés, variation de mon portefeuille en pourcentage seulement, jamais de montant), anniversaires, actus en \
 une phrase chacune, puis une phrase d'élan pour finir.
 3. Réponds UNIQUEMENT avec ce texte, sans titre ni commentaire, et n'appelle pas send_voice_note."""
 

@@ -185,6 +185,20 @@ async def cmd_brief_vocal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await cmd_brief(update, context, fmt="vocal")
 
 
+BOURSE_PROMPT = ("Fais-moi le point bourse : appelle market_overview, portfolio_status et "
+                 "investment_strategy_get, cherche les 2-3 actus éco/marchés des dernières 24 h qui comptent "
+                 "pour mes positions. Rédige court : ## 🌍 Marchés, ## 💼 Mon portefeuille (valeur, jour, "
+                 "plus-value, écarts à la cible), ## 📰 Ce qui bouge, ## 💡 Pistes de réflexion (2-3 max, "
+                 "liées à ma stratégie, sous forme de faits et de questions à me poser).")
+
+
+async def cmd_bourse(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not authorized(update):
+        return await refuse(update)
+    extra = " ".join(context.args or []).strip()
+    await answer(update, context, BOURSE_PROMPT + (f"\nPrécision : {extra}" if extra else ""))
+
+
 async def cmd_bilans(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return await refuse(update)
@@ -396,6 +410,7 @@ def main():
     app.add_handler(CommandHandler("taches", cmd_tasks))
     app.add_handler(CommandHandler("brief", cmd_brief))
     app.add_handler(CommandHandler("bilans", cmd_bilans))
+    app.add_handler(CommandHandler("bourse", cmd_bourse))
     app.add_handler(CommandHandler("briefvocal", cmd_brief_vocal))
     app.add_handler(CommandHandler("reponse", cmd_reponse))
     app.add_handler(CommandHandler("diag", cmd_diag))
