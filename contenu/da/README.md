@@ -36,6 +36,7 @@ Le rendu doit faire **« créateur humain », pas « IA »** : l'audience de Ben
 | [carrousels-briefing.md](carrousels-briefing.md) | Carrousels « briefing éditorial » |
 | [animations-3d.md](animations-3d.md) | Clips d'athlète 3D (mouvements d'haltéro…) |
 | [references.md](references.md) | Comptes et posts d'inspiration |
+| [design-system-en-ligne/](design-system-en-ligne/) | Copie du design system en ligne (tokens, brand book, couverture) |
 | [autres-marques.md](autres-marques.md) | Projets hors BEN&FIT (Twin's League / Ultimate League) |
 
 ## Mettre à jour
