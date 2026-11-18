@@ -8,7 +8,7 @@ Fiche commune à toutes les publications BEN&FIT hors Reels. Les styles de carro
   - **briefing éditorial** (réf. gofurther_training) : fond blanc quadrillé, titres Anton serrés, 01 / 02, schémas à la main annotés, bloc « À retenir ».
 - **Palette stricte** : marine `#0A206B`, blanc, bleu vif `#2E6BFF`. **Aucun autre bleu ni autre teinte** (nov. 2026). L'orange du début n'est plus utilisé.
 - **Logo BEN&FIT en bas à droite** de chaque slide.
-- Format 1080×1350 (4:5) ; textes lisibles sur téléphone (titre ≥ 80 px, texte ≥ 36 px).
+- Format **carré 1080×1080** (le 4:5 était coupé en hauteur à l'upload), PNG légers, pas de 2x ; textes lisibles sur téléphone (titre ≥ 80 px, texte ≥ 36 px).
 
 ## Ligne éditoriale
 - 4 piliers : **BUILD** (force) · **RUN** (endurance) · **PERFORM** (performance) · **MOVE** (mobilité).
