@@ -285,7 +285,7 @@ def remix():
     """Refaire seulement le son (sans recalculer l'image) puis réassembler la vidéo finale."""
     audio()
     out = os.path.join(WORK, "video_nosound.mp4")
-    final = os.path.join(WORK, "BENFIT_reel_zone2_hyrox_v2.mp4")
+    final = os.path.join(WORK, "BENFIT_reel_zone2_hyrox_v3.mp4")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", out, "-i", os.path.join(WORK, "mix.wav"), "-c:v", "copy",
                     "-c:a", "aac", "-b:a", "256k", "-shortest", "-movflags", "+faststart", final], check=True)
     print("ok", final)
@@ -311,11 +311,10 @@ def video():
 
 def audio():
     # voix tournée en courant : coupe-bas plus haut et réduction de bruit plus forte (vent), sans musique
-    # v2 (retour de Bene) : réduction de bruit moins forte (nr 16 → 11) et 20 % de son d'origine remélangé,
-    # pour une voix plus naturelle (la v1 sonnait un peu robotique) ; on garde un peu d'ambiance de course.
-    fc = ("[0:a]aresample=48000,highpass=f=90,asplit=2[a][b];"
-          "[a]afftdn=nf=-30:nr=11[den];"
-          "[den][b]amix=inputs=2:weights='0.8 0.2':normalize=0,equalizer=f=3000:t=q:w=1.2:g=1.5,"
+    # v3 (retour de Bene) : une seule chaîne, réduction de bruit plus légère que la v1 (nr 16 → 10).
+    # Ne JAMAIS remélanger le son d'origine avec le son débruité : afftdn décale le signal (~25 ms),
+    # le mélange crée un écho métallique et une voix qui « traîne » (erreur de la v2).
+    fc = ("[0:a]aresample=48000,highpass=f=90,afftdn=nf=-28:nr=10,equalizer=f=3000:t=q:w=1.2:g=1.5,"
           "acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120:makeup=2,pan=stereo|c0=c0|c1=c0,"
           "loudnorm=I=-14:TP=-1:LRA=9[o]")
     tmp = os.path.join(WORK, "mix_tmp.wav")
