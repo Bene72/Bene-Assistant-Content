@@ -72,6 +72,11 @@ Lot 2 (même jour, corbinsylk + justyn.ai) :
 - **Anneau macros**, **calendrier à spirale**, **carte barrée** (idées reçues barrées au feutre), **téléphone** qui lit une vidéo.
 - **Cadran d'effort** (RPE) : proche des jauges refusées, seulement si le Reel parle vraiment d'intensité.
 
+Lot 3 (même jour, midi) :
+- **Police qui change** (titre géant qui change de police, derrière Bene), **mot à mot géant** (phrase choc, un mot à la fois).
+- **Message qui s'écrit** (DM client), **curseur iOS** (intensité), **CTA « COMMENTE « MOT » »** en fin de Reel, **cercle au feutre**.
+- Outils de montage : **cadrage visage** (face lock pour les tournages caméra à la main), **swipe** (transition), **rembobinage** VHS.
+
 ## Choix au montage
 Tous les formats ci-dessous sont autorisés. **Claude choisit au montage le plus pertinent pour chaque moment du discours** :
 - chiffre ou progression → chiffres empilés ou carte de barres ;
@@ -87,7 +92,11 @@ Tous les formats ci-dessous sont autorisés. **Claude choisit au montage le plus
 - mythe / idée reçue → **carte barrée** ;
 - exercice ou app à montrer → **démo haut / Bene bas** ou **téléphone** ;
 - nutrition → **anneau macros** ; planning de la semaine → **calendrier** ;
-- moment perso ou drôle → **contour découpé** (+ gribouillis).
+- moment perso ou drôle → **contour découpé** (+ gribouillis) ;
+- question d'un client / problème posé → **message qui s'écrit** ;
+- phrase choc → **mot à mot géant** ; titre de sujet → **police qui change** ;
+- fin avec mot-clé à commenter → **CTA commente** ;
+- tournage en mouvement, caméra à la main → **cadrage visage** sur tout le Reel.
 Règle : un seul élément à l'écran à la fois, 3 à 5 moments graphiques forts par Reel, et varier les formats d'un passage à l'autre.
 
 ## Mouvement

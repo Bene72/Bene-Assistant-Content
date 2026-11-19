@@ -1,7 +1,7 @@
 # Bibliothèque d'effets « verre » BEN&FIT
 
-Effets de motion design réutilisables pour les Reels (1080×1920, 30 fps) : **15 effets**, ajoutés le 19 nov. 2026.
-Inspiration : les vidéos d'effets envoyées par Bene (**corbinsylk**, **justyn.ai**), **adaptées à la charte** :
+Effets de motion design réutilisables pour les Reels (1080×1920, 30 fps) : **24 effets et outils**, ajoutés le 19 nov. 2026.
+Inspiration : les vidéos d'effets envoyées par Bene (**corbinsylk**, **justyn.ai**, **geobertoo**, **tenfoldmarc**, **trainwithcharan**, **alirajabipro**, **jenna.nea**), **adaptées à la charte** :
 marine `#0A206B` + bleu vif `#2E6BFF` + blanc, pas d'orange, pas de halo ni de lueur, entrées sans rebond.
 
 Aperçus : dossier `apercus/` (une image par effet). Démo vidéo complète : `python demo.py RUSH.mp4`.
@@ -45,6 +45,15 @@ Pour « démo haut / Bene bas » et « téléphone » : `media = E.charger_media
 | Carte barrée | `fx_barre(titre, barres, juste)` | idées reçues barrées au feutre, la bonne réponse écrite à la main (mythes) | 5,2 s | bas du buste |
 | Téléphone | `fx_telephone(media)` | téléphone qui monte dans le cadre et lit une vidéo (exercice, app BoxLog, Reel cité) | 4,6 s | à droite |
 | Calendrier | `fx_calendrier(seances, repos)` | semaine type : les séances se posent jour par jour, le repos est entouré | 5,4 s | bas du buste |
+| Police qui change | `fx_police(mot, polices, derriere)` | titre géant qui change de police à chaque temps (Anton → serif italique → feutre → Coda) + menu « Police » en verre ; derrière Bene par défaut | 3 s | haut du cadre |
+| Mot à mot géant | `fx_mot_a_mot(mots)` | phrase choc dite **un mot à la fois**, en très gros ; mots-clés en serif italique bleu clair (remplace les sous-titres le temps de la phrase) | selon la phrase | centre bas |
+| Message qui s'écrit | `fx_message(nom, texte)` | DM d'un client ou question d'abonné qui se tape, puis « Envoyé » : pose le problème du Reel | 4,8 s | bas du buste |
+| Curseur iOS | `fx_curseur(label, de, vers)` | curseur vertical du centre de contrôle qui monte (intensité, volume, effort) | 4 s | à droite |
+| CTA commente | `fx_cta_commente(mot, sous)` | fin de Reel : COMMENTE « PROGRAMME » en géant (mot-clé à écrire en commentaire) | 3 s | bas |
+| Cercle au feutre | `fx_entoure(cx, cy, rx, ry)` | entourer un mot, un chiffre, un détail de l'image (« air marker ») | 2 s | où il faut |
+| Cadrage visage | `CadrageVisage(zoom)` (outil) | « face lock » : garde la tête de Bene au même endroit malgré la caméra à la main (tournage en courant) ; à appliquer à chaque image avant les effets | – | plein cadre |
+| Swipe | `transition_swipe(a, b, p)` (outil) | transition entre deux plans façon coup de fouet horizontal, avec flou de mouvement (~0,25 s) | 0,25 s | transition |
+| Rembobinage | `rembobiner(cv, t)` (outil) | habillage VHS ◀◀ RETOUR sur des images lues à l'envers et accélérées (« revenons en arrière ») | ~1,2 s | plein cadre |
 
 Outils communs : `glass_card` (carte en verre avec ombre, flou, filet blanc), `toggle`, `marker_arrow` (flèche au feutre
 qui se dessine), `mixed_title` (titre « Mot *italique* »), `env` (entrée/sortie), `eo` / `eio` (courbes sans rebond).
@@ -63,11 +72,20 @@ qui se dessine), `mixed_title` (titre « Mot *italique* »), `env` (entrée/sort
   derrière), *paper cut* + *doodle boil* (= contour découpé), *phone mockup* (= téléphone), carte flottante « mini course »
   (= encart flottant du design system), sous-titres en boîte (= nos sous-titres).
 
+- **Lot 3 (19 nov. 2026, midi)**, trainwithcharan, geobertoo, alirajabipro, tenfoldmarc « 10 new video effects », jenna.nea :
+  police qui change, mot à mot géant, message qui s'écrit, curseur iOS, CTA commente, cercle au feutre, cadrage visage,
+  swipe, rembobinage. Doublons écartés : liste avec élément surligné (= liste focus), contour rouge + gribouillis
+  (= contour découpé), mot sur flash blanc (= match-cut / mot géant), collage photo (= polaroid), « screen dive »
+  téléphone en main (≈ téléphone), mur de miniatures (déjà à apprendre).
+
 ## Vus mais pas encore reproduits (à apprendre)
 - **Muscles qui s'allument** (anatomie 3D, muscles travaillés en couleur, corps qui tourne) : à faire avec la fabrique 3D
   `contenu/benfit-3d/` (corps MakeHuman + Blender), muscles en bleu BEN&FIT. Très utile pour les Reels technique.
 - **Relight** : changer l'éclairage du visage (golden hour, Rembrandt, stores vénitiens) → demande un modèle d'IA vidéo.
 - **Graphe tenu en main** : la carte suit la main de Bene → demande du suivi de mouvement (tracking).
+- Effets de **suivi des mains** (tenfoldmarc) : étiquettes au bout des doigts (*finger tags*), objet entre les mains
+  (*hand frame*), photo sortie de la poche (*pocket proof*), objet lancé (*ball toss*), mur de photos au clap (*clap wave*),
+  plongée dans l'écran du téléphone (*screen dive*). À faire avec MediaPipe Hands (déjà dans l'environnement de `benfit-3d`).
 - **POV carrousel 3D** : écran de téléphone qui tourne en perspective avec des Reels qui défilent.
 - Mouvements de caméra : **zoom traversant** (zoom-through cut), **zoom numérique pixelisé**, **vertigo** (travelling compensé,
   demande le détourage), **pull-back reveal**, **orbit**.

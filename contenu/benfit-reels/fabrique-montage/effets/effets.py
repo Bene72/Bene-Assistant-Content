@@ -970,3 +970,337 @@ EFFETS.update({
     "telephone": (fx_telephone, 4.6),
     "calendrier": (fx_calendrier, 5.4),
 })
+
+
+# ================================================================== EFFETS — LOT 3 (19 nov. 2026, midi)
+# Inspirés de trainwithcharan (police qui change), geobertoo (mots géants, fenêtre de discussion),
+# alirajabipro (curseur iOS), tenfoldmarc « 10 new video effects » (face lock, swipe, rewind, air marker),
+# jenna.nea (COMMENT « CUT »).
+
+
+def fx_police(cv, t, mot="ZONE 2", polices=((NUM, False, "Anton"), (SERIF, True, "Instrument Serif"),
+                                            (HAND, False, "Permanent Marker"), (SANS_B, False, "Coda")),
+              step=0.55, y=880, derriere=True, dur=3.0, max_size=430):
+    """Titre géant qui change de police à chaque temps, avec un petit menu « Police » en verre dessous.
+    derriere=True : le titre passe derrière Bene (détourage)."""
+    a = env(t, dur, 0.15, 0.25)
+    if a <= 0:
+        return
+    k = min(int(max(t, 0) / step), len(polices) - 1)
+    face, ital, nom = polices[k]
+    pop = 1.06 - 0.06 * eo(((t % step) if k < len(polices) - 1 else t - k * step) / 0.12)
+
+    def draw(c):
+        size = max_size
+        while tw(c, mot, face, size, ital) > 980 and size > 60:
+            size -= 10
+        c.save()
+        c.translate(W / 2, y - size * 0.35)
+        c.scale(pop, pop)
+        text(c, mot, -tw(c, mot, face, size, ital) / 2, size * 0.35, face, size, WHITE, a, italic=ital)
+        c.restore()
+    if derriere:
+        _behind(cv, draw)
+    else:
+        cv.draw(draw)
+
+    def content(c, al):
+        text(c, "Police", -250, 12, SANS, 28, BLUE_L, al)
+        text(c, nom, 200, 12, SANS_B, 30, WHITE, al, "r")
+        c.move_to(222, -4)
+        c.line_to(234, 8)
+        c.line_to(246, -4)
+        c.set_source_rgba(1, 1, 1, al)
+        c.set_line_width(3)
+        c.stroke()
+    # le petit menu se place au-dessus du titre (au-dessus de la tête, jamais sur le visage)
+    glass_card(cv, W / 2, y - max_size * 1.02 - 40, 580, 76, 22, alpha=a, content=content)
+
+
+def fx_mot_a_mot(cv, t, mots=((0.0, "Cours", "b"), (0.35, "plus", "b"), (0.6, "lentement.", "i")), y=1250, dur=None):
+    """Sous-titres géants **un mot à la fois** (style « mot à mot ») : mots en Coda ExtraBold, mots-clés en
+    serif italique bleu clair. mots = [(t_debut, mot, "b" | "i")], t relatif au début de l'effet."""
+    dur = dur if dur is not None else mots[-1][0] + 0.6
+    if t < 0 or t > dur:
+        return
+    cur = None
+    for m in mots:
+        if t >= m[0]:
+            cur = m
+    if cur is None:
+        return
+    t0, w, st = cur
+    p = eo((t - t0) / 0.12)
+    out = 1 - eio((t - (dur - 0.15)) / 0.15)
+
+    def d(c):
+        c.save()
+        c.translate(W / 2, y)
+        sc = 1.18 - 0.18 * p
+        c.scale(sc, sc)
+        if st == "i":
+            face, size, col, ital = SERIF, 150, BLUE_L, True
+        else:
+            face, size, col, ital = SANS_B, 118, WHITE, False
+        while tw(c, w, face, size, ital) > 940:
+            size -= 6
+        font(c, face, size, ital)
+        x = -c.text_extents(w).x_advance / 2
+        c.move_to(x, size * 0.35)
+        c.text_path(w)
+        c.set_source_rgba(0.08, 0.30, 0.92, 0.9 * p * out)
+        c.set_line_width(10)
+        c.set_line_join(cairo.LINE_JOIN_ROUND)
+        c.stroke_preserve()
+        c.set_source_rgba(*col, p * out)
+        c.fill()
+        c.restore()
+    cv.draw(d)
+
+
+def _wrap(c, s, face, size, maxw):
+    lines, cur = [], ""
+    for wd in s.split():
+        if cur and tw(c, cur + " " + wd, face, size) > maxw:
+            lines.append(cur)
+            cur = wd
+        else:
+            cur = (cur + " " + wd).strip()
+    lines.append(cur)
+    return lines
+
+
+def fx_message(cv, t, nom="Thomas", texte="Coach, je stagne depuis 3 mois. Je fais quoi ?", heure="maintenant",
+               dur=4.8, cy=1200, cps=24):
+    """Message qui s'écrit dans une fenêtre de discussion en verre (DM d'un client, question d'abonné…)."""
+    a = env(t, dur)
+    if a <= 0:
+        return
+    w = 760
+    n = int(clamp((t - 0.5) * cps, 0, len(texte)))
+    shown = texte[:n]
+    sent = eo((t - 0.5 - len(texte) / cps - 0.35) / 0.25)
+    surf = cairo.ImageSurface(cairo.FORMAT_A8, 10, 10)
+    lines = _wrap(cairo.Context(surf), texte, SANS_B, 38, w - 150)
+    h = 150 + 56 * len(lines) + 40
+
+    def content(c, al):
+        c.arc(-w / 2 + 60, -h / 2 + 58, 30, 0, 2 * math.pi)
+        c.set_source_rgba(*BLUE, al)
+        c.fill()
+        text(c, nom[0].upper(), -w / 2 + 60, -h / 2 + 70, SANS_B, 32, WHITE, al, "c")
+        text(c, nom, -w / 2 + 108, -h / 2 + 54, SANS_B, 32, WHITE, al)
+        text(c, heure, -w / 2 + 108, -h / 2 + 86, SANS, 24, BLUE_L, al)
+        bx, by = -w / 2 + 40, -h / 2 + 120
+        bw = w - 80
+        bh = 56 * len(lines) + 30
+        rrect(c, bx, by, bw, bh, 26)
+        col = tuple(NAVY[i] * (1 - sent) + BLUE[i] * sent for i in range(3))
+        c.set_source_rgba(*col, 0.85 * al)
+        c.fill()
+        # texte tapé, ligne par ligne
+        left = shown
+        yy = by + 52
+        for ln in lines:
+            part = left[:len(ln)]
+            left = left[len(ln) + 1:]
+            x = bx + 26 + text(c, part, bx + 26, yy, SANS_B, 38, WHITE, al)
+            if part and len(part) < len(ln) or (ln == lines[-1] and n < len(texte) and part == ln):
+                if int(t * 3) % 2 == 0:
+                    c.rectangle(x + 4, yy - 34, 4, 40)
+                    c.set_source_rgba(1, 1, 1, al)
+                    c.fill()
+            yy += 56
+        if sent > 0:
+            text(c, "Envoyé", w / 2 - 44, h / 2 - 18, SANS, 24, BLUE_L, al * sent, "r")
+    glass_card(cv, W / 2, cy + 40 * (1 - eo(t / 0.45)), w, h, 36, rot=-1.0, alpha=a, content=content)
+
+
+def fx_curseur(cv, t, label="INTENSITÉ", de=0.25, vers=0.9, dur=4.0, cx=880, cy=980):
+    """Curseur vertical façon centre de contrôle iOS qui monte (intensité, effort, volume…)."""
+    a = env(t, dur)
+    if a <= 0:
+        return
+    pw, ph = 150, 440
+    v = de + (vers - de) * eio((t - 0.5) / 1.4)
+    x = cx + 60 * (1 - eo(t / 0.4))
+
+    def path(c):
+        rrect(c, x - pw / 2, cy - ph / 2, pw, ph, 46)
+    cv.shadow(path, 0.3 * a)
+    cv.glass(path, a, 0.38)
+
+    def deco(c):
+        c.save()
+        rrect(c, x - pw / 2, cy - ph / 2, pw, ph, 46)
+        c.clip()
+        c.rectangle(x - pw / 2, cy + ph / 2 - ph * v, pw, ph * v)
+        c.set_source_rgba(1, 1, 1, 0.92 * a)
+        c.fill()
+        c.restore()
+        rrect(c, x - pw / 2, cy - ph / 2, pw, ph, 46)
+        c.set_source_rgba(1, 1, 1, 0.3 * a)
+        c.set_line_width(2)
+        c.stroke()
+        # petites barres (icône)
+        for i in range(3):
+            hh = 14 + i * 10
+            c.rectangle(x - 26 + i * 20, cy + ph / 2 - 40 - hh, 12, hh)
+        c.set_source_rgba(*NAVY, a)
+        c.fill()
+        text(c, f"{round(v * 100)}", x, cy - ph / 2 - 26, NUM, 64, WHITE, a, "c")
+        text(c, label, x, cy + ph / 2 + 56, SANS_B, 30, WHITE, a, "c")
+    cv.draw(deco)
+
+
+class CadrageVisage:
+    """Cadrage verrouillé sur le visage (face lock) : recadre et zoome chaque image pour garder la tête de Bene
+    au même endroit, même caméra à la main. Utilise le détourage (segmentation.py), lissé dans le temps.
+    Usage : cad = CadrageVisage(zoom=1.25); frame = cad(frame)."""
+
+    def __init__(self, zoom=1.25, lissage=0.85, hauteur=0.36):
+        self.zoom, self.k, self.hy = zoom, lissage, hauteur
+        self.pos = None
+
+    def __call__(self, frame, mask=None):
+        if mask is None:
+            import segmentation
+            mask = segmentation.mask(frame)
+        ys, xs = np.nonzero(mask[::4, ::4] > 0.5)
+        if len(ys):
+            top = ys.min()
+            sel = ys < top + (ys.max() - top) * 0.25  # le haut de la silhouette = la tête
+            p = np.array([xs[sel].mean() * 4, ys[sel].mean() * 4 + 40])
+            self.pos = p if self.pos is None else self.k * self.pos + (1 - self.k) * p
+        if self.pos is None:
+            return frame
+        cw, ch = W / self.zoom, H / self.zoom
+        x0 = clamp(self.pos[0] - cw / 2, 0, W - cw)
+        y0 = clamp(self.pos[1] - ch * self.hy, 0, H - ch)
+        im = Image.fromarray(frame).crop((int(x0), int(y0), int(x0 + cw), int(y0 + ch))).resize((W, H), Image.BICUBIC)
+        return np.asarray(im)
+
+
+def _motion_blur_x(img, k):
+    if k < 2:
+        return img
+    acc = np.zeros_like(img, np.float32)
+    for i in range(k):
+        acc += np.roll(img, i - k // 2, axis=1)
+    return acc / k
+
+
+def transition_swipe(frame_a, frame_b, p, sens=1):
+    """Transition « swipe » (whip pan) : A part sur le côté, B arrive, flou de mouvement au milieu.
+    p de 0 à 1 (environ 0,25 s). Renvoie une image uint8."""
+    p = eio(p)
+    off = int(W * p) * sens
+    a = np.roll(frame_a.astype(np.float32), -off, axis=1)
+    b = np.roll(frame_b.astype(np.float32), W * sens - off, axis=1)
+    out = a.copy()
+    if sens > 0:
+        out[:, W - off:] = b[:, W - off:] if off > 0 else out[:, W - off:]
+    else:
+        out[:, :-off] = b[:, :-off] if off < 0 else out[:, :-off]
+    k = int(60 * math.sin(math.pi * p))
+    out = _motion_blur_x(out[::2, ::2], max(1, k // 2))
+    out = np.asarray(Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)).resize((W, H), Image.BILINEAR))
+    return out
+
+
+def rembobiner(cv, t, dur=1.2, label="RETOUR"):
+    """Habillage « rembobinage » VHS : à appliquer sur des images lues à l'envers et en accéléré (×3 à ×4).
+    Ajoute lignes de balayage, léger décalage de bande, ◀◀ et compteur. Le choix des images est fait au montage."""
+    if t < 0 or t > dur:
+        return
+    f = cv.f
+    f[::4] *= 0.82  # lignes de balayage
+    band = int((t * 900) % H)
+    f[band:band + 40] = np.roll(f[band:band + 40], 18, axis=1)
+    cv.f = f * 0.92 + np.array(NAVY, np.float32) * 0.08
+
+    def d(c):
+        x, y = 70, 230
+        for i in range(2):
+            c.move_to(x + 34 + i * 34, y - 24)
+            c.line_to(x + i * 34, y)
+            c.line_to(x + 34 + i * 34, y + 24)
+            c.close_path()
+        c.set_source_rgba(1, 1, 1, 0.95)
+        c.fill()
+        text(c, label, x + 100, y + 18, SANS_B, 52, WHITE, 0.95)
+        s = f"00:{int(59 - t * 40) % 60:02d}:{int((1 - t / dur) * 29):02d}"
+        text(c, s, W - 70, H - 380, SANS_B, 38, WHITE, 0.85, "r")
+    cv.draw(d)
+
+
+def fx_cta_commente(cv, t, mot="PROGRAMME", avant="COMMENTE", sous="et je t'envoie le plan", dur=3.0, y=1400):
+    """Appel à l'action géant : COMMENTE « MOT » (mot-clé que l'abonné doit écrire en commentaire)."""
+    a = env(t, dur, 0.2, 0.25)
+    if a <= 0:
+        return
+
+    def d(c):
+        p1 = eo(t / 0.2)
+        p2 = eo((t - 0.25) / 0.2)
+        c.save()
+        c.translate(W / 2, y - 90)
+        c.scale(1.1 - 0.1 * p1, 1.1 - 0.1 * p1)
+        font(c, NUM, 120)
+        x = -c.text_extents(avant).x_advance / 2
+        c.move_to(x, 40)
+        c.text_path(avant)
+        c.set_source_rgba(0.08, 0.30, 0.92, a * p1)
+        c.set_line_width(12)
+        c.set_line_join(cairo.LINE_JOIN_ROUND)
+        c.stroke_preserve()
+        c.set_source_rgba(1, 1, 1, a * p1)
+        c.fill()
+        c.restore()
+        s = f"« {mot} »"
+        font(c, SANS_B, 92)
+        bw = c.text_extents(s).x_advance + 60
+        c.save()
+        c.translate(W / 2, y + 60)
+        c.scale(1.1 - 0.1 * p2, 1.1 - 0.1 * p2)
+        rrect(c, -bw / 2, -66, bw, 132, 14)
+        c.set_source_rgba(*BLUE, a * p2)
+        c.fill()
+        text(c, s, 0, 32, SANS_B, 92, WHITE, a * p2, "c")
+        c.restore()
+        if sous:
+            text(c, sous, W / 2, y + 190, SERIF, 56, WHITE, a * eo((t - 0.5) / 0.3), "c", italic=True)
+    cv.draw(d)
+
+
+def fx_entoure(cv, t, cx=540, cy=1300, rx=260, ry=80, dur=2.0, color=None):
+    """Cercle au feutre qui se dessine autour d'un mot ou d'un chiffre (« air marker »)."""
+    a = env(t, dur, 0.05, 0.25)
+    if a <= 0:
+        return
+    p = eo(t / 0.45)
+    col = color or BLUE
+
+    def d(c):
+        n = int(60 * p) + 1
+        c.set_line_cap(cairo.LINE_CAP_ROUND)
+        c.set_line_join(cairo.LINE_JOIN_ROUND)
+        c.set_line_width(8)
+        c.set_source_rgba(*col, a)
+        for i in range(n):
+            ang = -2.6 + 2.15 * math.pi * i / 60
+            wob = 1 + 0.04 * math.sin(i * 0.7)
+            x, y = cx + rx * wob * math.cos(ang), cy + ry * wob * math.sin(ang) - 6 * i / 60
+            (c.move_to if i == 0 else c.line_to)(x, y)
+        c.stroke()
+    cv.draw(d)
+
+
+EFFETS.update({
+    "police": (fx_police, 3.0),
+    "motamot": (fx_mot_a_mot, 2.4),
+    "message": (fx_message, 4.8),
+    "curseur": (fx_curseur, 4.0),
+    "cta": (fx_cta_commente, 3.0),
+    "entoure": (fx_entoure, 2.0),
+})
