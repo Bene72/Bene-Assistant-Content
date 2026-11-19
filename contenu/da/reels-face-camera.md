@@ -29,6 +29,10 @@ Méthode de montage : `contenu/methodes-claude/monteur-reels-benfit.md` · scrip
 | exercice, app à montrer | **démo haut / Bene bas** ou **téléphone** qui lit la vidéo |
 | nutrition, planning | **anneau macros**, **calendrier** à spirale |
 | moment perso / drôle | **contour découpé** façon sticker + gribouillis |
+| question d'un client, problème posé | **message qui s'écrit** (DM) |
+| phrase choc | **mot à mot géant** (un mot à la fois) |
+| fin avec mot-clé à commenter | **CTA « COMMENTE « PROGRAMME » »** |
+| tournage caméra à la main (course, salle) | **cadrage visage** (face lock) + transitions **swipe** |
 
 Effets « verre » prêts à l'emploi : `contenu/benfit-reels/fabrique-montage/effets/` (catalogue, aperçus, code).
 
@@ -36,7 +40,7 @@ Effets « verre » prêts à l'emploi : `contenu/benfit-reels/fabrique-montage/e
 - Reel « 4 qualités » v2 : motion design + GIFs drôles.
 - Cartes interface (réf. Théo Parisi, Project Orange), typographie mixte gras + *italique serif*.
 - Titre qui s'enflamme puis redevient net (réf. pierre_lesr), encart vidéo flottant sur le buste (réf. amaury.bodin).
-- Effets de corbinsylk et justyn.ai (19 nov. 2026) : Bene veut que Claude sache tous les faire → 15 effets recolorés BEN&FIT dans `fabrique-montage/effets/` (catalogue dans son README, liste de ceux qui restent à apprendre).
+- Effets de corbinsylk et justyn.ai (19 nov. 2026) : Bene veut que Claude sache tous les faire → 24 effets et outils recolorés BEN&FIT dans `fabrique-montage/effets/` (catalogue dans son README, liste de ceux qui restent à apprendre).
 
 ## Refusé
 - Le tout premier Reel (« Tu peux être fort… ») : trop « IA ».
