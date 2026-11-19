@@ -241,8 +241,9 @@ def marker_arrow(c, x0, y0, x1, y1, prog, alpha, color=WHITE, width=5):
 
 # ================================================================== EFFETS
 def fx_toggles(cv, t, rows=("Échauffement", "Allure à 80 %", "WOD fini debout"), dur=4.6,
-               cy=1240, step=0.65, t_first=0.7):
-    """Carte d'interrupteurs qui s'allument un par un (checklist « une étape = un toggle »)."""
+               cy=1240, step=0.65, t_first=0.7, on_times=None):
+    """Carte d'interrupteurs qui s'allument un par un (checklist « une étape = un toggle »).
+    on_times : instants (s, depuis le début de l'effet) où chaque toggle s'allume, calés sur la voix."""
     a = env(t, dur)
     if a <= 0:
         return
@@ -254,7 +255,8 @@ def fx_toggles(cv, t, rows=("Échauffement", "Allure à 80 %", "WOD fini debout"
     def content(c, al):
         for i, r in enumerate(rows):
             yy = -h / 2 + 24 + i * rh
-            on = eo((t - t_first - i * step) / 0.25)
+            t_on = on_times[i] if on_times else t_first + i * step
+            on = eo((t - t_on) / 0.25)
             text(c, r, -w / 2 + 44, yy + rh / 2 + 14, SANS_B, 40, WHITE, al * (0.65 + 0.35 * on))
             toggle(c, w / 2 - 44 - 84, yy + rh / 2 - 24, on, al)
             if i < len(rows) - 1:
