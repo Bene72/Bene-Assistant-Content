@@ -16,6 +16,7 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 | 4 | Les 4 qualités (« si je devais tout recommencer ») | Les 4 piliers | **v2 naturelle** | 1 min 44 | – | – | – | – | – | – | – | – |
 | 5 | Cardio et perte de muscle (« tu as peur de perdre du muscle ? ») | BUILD / RUN | **v2 naturelle** + cartes interface | 1 min 29 | – | – | – | – | – | – | – | – |
 | 6 | J'ai testé le bloc d'Apocalypse Training (collab, reel d'entraînement) | BUILD / PERFORM | **v2 naturelle**, sans parole | 34 s | – | – | – | – | – | – | – | – |
+| 7 | Courir plus lentement pour courir plus vite (zone 2 / HYROX) | RUN | **v2 naturelle**, format court, 2 effets | 28 s | – | – | – | – | – | – | – | – |
 
 > « – » = à remplir. Indicateurs les plus importants, dans l'ordre : **durée moyenne de visionnage**, **partages**, **enregistrements**, **abonnés gagnés**. Les vues seules ne disent presque rien.
 
@@ -105,3 +106,17 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 | Date | Reel d'origine | Question / objection reçue | Idée de contenu |
 |---|---|---|---|
 | – | – | – | – |
+
+### #7 — Courir plus lentement pour courir plus vite (zone 2 / HYROX)
+- **Date de publication** : à compléter (prêt le 19 nov. 2026)
+- **Sujet** : pour un HYROX, la zone 2 (allure où l'on peut parler) permet d'augmenter le volume sans se cramer : meilleure récupération, moins de fatigue, plus vite le jour J ; ne faire que de la piste « crame le moteur ». Fin : « Oublie pas le lièvre et la tortue. »
+- **Cible** : athlètes confirmés (HYROX), plus les débutants.
+- **DA** : v2 naturelle, **format court et intense** : tourné en courant, caméra à la main, coupes sèches, punch-ins. **2 effets seulement** : texte « ZONE 2 » derrière Bene, interrupteurs des 3 bénéfices. Étalonnage quasi nul.
+- **Durée** : 28 s
+- **Accroche** : « Tu veux courir plus vite sur ton HYROX ? Non. Courir une allure zone 2. »
+- **Hypothèse testée** : *un Reel **court (< 30 s), tourné en mouvement** et peu chargé en effets retient mieux (durée moyenne de visionnage proche de la durée totale) et se partage plus que les Reels longs face caméra assis (#4 : 1 min 44, #5 : 1 min 29).*
+  - Comparer : % de visionnage complet, partages, abonnés gagnés, avec #4 et #5.
+  - À observer : un sujet ciblé « confirmés » (HYROX) attire-t-il plus de visites de profil / DM ?
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
+
