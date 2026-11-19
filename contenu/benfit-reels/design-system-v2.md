@@ -54,6 +54,17 @@ Référence : Reels de Théo Parisi (Project Orange). Graphique mais « designé
 - **Les éléments vivent dans le temps** : une carte apparaît, se range sur le côté et reste en fond pendant que la suivante arrive (on raconte une histoire).
 - **Mot géant ponctuel** sur la phrase forte (« *C'est* **la régularité.** »), une fois par Reel maximum.
 
+## Effets « verre » (ajout du 19 nov. 2026)
+Bibliothèque prête à l'emploi : `fabrique-montage/effets/` (code + aperçus + README).
+Inspirés des effets « Liquid Glass » de corbinsylk, **recolorés BEN&FIT** (marine + bleu vif, pas d'orange, pas de halo, pas de rebond).
+- **Interrupteurs** : checklist dont chaque toggle s'allume sur la règle dite.
+- **Graphe en verre** : courbe qui se trace + chiffre qui compte.
+- **Liste focus** : étapes / chapitres, l'étape en cours nette, les autres floues, « tu es ici » au feutre.
+- **Carte preuve** : gros chiffre qui compte + souligné feutre + annotation manuscrite.
+- **Match-cut** : pages de texte en coupe sèche, mot-clé verrouillé au centre (1 fois par Reel max).
+- **Cartes en éventail** : annoncer une liste puis faire passer une carte devant.
+- **Pastilles épaule** : avant / après à côté de la tête.
+
 ## Choix au montage
 Tous les formats ci-dessous sont autorisés. **Claude choisit au montage le plus pertinent pour chaque moment du discours** :
 - chiffre ou progression → chiffres empilés ou carte de barres ;
@@ -61,7 +72,10 @@ Tous les formats ci-dessous sont autorisés. **Claude choisit au montage le plus
 - notion ou mouvement concret → vraie vidéo en encart ou polaroid ;
 - comparaison (A ≠ B) → carte à deux étiquettes ;
 - moment drôle ou relâché → sticker GIF ;
-- phrase forte → mot géant ou punch-in.
+- phrase forte → mot géant, punch-in ou **match-cut** ;
+- règles / étapes à suivre → **interrupteurs** ou **liste focus** ;
+- résultat chiffré → **carte preuve**, **graphe en verre** ou **pastilles épaule** (avant / après) ;
+- liste annoncée (« 3 erreurs ») → **cartes en éventail**.
 Règle : un seul élément à l'écran à la fois, 3 à 5 moments graphiques forts par Reel, et varier les formats d'un passage à l'autre.
 
 ## Mouvement
