@@ -11,10 +11,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import effets as E
 
 W, H, FPS = E.W, E.H, 30
-ORDER = ["toggles", "graphe", "focus", "preuve", "matchcut", "eventail", "epaule"]
+ORDER = ["toggles", "graphe", "focus", "preuve", "matchcut", "eventail", "epaule",
+         "derriere", "decoupe", "split", "macros", "cadran", "barre", "telephone", "calendrier"]
 NAMES = {"toggles": "Interrupteurs", "graphe": "Graphe en verre", "focus": "Liste focus",
          "preuve": "Carte preuve", "matchcut": "Match-cut", "eventail": "Cartes en éventail",
-         "epaule": "Pastilles épaule"}
+         "epaule": "Pastilles épaule", "derriere": "Texte derrière", "decoupe": "Contour découpé",
+         "split": "Démo haut / Bene bas", "macros": "Anneau macros", "cadran": "Cadran d'effort",
+         "barre": "Carte barrée", "telephone": "Téléphone", "calendrier": "Calendrier"}
+HERE = os.path.dirname(os.path.abspath(__file__))
+MEDIA_DEFAUT = os.path.join(HERE, "..", "..", "..", "bibliotheque", "sport", "pull-ups.gif")
+EXTRA = {"split": lambda m: {"media": m, "mots": [(0.6, "TRACTIONS"), (2.0, "omoplates")]},
+         "telephone": lambda m: {"media": m}}
 GAP = 0.6
 
 
@@ -45,6 +52,8 @@ def main():
     ap.add_argument("sortie", nargs="?", default="demo_effets.mp4")
     ap.add_argument("--debut", type=float, default=2.6)
     ap.add_argument("--stills", action="store_true")
+    ap.add_argument("--media", default=MEDIA_DEFAUT, help="GIF ou vidéo pour les effets split / téléphone")
+    ap.add_argument("--seulement", default="", help="liste d'effets séparés par des virgules")
     a = ap.parse_args()
 
     raw = os.path.join(tempfile.gettempdir(), "plate_effets.raw")
@@ -52,6 +61,9 @@ def main():
                     "-vf", f"fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}",
                     "-f", "rawvideo", "-pix_fmt", "rgb24", raw], check=True)
     plate = np.memmap(raw, np.uint8, "r").reshape(-1, H, W, 3)
+    media = E.charger_media(a.media)
+    if a.seulement:
+        ORDER[:] = [k for k in ORDER if k in a.seulement.split(",")]
     tl, dur = build_timeline()
 
     def frame(T):
@@ -63,7 +75,7 @@ def main():
         cv = E.Canvas(np.array(plate[min(int(local * FPS), plate.shape[0] - 1)]))
         for i, (key, fn, s, d) in enumerate(tl):
             if s - 0.1 <= T <= s + d + 0.1:
-                fn(cv, T - s)
+                fn(cv, T - s, **(EXTRA[key](media) if key in EXTRA else {}))
                 label(cv, NAMES[key], i + 1, E.env(T - s, d, 0.2, 0.2))
         return cv.out()
 
@@ -72,7 +84,8 @@ def main():
         out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "apercus")
         os.makedirs(out, exist_ok=True)
         for key, fn, s, d in tl:
-            Image.fromarray(frame(s + d * 0.9)).resize((540, 960)).save(f"{out}/{key}.jpg", quality=82)
+            frac = {"derriere": 0.6, "decoupe": 0.5, "split": 0.6, "telephone": 0.5}.get(key, 0.9)
+            Image.fromarray(frame(s + d * frac)).resize((540, 960)).save(f"{out}/{key}.jpg", quality=82)
         return
     p = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
                           "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
