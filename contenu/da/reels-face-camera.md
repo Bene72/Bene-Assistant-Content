@@ -24,7 +24,11 @@ Méthode de montage : `contenu/methodes-claude/monteur-reels-benfit.md` · scrip
 | règles, étapes à suivre | **interrupteurs** qui s'allument un par un |
 | résultat chiffré | **carte preuve** (chiffre qui compte), **graphe en verre**, **pastilles épaule** (avant / après) |
 | liste annoncée (« 3 erreurs ») | **cartes en éventail** |
-| LE mot-clé du Reel | **match-cut** (pages de texte, mot fixe au centre), 1 fois max |
+| LE mot-clé du Reel | **match-cut** (pages de texte, mot fixe au centre) ou **texte derrière** Bene, 1 fois max |
+| mythe, idée reçue | **carte barrée** au feutre |
+| exercice, app à montrer | **démo haut / Bene bas** ou **téléphone** qui lit la vidéo |
+| nutrition, planning | **anneau macros**, **calendrier** à spirale |
+| moment perso / drôle | **contour découpé** façon sticker + gribouillis |
 
 Effets « verre » prêts à l'emploi : `contenu/benfit-reels/fabrique-montage/effets/` (catalogue, aperçus, code).
 
@@ -32,7 +36,7 @@ Effets « verre » prêts à l'emploi : `contenu/benfit-reels/fabrique-montage/e
 - Reel « 4 qualités » v2 : motion design + GIFs drôles.
 - Cartes interface (réf. Théo Parisi, Project Orange), typographie mixte gras + *italique serif*.
 - Titre qui s'enflamme puis redevient net (réf. pierre_lesr), encart vidéo flottant sur le buste (réf. amaury.bodin).
-- Effets « Liquid Glass » de corbinsylk (19 nov. 2026) : Bene veut que Claude sache tous les faire → 7 effets recolorés BEN&FIT dans `fabrique-montage/effets/` (interrupteurs, graphe, liste focus, carte preuve, match-cut, éventail, pastilles).
+- Effets de corbinsylk et justyn.ai (19 nov. 2026) : Bene veut que Claude sache tous les faire → 15 effets recolorés BEN&FIT dans `fabrique-montage/effets/` (catalogue dans son README, liste de ceux qui restent à apprendre).
 
 ## Refusé
 - Le tout premier Reel (« Tu peux être fort… ») : trop « IA ».

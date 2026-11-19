@@ -65,6 +65,13 @@ Inspirés des effets « Liquid Glass » de corbinsylk, **recolorés BEN&FIT** (m
 - **Cartes en éventail** : annoncer une liste puis faire passer une carte devant.
 - **Pastilles épaule** : avant / après à côté de la tête.
 
+Lot 2 (même jour, corbinsylk + justyn.ai) :
+- **Texte derrière** : titre ou chiffres géants derrière Bene (détourage automatique), il passe devant les lettres.
+- **Contour découpé** : contour blanc façon sticker + gribouillis qui tremblent + note au feutre.
+- **Démo haut / Bene bas** : écran séparé exercice ou app en haut, Bene en bas, mot-clé bleu au milieu.
+- **Anneau macros**, **calendrier à spirale**, **carte barrée** (idées reçues barrées au feutre), **téléphone** qui lit une vidéo.
+- **Cadran d'effort** (RPE) : proche des jauges refusées, seulement si le Reel parle vraiment d'intensité.
+
 ## Choix au montage
 Tous les formats ci-dessous sont autorisés. **Claude choisit au montage le plus pertinent pour chaque moment du discours** :
 - chiffre ou progression → chiffres empilés ou carte de barres ;
@@ -75,7 +82,12 @@ Tous les formats ci-dessous sont autorisés. **Claude choisit au montage le plus
 - phrase forte → mot géant, punch-in ou **match-cut** ;
 - règles / étapes à suivre → **interrupteurs** ou **liste focus** ;
 - résultat chiffré → **carte preuve**, **graphe en verre** ou **pastilles épaule** (avant / après) ;
-- liste annoncée (« 3 erreurs ») → **cartes en éventail**.
+- liste annoncée (« 3 erreurs ») → **cartes en éventail** ;
+- titre fort, chiffre clé → **texte derrière** Bene ;
+- mythe / idée reçue → **carte barrée** ;
+- exercice ou app à montrer → **démo haut / Bene bas** ou **téléphone** ;
+- nutrition → **anneau macros** ; planning de la semaine → **calendrier** ;
+- moment perso ou drôle → **contour découpé** (+ gribouillis).
 Règle : un seul élément à l'écran à la fois, 3 à 5 moments graphiques forts par Reel, et varier les formats d'un passage à l'autre.
 
 ## Mouvement

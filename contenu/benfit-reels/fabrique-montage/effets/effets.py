@@ -43,9 +43,18 @@ def env(t, dur, fin=0.35, fout=0.3):
 class Canvas:
     """Image du Reel (float32 0..1) + calques cairo composés par-dessus."""
 
-    def __init__(self, frame_uint8):
+    def __init__(self, frame_uint8, person_mask=None):
+        self.src = frame_uint8
         self.f = frame_uint8.astype(np.float32) / 255.0
         self._blur = None
+        self._person = person_mask
+
+    def person(self):
+        """Masque de Bene (H, W) 0..1, calculé à la demande (segmentation.py) ou fourni à l'avance."""
+        if self._person is None:
+            import segmentation
+            self._person = segmentation.mask(self.src)
+        return self._person
 
     def blurred(self, radius=26):
         if self._blur is None:
@@ -526,3 +535,436 @@ EFFETS = {
     "eventail": (fx_eventail, 5.2),
     "epaule": (fx_epaule, 4.4),
 }
+
+
+# ================================================================== EFFETS — LOT 2 (19 nov. 2026)
+# Inspirés de corbinsylk (split démo, anatomie) et justyn.ai (texte derrière, cadran, calendrier,
+# carte barrée, téléphone) + liste « 17 video effects » (paper cut, doodle boil, phone mockup…).
+PAPER = (0xFA / 255, 0xF7 / 255, 0xF0 / 255)
+
+
+def charger_media(path, fps=30, max_s=6):
+    """Charge un GIF ou une vidéo en liste d'images uint8 (pour fx_split / fx_telephone)."""
+    import subprocess, json
+    pr = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+                         "-of", "json", path], capture_output=True, text=True)
+    st = json.loads(pr.stdout)["streams"][0]
+    w, h = st["width"], st["height"]
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-t", str(max_s), "-vf", f"fps={fps}",
+                          "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True).stdout
+    n = len(raw) // (w * h * 3)
+    return [np.frombuffer(raw, np.uint8, w * h * 3, i * w * h * 3).reshape(h, w, 3) for i in range(n)]
+
+
+def _cover(img, w, h):
+    """Recadre une image pour remplir w x h (comme object-fit: cover)."""
+    im = Image.fromarray(img)
+    sc = max(w / im.width, h / im.height)
+    im = im.resize((max(1, int(im.width * sc + 0.5)), max(1, int(im.height * sc + 0.5))), Image.BILINEAR)
+    x0, y0 = (im.width - w) // 2, (im.height - h) // 2
+    return np.asarray(im.crop((x0, y0, x0 + w, y0 + h))).astype(np.float32) / 255.0
+
+
+def _paste_media(cv, img, x, y, w, h, r, alpha, rot=0.0):
+    """Colle une image arrondie (et éventuellement tournée) dans le Reel."""
+    tile = _cover(img, int(w), int(h))
+    big = np.zeros((H, W, 3), np.float32)
+    # placement par transformée affine (PIL) pour gérer la rotation
+    t_im = Image.fromarray((tile * 255).astype(np.uint8))
+    canvas = Image.new("RGB", (W, H))
+    if rot:
+        t_im = t_im.rotate(-rot, resample=Image.BICUBIC, expand=True)
+    cx, cy = x + w / 2, y + h / 2
+    canvas.paste(t_im, (int(cx - t_im.width / 2), int(cy - t_im.height / 2)))
+    big = np.asarray(canvas).astype(np.float32) / 255.0
+    m = cv._mask(lambda c: (place(c, cx, cy, rot), rrect(c, -w / 2, -h / 2, w, h, r))) * alpha
+    cv.f = cv.f * (1 - m) + big * m
+
+
+def _behind(cv, draw_fn, alpha=1.0):
+    """Dessine un calque cairo DERRIÈRE Bene (le masque de la personne passe devant)."""
+    s = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
+    c = cairo.Context(s)
+    draw_fn(c)
+    s.flush()
+    a = np.ndarray((H, W, 4), np.uint8, s.get_data()).astype(np.float32) / 255.0
+    keep = (1 - cv.person())[..., None] * alpha
+    cv.f = cv.f * (1 - a[..., 3:4] * keep) + a[..., [2, 1, 0]] * keep
+
+
+def fx_derriere(cv, t, lignes=("1 2 3",), face=NUM, y=960, interligne=0.92, dur=3.8, step=0.35,
+                color=WHITE, italic=False, max_size=560):
+    """Texte géant DERRIÈRE Bene (il passe devant les lettres). Les mots arrivent un par un."""
+    a = env(t, dur, 0.15, 0.3)
+    if a <= 0:
+        return
+    words_all = [(li, wd) for li, ln in enumerate(lignes) for wd in ln.split()]
+
+    def draw(c):
+        k = 0
+        yy = y
+        sizes = []
+        for ln in lignes:
+            size = max_size
+            while tw(c, ln, face, size, italic) > 1000 and size > 60:
+                size -= 10
+            sizes.append(size)
+        tot = sum(s * interligne for s in sizes)
+        yy = y - tot + sizes[0] * interligne
+        for li, ln in enumerate(lignes):
+            size = sizes[li]
+            x = W / 2 - tw(c, ln, face, size, italic) / 2
+            for wd in ln.split():
+                p = eo((t - k * step) / 0.25)
+                if p > 0:
+                    c.save()
+                    wdw = tw(c, wd, face, size, italic)
+                    c.translate(x + wdw / 2, yy - size * 0.35)
+                    sc = 1.08 - 0.08 * p
+                    c.scale(sc, sc)
+                    text(c, wd, -wdw / 2, size * 0.35, face, size, color, a * p, italic=italic)
+                    c.restore()
+                x += tw(c, wd + " ", face, size, italic)
+                k += 1
+            yy += size * interligne
+    _behind(cv, draw)
+
+
+def fx_decoupe(cv, t, dur=4.2, note="ça, c'est toi", doodles=True, dim=0.35):
+    """Contour « découpé » blanc autour de Bene (effet sticker / paper cut) + gribouillis qui
+    tremblent (doodle boil). Le fond s'assombrit légèrement."""
+    a = env(t, dur, 0.25, 0.3)
+    if a <= 0:
+        return
+    pm = cv.person()
+    small = Image.fromarray((pm[::2, ::2] * 255).astype(np.uint8))
+    dil = np.asarray(small.filter(ImageFilter.MaxFilter(9)).resize((W, H), Image.BILINEAR)).astype(np.float32) / 255
+    ring = np.clip(dil - pm, 0, 1)[..., None]
+    keep = 1 - pm[..., None]
+    cv.f = cv.f * (1 - dim * a * keep) + cv.f * 0  # fond assombri, Bene intact
+    cv.f = cv.f * (1 - ring * a) + ring * a
+    if not doodles:
+        return
+    boil = int(t * 8)
+    rnd = np.random.default_rng(boil)
+
+    def jit(v):
+        return v + rnd.uniform(-3, 3)
+
+    def dfn(c):
+        al = a * eo((t - 0.3) / 0.3)
+        c.set_source_rgba(1, 1, 1, al)
+        c.set_line_width(6)
+        c.set_line_cap(cairo.LINE_CAP_ROUND)
+        c.set_line_join(cairo.LINE_JOIN_ROUND)
+        # étoile à droite de la tête
+        cx, cy, R = 860, 520, 46
+        for i in range(4):
+            ang = i * math.pi / 4
+            c.move_to(jit(cx - R * math.cos(ang)), jit(cy - R * math.sin(ang)))
+            c.line_to(jit(cx + R * math.cos(ang)), jit(cy + R * math.sin(ang)))
+        c.stroke()
+        # traits de mouvement à gauche
+        for i in range(3):
+            c.move_to(jit(150), jit(640 + i * 50))
+            c.line_to(jit(230 - i * 15), jit(625 + i * 50))
+        c.stroke()
+        # gribouillis en spirale en haut à gauche
+        c.move_to(jit(170), jit(420))
+        for i in range(1, 22):
+            ang = i * 0.6
+            rr = 6 + i * 2.2
+            c.line_to(jit(200 + rr * math.cos(ang)), jit(430 + rr * math.sin(ang)))
+        c.stroke()
+        if note:
+            c.save()
+            c.translate(jit(600), jit(420))
+            c.rotate(math.radians(-6))
+            text(c, note, 0, 0, HAND, 52, WHITE, al)
+            c.restore()
+            marker_arrow(c, 640, 445, 560, 540, 1.0, al)
+    cv.draw(dfn)
+
+
+def fx_split(cv, t, media, mots=(), dur=5.0, fps=30):
+    """Écran séparé « démo en haut / Bene en bas » : une vidéo ou un GIF arrive en haut,
+    Bene glisse en bas, un mot-clé bleu s'affiche sous la démo. mots = [(t_debut, "mot"), …]"""
+    if t < 0 or t > dur:
+        return
+    p = eio(t / 0.45) * (1 - eio((t - (dur - 0.4)) / 0.4))
+    off = int(560 * p)
+    src = cv.f.copy()
+    deep = np.array(DEEP, np.float32)
+    cv.f[:] = deep
+    if off < H:
+        cv.f[off:] = src[:H - off]
+    # zone haute sombre derrière la démo
+    if off > 0:
+        cv.f[:off] = deep
+    img = media[int(t * fps) % len(media)]
+    pw, ph = 960, 720
+    py = 110 - (1 - p) * 900
+    _paste_media(cv, img, (W - pw) / 2, py, pw, ph, 34, 1.0)
+
+    def deco(c):
+        rrect(c, (W - pw) / 2, py, pw, ph, 34)
+        c.set_source_rgba(1, 1, 1, 0.25 * p)
+        c.set_line_width(2)
+        c.stroke()
+        cur = None
+        for t0, m in mots:
+            if t >= t0:
+                cur = (t0, m)
+        if cur and p > 0.6:
+            q = eo((t - cur[0]) / 0.15)
+            font(c, SANS_B, 58)
+            e = c.text_extents(cur[1])
+            bw = e.x_advance + 44
+            rrect(c, W / 2 - bw / 2, py + ph + 26, bw, 84, 12)
+            c.set_source_rgba(*BLUE, q * p)
+            c.fill()
+            text(c, cur[1], W / 2, py + ph + 88, SANS_B, 58, WHITE, q * p, "c")
+    cv.draw(deco)
+
+
+def fx_macros(cv, t, kcal=2450, macros=(("Protéines", 160), ("Glucides", 280), ("Lipides", 75)),
+              titre=("Ta", "journée"), dur=5.0, cy=1260):
+    """Carte nutrition : anneau qui se remplit + kcal qui comptent + grammes par macro."""
+    a = env(t, dur)
+    if a <= 0:
+        return
+    w, h = 820, 470
+    p = eio((t - 0.4) / 1.8)
+
+    def content(c, al):
+        mixed_title(c, titre[0], titre[1], -w / 2 + 44, -h / 2 + 78, 44, al)
+        cx, cy2, R = -w / 2 + 200, 40, 125
+        c.new_path()
+        c.set_line_width(26)
+        c.set_line_cap(cairo.LINE_CAP_ROUND)
+        c.arc(cx, cy2, R, 0, 2 * math.pi)
+        c.set_source_rgba(1, 1, 1, 0.14 * al)
+        c.stroke()
+        if p > 0.01:
+            c.arc(cx, cy2, R, -math.pi / 2, -math.pi / 2 + 2 * math.pi * 0.92 * p)
+            c.set_source_rgba(*BLUE, al)
+            c.stroke()
+        text(c, f"{round(kcal * p):,}".replace(",", " "), cx, cy2 + 22, NUM, 64, WHITE, al, "c")
+        text(c, "kcal", cx, cy2 + 62, SANS, 28, BLUE_L, al, "c")
+        x0 = -w / 2 + 390
+        for i, (lab, g) in enumerate(macros):
+            yy = -40 + i * 100
+            q = eo((t - 0.8 - i * 0.3) / 0.6)
+            text(c, lab, x0, yy, SANS_B, 32, BLUE_L, al)
+            text(c, f"{round(g * q)} g", w / 2 - 44, yy + 4, NUM, 52, WHITE, al, "r")
+            c.move_to(x0, yy + 26)
+            c.line_to(x0 + (w / 2 - 44 - x0) * q, yy + 26)
+            c.set_source_rgba(*BLUE, al)
+            c.set_line_width(5)
+            c.stroke()
+    glass_card(cv, W / 2, cy + 40 * (1 - eo(t / 0.45)), w, h, 40, rot=-1.0, alpha=a, content=content)
+
+
+def fx_cadran(cv, t, label="RPE", valeur=8, maxi=10, gauche="FACILE", droite="MAX", dur=4.6, cy=1250):
+    """Cadran d'effort (molette) : l'aiguille tourne jusqu'à la valeur (ex. RPE 8/10)."""
+    a = env(t, dur)
+    if a <= 0:
+        return
+    w = h = 560
+    p = eio((t - 0.5) / 1.3)
+    v = valeur * p
+    A0, A1 = math.radians(135), math.radians(405)
+
+    def content(c, al):
+        R = 190
+        cy2 = 10
+        text(c, label, 0, -h / 2 + 66, SANS_B, 34, BLUE_L, al, "c")
+        c.new_path()
+        c.set_line_width(14)
+        c.set_line_cap(cairo.LINE_CAP_ROUND)
+        c.arc(0, cy2, R, A0, A1)
+        c.set_source_rgba(1, 1, 1, 0.14 * al)
+        c.stroke()
+        if v > 0.01:
+            c.arc(0, cy2, R, A0, A0 + (A1 - A0) * v / maxi)
+            c.set_source_rgba(*BLUE, al)
+            c.stroke()
+        for i in range(maxi + 1):
+            ang = A0 + (A1 - A0) * i / maxi
+            r1, r2 = R - 34, R - (52 if i % 5 == 0 else 44)
+            c.move_to(r1 * math.cos(ang), cy2 + r1 * math.sin(ang))
+            c.line_to(r2 * math.cos(ang), cy2 + r2 * math.sin(ang))
+            c.set_source_rgba(1, 1, 1, 0.55 * al)
+            c.set_line_width(3)
+            c.stroke()
+        ang = A0 + (A1 - A0) * v / maxi
+        c.move_to(0, cy2)
+        c.line_to((R - 70) * math.cos(ang), cy2 + (R - 70) * math.sin(ang))
+        c.set_source_rgba(1, 1, 1, al)
+        c.set_line_width(8)
+        c.stroke()
+        c.arc(0, cy2, 22, 0, 2 * math.pi)
+        c.set_source_rgba(*NAVY, al)
+        c.fill_preserve()
+        c.set_source_rgba(1, 1, 1, al)
+        c.set_line_width(4)
+        c.stroke()
+        text(c, gauche, -R * 0.72, cy2 + R * 0.95, SANS_B, 24, BLUE_L, al, "c")
+        text(c, droite, R * 0.72, cy2 + R * 0.95, SANS_B, 24, BLUE_L, al, "c")
+        text(c, f"{round(v)}/{maxi}", 0, cy2 + 150, NUM, 70, WHITE, al, "c")
+    glass_card(cv, W / 2, cy + 40 * (1 - eo(t / 0.45)), w, h, 48, rot=2.0, alpha=a, content=content)
+
+
+def fx_barre(cv, t, titre="Pour progresser", barres=("Plus de séances", "S'entraîner tous les jours"),
+             juste="Mieux récupérer", dur=5.2, cy=1250):
+    """Carte papier : des idées reçues se font barrer au feutre, la bonne réponse s'écrit à la main."""
+    a = env(t, dur)
+    if a <= 0:
+        return
+    w, h = 720, 120 + 86 * (len(barres) + 1) + 40
+    cx, y = W / 2, cy + 40 * (1 - eo(t / 0.45))
+
+    def path(c):
+        place(c, cx, y, -2.0)
+        rrect(c, -w / 2, -h / 2, w, h, 24)
+    cv.shadow(path, 0.3 * a)
+    cv.paper(path, a, PAPER)
+
+    def deco(c):
+        place(c, cx, y, -2.0)
+        text(c, titre, 0, -h / 2 + 86, SERIF, 64, NAVY, a, "c", italic=True)
+        for i, b in enumerate(barres):
+            yy = -h / 2 + 180 + i * 86
+            bw = text(c, b, -tw(c, b, SANS_B, 40) / 2, yy, SANS_B, 40, NAVY, a * 0.85)
+            q = eo((t - 0.9 - i * 0.6) / 0.35)
+            if q > 0:
+                x0 = -bw / 2 - 12
+                c.move_to(x0, yy - 12)
+                c.curve_to(x0 + bw * 0.3, yy - 18, x0 + bw * 0.6, yy - 6, x0 + (bw + 24) * q, yy - 14)
+                c.set_source_rgba(*BLUE, a)
+                c.set_line_width(8)
+                c.set_line_cap(cairo.LINE_CAP_ROUND)
+                c.stroke()
+        q = eo((t - 0.9 - len(barres) * 0.6 - 0.2) / 0.4)
+        if q > 0:
+            yy = -h / 2 + 180 + len(barres) * 86 + 6
+            c.save()
+            c.translate(0, yy)
+            c.rotate(math.radians(-3))
+            text(c, juste, 0, 0, HAND, 54, BLUE, a * q, "c")
+            c.restore()
+    cv.draw(deco)
+
+
+def fx_telephone(cv, t, media, dur=4.6, cx=720, cy=1180, rot=6.0, fps=30):
+    """Téléphone flottant qui monte dans le cadre et lit une vidéo (exercice, extrait de Reel…)."""
+    a = env(t, dur, 0.4, 0.35)
+    if a <= 0:
+        return
+    pw, ph = 380, 780
+    y = cy + 500 * (1 - eo(t / 0.5))
+
+    def body(c):
+        place(c, cx, y, rot)
+        rrect(c, -pw / 2, -ph / 2, pw, ph, 58)
+    cv.shadow(body, 0.4 * a, 30, 22)
+    cv.paper(body, a, (0.05, 0.05, 0.06))
+    img = media[int(t * fps) % len(media)]
+    # écran (position approximée sans rotation du contenu au-delà de la rotation du cadre)
+    sw, sh = pw - 26, ph - 26
+    _paste_media(cv, img, cx - sw / 2 + (y - cy) * math.sin(math.radians(rot)) * 0,
+                 y - sh / 2, sw, sh, 46, a, rot)
+
+    def deco(c):
+        place(c, cx, y, rot)
+        rrect(c, -46, -ph / 2 + 26, 92, 26, 13)
+        c.set_source_rgba(0, 0, 0, a)
+        c.fill()
+        rrect(c, -pw / 2, -ph / 2, pw, ph, 58)
+        c.set_source_rgba(1, 1, 1, 0.18 * a)
+        c.set_line_width(2)
+        c.stroke()
+    cv.draw(deco)
+
+
+def fx_calendrier(cv, t, jours=("L", "M", "M", "J", "V", "S", "D"),
+                  seances=((0, "BUILD"), (1, "RUN"), (3, "PERFORM"), (4, "MOVE"), (5, "RUN")),
+                  repos=6, mot="repos", dur=5.4, cy=1330):
+    """Calendrier papier à spirale : les séances de la semaine se posent une à une, le jour de repos
+    est entouré au feutre."""
+    a = env(t, dur)
+    if a <= 0:
+        return
+    w, h = 940, 470
+    cx, y = W / 2, cy + 40 * (1 - eo(t / 0.45))
+
+    def path(c):
+        place(c, cx, y, -1.5)
+        rrect(c, -w / 2, -h / 2, w, h, 22)
+    cv.shadow(path, 0.3 * a)
+    cv.paper(path, a, PAPER)
+
+    def deco(c):
+        place(c, cx, y, -1.5)
+        # spirale
+        for i in range(16):
+            x = -w / 2 + 60 + i * (w - 120) / 15
+            c.arc(x, -h / 2 + 2, 11, math.pi, 2 * math.pi)
+            c.set_source_rgba(0.15, 0.15, 0.18, a)
+            c.set_line_width(5)
+            c.stroke()
+        colw = (w - 80) / 7
+        x0 = -w / 2 + 40
+        for i, j in enumerate(jours):
+            text(c, j, x0 + colw * (i + 0.5), -h / 2 + 80, SANS_B, 36, NAVY, a * 0.8, "c")
+            c.move_to(x0 + colw * i, -h / 2 + 105)
+            c.line_to(x0 + colw * i, h / 2 - 30)
+            c.set_source_rgba(*NAVY, 0.12 * a)
+            c.set_line_width(1.5)
+            c.stroke()
+        for k, (d, lab) in enumerate(seances):
+            q = eo((t - 0.6 - k * 0.32) / 0.25)
+            if q <= 0:
+                continue
+            bx = x0 + colw * d + 8
+            by = -h / 2 + 130 + (k % 2) * 40
+            bh = 170
+            rrect(c, bx, by + (1 - q) * 20, colw - 16, bh, 12)
+            c.set_source_rgba(*BLUE, a * q)
+            c.fill()
+            c.save()
+            c.translate(bx + (colw - 16) / 2 + 9, by + bh / 2 + (1 - q) * 20)
+            c.rotate(-math.pi / 2)
+            text(c, lab, 0, 0, SANS_B, 26, WHITE, a * q, "c")
+            c.restore()
+        q = eo((t - 0.6 - len(seances) * 0.32 - 0.2) / 0.5)
+        if q > 0 and repos is not None:
+            ex = x0 + colw * (repos + 0.5)
+            pts = []
+            for i in range(int(40 * q) + 1):
+                ang = -math.pi / 2 + 2.2 * math.pi * i / 40
+                pts.append((ex + 62 * math.cos(ang), 0 + 130 * math.sin(ang)))
+            c.move_to(*pts[0])
+            for pp in pts[1:]:
+                c.line_to(*pp)
+            c.set_source_rgba(*BLUE, a)
+            c.set_line_width(6)
+            c.stroke()
+            c.save()
+            c.translate(ex - 10, h / 2 - 40)
+            c.rotate(math.radians(-6))
+            text(c, mot, 0, 0, SERIF, 64, BLUE, a * q, "c", italic=True)
+            c.restore()
+    cv.draw(deco)
+
+
+EFFETS.update({
+    "derriere": (fx_derriere, 3.8),
+    "decoupe": (fx_decoupe, 4.2),
+    "split": (fx_split, 5.0),
+    "macros": (fx_macros, 5.0),
+    "cadran": (fx_cadran, 4.6),
+    "barre": (fx_barre, 5.2),
+    "telephone": (fx_telephone, 4.6),
+    "calendrier": (fx_calendrier, 5.4),
+})
