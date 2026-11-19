@@ -20,12 +20,19 @@ Méthode de montage : `contenu/methodes-claude/monteur-reels-benfit.md` · scrip
 | comparaison A ≠ B | carte à deux colonnes |
 | moment drôle | **sticker GIF** de `contenu/bibliotheque/` (jamais de personnage de film/animé, ni filigrane) |
 | phrase forte | **mot géant** (une fois par Reel) ou punch-in |
-| changement de partie | tag de chapitre « 02 · LA GESTION » souligné au feutre |
+| changement de partie | tag de chapitre « 02 · LA GESTION » souligné au feutre, ou **liste focus** |
+| règles, étapes à suivre | **interrupteurs** qui s'allument un par un |
+| résultat chiffré | **carte preuve** (chiffre qui compte), **graphe en verre**, **pastilles épaule** (avant / après) |
+| liste annoncée (« 3 erreurs ») | **cartes en éventail** |
+| LE mot-clé du Reel | **match-cut** (pages de texte, mot fixe au centre), 1 fois max |
+
+Effets « verre » prêts à l'emploi : `contenu/benfit-reels/fabrique-montage/effets/` (catalogue, aperçus, code).
 
 ## Validé / aimé
 - Reel « 4 qualités » v2 : motion design + GIFs drôles.
 - Cartes interface (réf. Théo Parisi, Project Orange), typographie mixte gras + *italique serif*.
 - Titre qui s'enflamme puis redevient net (réf. pierre_lesr), encart vidéo flottant sur le buste (réf. amaury.bodin).
+- Effets « Liquid Glass » de corbinsylk (19 nov. 2026) : Bene veut que Claude sache tous les faire → 7 effets recolorés BEN&FIT dans `fabrique-montage/effets/` (interrupteurs, graphe, liste focus, carte preuve, match-cut, éventail, pastilles).
 
 ## Refusé
 - Le tout premier Reel (« Tu peux être fort… ») : trop « IA ».

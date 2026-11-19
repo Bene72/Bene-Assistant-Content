@@ -16,6 +16,10 @@ Les scripts qui ont produit le Reel « Les 4 qualités / Si je devais tout recom
 5. `compose.py` : tout le motion design (accroche en typographie animée, volets de chapitres 01–04, barre de progression, écran partagé, cartes, stickers GIF, carte de fin).
 6. `audio.py` : musique et bruitages générés (aucun souci de droits), puis mixage avec ffmpeg (voix prioritaire, -14 LUFS).
 
+## Effets « verre » (bibliothèque)
+Dossier `effets/` : interrupteurs, graphe en verre, liste focus, carte preuve, match-cut, cartes en éventail, pastilles épaule.
+À appeler depuis le compositing (voir `effets/README.md`). Démo : `python effets/demo.py RUSH.mp4`.
+
 ## Charte
 - Police **Coda ExtraBold** (sous-titres blancs, bords bleus, mots-clés dans un bloc bleu), **Anton** pour les grands chiffres.
 - Bleu `#2E6BFF`, marine `#08122F`, blanc.
