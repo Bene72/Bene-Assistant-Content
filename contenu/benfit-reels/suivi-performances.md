@@ -125,9 +125,9 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 - **Date de publication** : à compléter (prêt le 20 nov. 2026)
 - **Sujet** : la discipline plutôt que la motivation. Phrase de Bene, essoufflé en pleine séance : « Pas de motivation, mais le taf, il est là. Et du coup, c'est la discipline… » (fin de phrase à confirmer par Bene, son difficile).
 - **DA** : **montage seulement** (demande de Bene) : aucun étalonnage ni grain (couleurs d'origine), aucun effet à part les sous-titres. Coupes sèches sur les mots, punch-ins, plans de coupe sur la voix (squat, sled, vélo, fentes, snatch haltère). Son des plans de coupe coupé (musique de la salle).
-- **Durée** : 8 s
-- **Accroche** : « Pas de motivation, » face caméra, punch-in serré.
-- **Hypothèse testée** : *un Reel **ultra court (< 10 s)**, une seule phrase + images d'entraînement, se regarde en boucle (durée moyenne de visionnage > 100 % de la durée) et se partage plus que #7 (28 s).*
+- **Durée** : 15 s (v1 de 8 s jugée trop courte par Bene)
+- **Accroche** : « Pas de motivation, » face caméra, punch-in serré. **Chute** : « Discipline is everything. » face à l'objectif après le montage d'entraînement.
+- **Hypothèse testée** : *un Reel **court (15 s)**, une phrase + montage d'entraînement + chute, se regarde en boucle (durée moyenne de visionnage > 100 % de la durée) et se partage plus que #7 (28 s).*
   - Comparer : % de visionnage (boucles), partages, enregistrements, avec #7.
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
