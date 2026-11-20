@@ -3,6 +3,8 @@ import asyncio
 import html
 import logging
 import sys
+import time
+from zoneinfo import ZoneInfo
 from logging.handlers import RotatingFileHandler
 
 from telegram import Update
@@ -24,6 +26,21 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 log = logging.getLogger("main")
 
 TELEGRAM_LIMIT = 4000
+STARTED = time.time()  # heure de démarrage : un message plus ancien a été écrit pendant que l'agent était éteint
+
+
+def sent_offline(update: Update) -> bool:
+    date = getattr(update.message, "date", None)
+    return date is not None and date.timestamp() < STARTED - 5
+
+
+def offline_note(update: Update) -> str:
+    """Préfixe pour un message reçu pendant que l'agent était éteint (Telegram le garde 24 h)."""
+    if not sent_offline(update):
+        return ""
+    when = update.message.date.astimezone(ZoneInfo(config.TIMEZONE)).strftime("%d/%m à %H:%M")
+    return (f"[Message envoyé le {when}, pendant que tu étais hors ligne : tu le reçois seulement "
+            f"maintenant. Traite-le normalement.] ")
 
 
 def split(text: str) -> list[str]:
@@ -254,6 +271,9 @@ async def cmd_diag(update: Update, _: ContextTypes.DEFAULT_TYPE):
 async def cmd_ok(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if not authorized(update):
         return await refuse(update)
+    if sent_offline(update):
+        return await update.message.reply_text("Ce /ok a été envoyé pendant que j'étais éteint : par sécurité "
+                                               "je ne l'exécute pas. Redemande-moi l'action si besoin.")
     await update.message.reply_text(await confirm.execute(update.effective_chat.id), disable_web_page_preview=True)
 
 
@@ -295,7 +315,7 @@ async def on_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not text:
         return await update.message.reply_text("Je n'ai rien entendu dans ce vocal.")
     await update.message.reply_text(f"🎙 « {text} »")
-    await answer(update, context, SPOKEN.format(owner=config.OWNER_NAME, text=text), spoken=True,
+    await answer(update, context, offline_note(update) + SPOKEN.format(owner=config.OWNER_NAME, text=text), spoken=True,
                  history_text=f"(vocal) {text}")
 
 
@@ -332,7 +352,7 @@ async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text or update.message.caption or ""
     if not text.strip():
         return await update.message.reply_text("Pour l'instant je ne lis que le texte.")
-    await answer(update, context, text)
+    await answer(update, context, offline_note(update) + text, history_text=text)
 
 
 async def answer(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, use_history: bool = True,
@@ -427,7 +447,7 @@ def main():
         app.add_handler(CommandHandler("diag", cmd_diag))
         app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
         log.info("Bot BoxLog en ligne. Ctrl+C pour arrêter.")
-        return app.run_polling(drop_pending_updates=True)
+        return app.run_polling(drop_pending_updates=False)
     app.add_handler(CommandHandler("taches", cmd_tasks))
     app.add_handler(CommandHandler("brief", cmd_brief))
     app.add_handler(CommandHandler("bilans", cmd_bilans))
@@ -443,7 +463,7 @@ def main():
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, on_voice))
     app.add_handler(MessageHandler(filters.Document.ALL, on_document))
     log.info("Agent en ligne. Ctrl+C pour arrêter.")
-    app.run_polling(drop_pending_updates=True)
+    app.run_polling(drop_pending_updates=False)
 
 
 if __name__ == "__main__":
