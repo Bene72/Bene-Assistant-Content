@@ -15,3 +15,8 @@ Demande de Bene : **montage seulement**. Couleurs d'origine (aucun étalonnage, 
 Rushs : Release « rushs », VID_20261120_103837 (face caméra), 104034 (squat + « Discipline is everything »), 105756 (fentes), 110507 (sled), 112023 et 112113 (vélo), 112308 et 112349 (snatch).
 
 Retour de Bene : 8 s, c'est trop court ; viser ~15 s en ajoutant des plans.
+
+
+## Version courte (8 s) et son moins traité (21 nov.)
+- `VERSION=court python build_discipline.py edl` puis `VERSION=court python build_discipline.py video` → version 8 s (phrase face caméra, fentes, snatch), que Bene préfère publier.
+- Retour de Bene : voix « un peu moins isolée », traitement réduit de 20 % (`VOIX_FILTRE`) : coupe-bas 80 → 65 Hz, débruitage nr 8 → 6,4, présence +1,5 → +1,2 dB, compresseur 2,5:1 → 2:1. Toujours une seule chaîne.

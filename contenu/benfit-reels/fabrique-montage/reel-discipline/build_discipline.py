@@ -56,6 +56,15 @@ SEQUENCE = [
     ("voix", "squat", 6.15, 7.45, [(0.0, "squat", None, 1.10, 0.50, 0.40)]),     # Discipline is everything.
 ]
 
+# Version courte (8 s, la v1) : la phrase face caméra puis fentes + snatch, sans la chute.
+SEQUENCE_COURTE = SEQUENCE[:4] + [
+    ("plan", "fentes", 9.55, 1.00, 1.18, 0.50, 0.50),
+    ("plan", "snatch", 6.95, 1.40, 1.10, 0.50, 0.44),
+]
+COURT = os.environ.get("VERSION") == "court"   # VERSION=court python build_discipline.py edl / video
+if COURT:
+    SEQUENCE = SEQUENCE_COURTE
+
 # Sous-titres : texte exact dit par Bene, groupes calés sur la voix (plan parlé, temps source).
 SOUS_TITRES = [
     ("face", 9.00, 10.28, ["Pas", "de", "motivation,"]),
@@ -69,6 +78,12 @@ SOUS_TITRES = [
 ]
 KEYS = {"motivation,", "taf,", "discipline", "Discipline", "everything."}
 FIN_TENUE = 0.08  # quelques images de plus après le dernier mot (temps source)
+
+# Traitement de la voix. Retour de Bene (21 nov.) : voix « un peu moins isolée », traitement réduit de 20 %
+# (v1 : coupe-bas 80 Hz, débruitage nr 8, présence +1,5 dB, compresseur 2,5:1 → valeurs ci-dessous).
+# Toujours UNE seule chaîne : jamais de mélange voix nettoyée + voix d'origine (écho métallique).
+VOIX_FILTRE = ("highpass=f=65,afftdn=nf=-30:nr=6.4,equalizer=f=3000:t=q:w=1.2:g=1.2,"
+               "acompressor=threshold=-20dB:ratio=2:attack=10:release=140:makeup=1.6")
 
 
 def energy(clip):
@@ -100,7 +115,7 @@ def edl():
             continue
         _, clip, a, b, plans = it
         a2, b2 = snap(clip, a), snap(clip, b)
-        if k == len(SEQUENCE) - 1:
+        if k == len(SEQUENCE) - 1 and not COURT:
             b2 = b + FIN_TENUE
         voix.append(dict(clip=clip, src_in=a2, src_out=b2, start=round(t, 3)))
         L = b2 - a2
@@ -110,7 +125,10 @@ def edl():
                              start=round(t + off, 3), zoom=zoom, cx=cx, cy=cy))
         t += L
     subs = []
+    parles_ici = {v["clip"] for v in voix}
     for clip, a, b, ws in SOUS_TITRES:
+        if clip not in parles_ici:
+            continue
         def conv(x):
             for v in voix:
                 if v["clip"] == clip and v["src_in"] - 0.1 <= x <= v["src_out"] + 0.1:
@@ -258,8 +276,7 @@ def audio(d):
         w.writeframes((np.clip(buf, -1, 1) * 32767).astype(np.int16).tobytes())
     tmp = os.path.join(WORK, "voix_tmp.wav")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-af",
-                    f"atempo={SPEED},highpass=f=80,afftdn=nf=-30:nr=8,equalizer=f=3000:t=q:w=1.2:g=1.5,"
-                    "acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120:makeup=2,pan=stereo|c0=c0|c1=c0",
+                    f"atempo={SPEED},{VOIX_FILTRE},pan=stereo|c0=c0|c1=c0",
                     "-ar", str(SR), tmp], check=True)
     # volume mesuré sur les passages parlés seulement, puis correction pour -14 LUFS (limiteur -1 dB)
     parts = ";".join(f"[0:a]atrim={v['start'] / SPEED:.3f}:{(v['start'] + v['src_out'] - v['src_in']) / SPEED:.3f},"
@@ -288,7 +305,7 @@ def video():
     wr.stdin.close()
     wr.wait()
     audio(d)
-    final = os.path.join(WORK, "BENFIT_reel_discipline.mp4")
+    final = os.path.join(WORK, "BENFIT_reel_discipline_8s.mp4" if COURT else "BENFIT_reel_discipline_15s.mp4")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", out, "-i", os.path.join(WORK, "voix.wav"), "-c:v", "copy",
                     "-c:a", "aac", "-b:a", "320k", "-shortest", "-movflags", "+faststart", final], check=True)
     print("ok", final)
