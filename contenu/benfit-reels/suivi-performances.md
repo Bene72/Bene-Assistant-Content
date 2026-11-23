@@ -131,3 +131,11 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
   - Comparer : % de visionnage (boucles), partages, enregistrements, avec #7.
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
+
+### #9 — Acteur principal (Reel d'entraînement)
+- **Date de publication** : à compléter (prêt le 23 nov. 2026)
+- **Format** : Reel d'entraînement motivant, 21,7 s : voix off de Bene en footing (« c'est toi l'acteur principal ») sur ses séances de la semaine, montage rapide, ralentis 60 i/s, fin sur sa photo résultat (vestiaire).
+- **Accroche** : box jump au ralenti + « Certains vont être narrateurs de ta vie, »
+- **Hypothèse testée** : *une voix off motivante + un montage de séances + une photo résultat en fin donne plus de likes et d'enregistrements qu'un Reel face caméra explicatif.*
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
