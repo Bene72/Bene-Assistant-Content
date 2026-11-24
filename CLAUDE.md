@@ -29,7 +29,7 @@
 | Montage « montage seulement » (sans effets/étalonnage) | — | `reel-discipline/build_discipline.py` (`SEQUENCE`, `VERSION=court`) |
 | Miniature | `contenu/da/miniatures.md` | `thumb_*.py` dans chaque dossier de Reel (naturelle, studio, **dark** = `reel-discipline/thumb_dark.py`) ; exemples `contenu/benfit-reels/miniatures/` |
 | Carrousel | `contenu/da/carrousels-storytelling.md` ou `carrousels-briefing.md`, `publications-instagram.md` | export **carré 1080×1080, PNG légers, pas de 2x** |
-| Effets gestes (carrousel au doigt, claquement, mur au clap) | `fabrique-montage/reel-canape/README.md` | `reel-canape/build_canape.py` (flux optique + son, détourage rembg) |
+| Effets gestes (carrousel au doigt, claquement, mur au clap, tornade multivers) | `fabrique-montage/reel-canape/README.md` | `reel-canape/build_canape.py` (flux optique + son, détourage rembg) |
 | Effets à apprendre (il envoie des Reels d'autres créateurs) | `fabrique-montage/effets/README.md` | `effets/effets.py` ; but = enregistrer le savoir-faire, pas livrer une vidéo |
 | Clip 3D d'athlète | `contenu/da/animations-3d.md` | `contenu/benfit-3d/` (référence : arraché v2) |
 | Plan de contenu / audit profil / analyse concurrents | `contenu/methodes-claude/*.md` | skills du même nom |

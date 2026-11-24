@@ -5,6 +5,8 @@
      de la main), sans modèle de suivi des mains.
   2. Claquement → tenue de sport : coupe sèche sur le claquement (détecté au son) entre deux prises cadrées pareil,
      flash blanc de 2 images.
+  4. Tornade « multivers » (prise debout) : ses vidéos tournent autour de lui comme une tornade, derrière puis
+     devant lui (détourage), de plus en plus vite.
   3. Mur au clap : au clap (détecté au son), un mur de ses vidéos se construit derrière lui en vague depuis ses mains ;
      Bene reste devant (détourage rembg u2net_human_seg).
 Couleurs d'origine (BT.709 conservé), aucun étalonnage.
@@ -35,6 +37,7 @@ SEGMENTS = [
     dict(src="1124_145821", a=13.05, b=13.72, role="choix"),        # main levée… claquement (13,74)
     dict(src="1124_150014", a=4.51, b=5.35, role="flash"),          # claquement en tenue de sport (4,53)
     dict(src="1124_150218", a=4.55, b=8.60, role="mur", clap=5.32), # clap → mur de vidéos
+    dict(src="1124_150135", a=21.80, b=27.40, role="tornade"),      # debout, il regarde autour de lui → tornade
 ]
 # Cartes du carrousel / tuiles du mur : (rush, début, vitesse, titre)
 CARTES = [  # carrousel : dans l'ordre ; 6 balayages → on finit sur la 7e (l'arraché barre)
@@ -284,6 +287,63 @@ def draw_wall(frame, mask, media, t_since, origin):
     return (wall * (1 - a) + frame * a).astype(np.uint8)
 
 
+# ------------------------------------------------------------------ 4. tornade (multivers)
+TORNADE_N = 20
+VISAGE = (0.36 * W, 0.25 * H, 0.64 * W, 0.45 * H)   # zone du visage (prise debout) : jamais couverte
+TCX = 0.50 * W          # axe de la tornade = Bene debout au centre
+
+
+def zone_tete(mask, haut=200, marge=40):
+    """Boîte de la tête de Bene, retrouvée à chaque image dans le détourage (haut du corps)."""
+    rows = np.where((mask > 0.5).sum(1) > 25)[0]
+    if not len(rows):
+        return (0.36 * W, 0.25 * H, 0.64 * W, 0.45 * H)
+    top = rows[0]
+    band = mask[top:top + haut] > 0.5
+    cols = np.where(band.sum(0) > 3)[0]
+    return (cols[0] - marge, top - marge, cols[-1] + marge, top + haut + marge)
+
+
+def draw_tornado(frame, mask, media, t):
+    """Cartes vidéo en orbite autour de Bene, à différentes hauteurs, de plus en plus vite.
+    Derrière lui (z < 0) : masquées par son corps ; devant (z > 0) : par-dessus."""
+    back, front = [], []
+    tete = zone_tete(mask)
+    entree = E.eo(E.clamp(t / 0.6, 0, 1))
+    tourne = 1.3 * t + 0.35 * t * t                    # accélère
+    for i in range(TORNADE_N):
+        th = i * 2 * math.pi / TORNADE_N * 2.0 + tourne * (1.0 + 0.15 * (i % 3))   # 2 tours de spirale
+        u = (i * 0.618) % 1.0                            # hauteurs bien réparties (nombre d'or)
+        hy = H * (0.10 + 0.78 * u)
+        rx = (520 - 300 * u + 30 * math.sin(i * 1.7)) * (1 + 1.2 * (1 - entree))   # entonnoir : large en haut
+        z = math.sin(th)
+        x = TCX + rx * math.cos(th)
+        y = hy + 70 * z + 20 * math.sin(t * 2 + i)
+        s = (0.55 + 0.35 * (z + 1) / 2)
+        w, h = 210 * s, 373 * s
+        largeur = 0.25 + 0.75 * abs(z)                   # vue de face quand elle passe devant/derrière, tranche sur les côtés
+        hw = w * largeur / 2
+        quad = np.float32([[x - hw, y - h / 2], [x + hw, y - h / 2], [x + hw, y + h / 2], [x - hw, y + h / 2]])
+        vx0, vy0, vx1, vy1 = tete
+        if not (x + hw < vx0 or x - hw > vx1 or y + h / 2 < vy0 or y - h / 2 > vy1):
+            continue                                     # jamais sur la tête : la carte « disparaît » derrière
+        (front if z > 0 else back).append((z, i, quad))
+    def dessine(dst, items):
+        for z, i, quad in sorted(items):
+            fs, _ = media[i % len(media)]
+            img = fs[(int(t * FPS) + i * 5) % len(fs)].copy()
+            cv2.rectangle(img, (2, 2), (CW - 3, CH - 3), (255, 255, 255), 5, cv2.LINE_AA)
+            rgba = np.dstack([img, MASK_CARTE])
+            fade = 0.55 + 0.45 * (z + 1) / 2
+            paste_quad(dst, (rgba.astype(np.float32) * [fade, fade, fade, 1]).astype(np.uint8), quad, alpha=entree)
+    bg = frame.copy()
+    dessine(bg, back)
+    a = mask[..., None]
+    out = (bg * (1 - a) + frame * a).astype(np.uint8)
+    dessine(out, front)
+    return out
+
+
 # ------------------------------------------------------------------ montage
 def plan():
     st = strokes(SEGMENTS[1])
@@ -310,7 +370,7 @@ def render(only=None):
                 k_global += n
                 continue
         fs = decode(R(s["src"]), s["a"], s["b"] - s["a"])
-        masks = person_masks(fs) if s["role"] == "mur" else None
+        masks = person_masks(fs) if s["role"] in ("mur", "tornade") else None
         for i in idx:
             T = s["start"] + i / FPS
             t_src = s["a"] + i / FPS
@@ -326,6 +386,8 @@ def render(only=None):
                 ts = t_src - s["clap"]
                 if ts > 0:
                     f = draw_wall(f, masks[i], media_mur, ts, (W * 0.52, H * 0.42))
+            elif s["role"] == "tornade":
+                f = draw_tornado(f, masks[i], media_mur, t_src - s["a"])
             yield T, f
         k_global += n
 

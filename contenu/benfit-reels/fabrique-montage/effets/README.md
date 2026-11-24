@@ -84,6 +84,7 @@ qui se dessine), `mixed_title` (titre « Mot *italique* »), `env` (entrée/sort
 | Carrousel au doigt | `strokes()` + `draw_carousel()` | « sélection de personnage » : chaque balayage de la main fait tourner un carrousel 3D de vidéos |
 | Claquement de doigts | coupe sur l'attaque du son + flash 3 images | changement de tenue / de lieu entre deux prises cadrées pareil |
 | Mur au clap | `draw_wall()` + `person_masks()` | au clap, mur de vidéos qui se construit derrière Bene en vague depuis ses mains |
+| Tornade multivers | `draw_tornado()` + `zone_tete()` | Bene debout au centre, ses vidéos tournent autour de lui en entonnoir (derrière/devant), jamais sur la tête |
 Gestes détectés par le flux optique (mouvement) et le son (claquement, clap) : pas besoin de modèle de main.
 
 ## Vus mais pas encore reproduits (à apprendre)
