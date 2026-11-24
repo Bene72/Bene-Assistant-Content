@@ -139,3 +139,10 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 - **Hypothèse testée** : *une voix off motivante + un montage de séances + une photo résultat en fin donne plus de likes et d'enregistrements qu'un Reel face caméra explicatif.*
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
+
+### #10 — Choisis ta séance depuis ton canapé (effets gestes)
+- **Date de publication** : à compléter (prêt le 24 nov. 2026)
+- **Format** : 11,8 s sans voix : sur le canapé, carrousel 3D de ses vidéos au balayage du doigt → claquement de doigts → en tenue de sport → clap → mur de vidéos derrière lui.
+- **Hypothèse testée** : *des effets « magiques » pilotés par les gestes (sans texte, très visuels) font plus de partages et de vues que les Reels explicatifs.*
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter

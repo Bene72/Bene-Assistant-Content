@@ -29,6 +29,7 @@
 | Montage « montage seulement » (sans effets/étalonnage) | — | `reel-discipline/build_discipline.py` (`SEQUENCE`, `VERSION=court`) |
 | Miniature | `contenu/da/miniatures.md` | `thumb_*.py` dans chaque dossier de Reel (naturelle, studio, **dark** = `reel-discipline/thumb_dark.py`) ; exemples `contenu/benfit-reels/miniatures/` |
 | Carrousel | `contenu/da/carrousels-storytelling.md` ou `carrousels-briefing.md`, `publications-instagram.md` | export **carré 1080×1080, PNG légers, pas de 2x** |
+| Effets gestes (carrousel au doigt, claquement, mur au clap) | `fabrique-montage/reel-canape/README.md` | `reel-canape/build_canape.py` (flux optique + son, détourage rembg) |
 | Effets à apprendre (il envoie des Reels d'autres créateurs) | `fabrique-montage/effets/README.md` | `effets/effets.py` ; but = enregistrer le savoir-faire, pas livrer une vidéo |
 | Clip 3D d'athlète | `contenu/da/animations-3d.md` | `contenu/benfit-3d/` (référence : arraché v2) |
 | Plan de contenu / audit profil / analyse concurrents | `contenu/methodes-claude/*.md` | skills du même nom |
@@ -53,8 +54,8 @@
 - Upscale 4K : pas de GPU ici (Real-ESRGAN ≈ 30 s/image). Rendu validé en test : 50 % IA / 50 % image réelle. Pour une vidéo entière, conseiller Topaz / CapCut.
 
 ## 5. Ce qui a déjà été fait (Reels)
-#1 Fort ≠ en forme (trop « IA ») · #2 Zone 2 · #3 Tractions · #4 Les 4 qualités (adoré : motion design + GIFs) · #5 Cardio et muscle (`reel-cardio-muscle/`) · #6 Collab Apocalypse Training (`reel-apocalypse/`) · #7 Zone 2 / HYROX (`reel-zone2-hyrox/`) · #8 Discipline (`reel-discipline/`, versions 8 s et 15 s) · #9 Acteur principal, Reel d'entraînement (`reel-semaine-entrainement/`).
-Idées en attente : « Pourquoi tu finis tes WOD explosé ? » (pacing), « a day in the life » de coach, clip 3D épaulé-jeté.
+#1 Fort ≠ en forme (trop « IA ») · #2 Zone 2 · #3 Tractions · #4 Les 4 qualités (adoré : motion design + GIFs) · #5 Cardio et muscle (`reel-cardio-muscle/`) · #6 Collab Apocalypse Training (`reel-apocalypse/`) · #7 Zone 2 / HYROX (`reel-zone2-hyrox/`) · #8 Discipline (`reel-discipline/`, versions 8 s et 15 s) · #9 Acteur principal, Reel d'entraînement (`reel-semaine-entrainement/`) · #10 Canapé, effets gestes (`reel-canape/`).
+Idées en attente : verre d'eau infini (effet), « Pourquoi tu finis tes WOD explosé ? » (pacing), « a day in the life » de coach, clip 3D épaulé-jeté.
 
 ## 6. Ses autres projets (dépôts séparés — ne pas mélanger)
 | Projet | Où | À savoir |

@@ -1,0 +1,16 @@
+# Reel « canapé » (24 nov. 2026) : 3 effets pilotés par les gestes
+
+11,8 s, sans voix (son tendance ajouté sur Insta). Couleurs d'origine (BT.709 conservé).
+
+1. **Carrousel au doigt** (sélection de personnage) : chaque balayage de la main fait tourner un carrousel 3D de ses vidéos
+   d'entraînement (DB SNATCH, RUN, BIKE, BOX JUMP, PULL-UPS, SLED, SQUAT). Balayages détectés par **flux optique**
+   (mouvement horizontal dans la zone des mains, `strokes()`), pas de modèle de main (MediaPipe n'est pas téléchargeable ici).
+   Une carte de chaque côté, la carte du centre a son titre en chip bleu. Placé devant les jambes, jamais sur le visage.
+2. **Claquement → tenue de sport** : coupe sèche sur l'attaque du son du claquement dans les deux prises (même cadre), flash blanc 3 images.
+3. **Mur au clap** : au clap (détecté au son), tuiles vidéo qui apparaissent en vague depuis ses mains, **derrière** lui
+   (détourage rembg `u2net_human_seg`), limité au haut du cadre (pas sur les jambes).
+
+`python build_canape.py strokes` (voir les balayages détectés) → `stills T…` → `video` ; `python thumb_canape.py`.
+Rushs : 145737 (intro casque/téléphone), 145821 (balayages + claquement 13,74 s), 150014 (claquement tenue de sport 4,53 s),
+150218 (clap 5,32 s). Prise 150135 (debout) non utilisée.
+Tournage : téléphone fixe, gestes francs, claquement et clap bien audibles.
