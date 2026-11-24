@@ -37,13 +37,22 @@ SEGMENTS = [
     dict(src="1124_150218", a=4.55, b=8.60, role="mur", clap=5.32), # clap → mur de vidéos
 ]
 # Cartes du carrousel / tuiles du mur : (rush, début, vitesse, titre)
-CARTES = [
+CARTES = [  # carrousel : dans l'ordre ; 6 balayages → on finit sur la 7e (l'arraché barre)
     ("1120_112349", 6.0, 1.0, "DB SNATCH"),
     ("1119_102125", 3.0, 1.0, "RUN"),
-    ("1120_112023", 10.0, 1.0, "BIKE"),
+    ("1005_111804", 9.5, 1.0, "WALL BALL"),
+    ("1005_111524", 10.0, 1.0, "ROWER"),
     ("1123_103801", 12.4, 0.5, "BOX JUMP"),
-    ("1117_104154", 24.0, 1.0, "PULL-UPS"),
     ("1120_110507", 3.1, 1.0, "SLED"),
+    ("0924_105249", 21.5, 1.0, "SNATCH"),
+]
+# Mur au clap : 13 vidéos différentes (13 et 4 colonnes premiers entre eux → deux tuiles voisines jamais pareilles)
+MUR = CARTES + [
+    ("1120_112023", 10.0, 1.0, "BIKE"),
+    ("0628_125056", 6.5, 1.0, "BIKE"),
+    ("0806_110206", 8.0, 1.0, "PULLDOWN"),
+    ("1012_104315", 38.8, 1.0, "JERK"),
+    ("1117_104154", 24.0, 1.0, "PULL-UPS"),
     ("1120_104034", 29.9, 1.0, "SQUAT"),
 ]
 CW, CH = 330, 587           # carte du centre (9:16)
@@ -130,9 +139,9 @@ def position(t_src, strokes_):
 
 
 # ------------------------------------------------------------------ rendu des cartes
-def card_media():
+def card_media(liste):
     out = []
-    for src, a, sp, titre in CARTES:
+    for src, a, sp, titre in liste:
         # recadrage 9:16 au centre puis taille carte (×2 pour les tuiles du mur)
         fs = decode(R(src), a, 2.5, size=(CW, CH), speed=sp, crop="crop='min(iw,ih*9/16)':'min(ih,iw*16/9)'")
         out.append((fs, titre))
@@ -288,7 +297,8 @@ def plan():
 
 def render(only=None):
     st, total = plan()
-    media = card_media()
+    media = card_media(CARTES)
+    media_mur = card_media(MUR)
     pos_fin = position(1e9, st)
     k_global = 0
     for s in SEGMENTS:
@@ -315,7 +325,7 @@ def render(only=None):
             elif s["role"] == "mur":
                 ts = t_src - s["clap"]
                 if ts > 0:
-                    f = draw_wall(f, masks[i], media, ts, (W * 0.52, H * 0.42))
+                    f = draw_wall(f, masks[i], media_mur, ts, (W * 0.52, H * 0.42))
             yield T, f
         k_global += n
 
