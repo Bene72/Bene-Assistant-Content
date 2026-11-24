@@ -11,6 +11,7 @@
    (détourage rembg `u2net_human_seg`), limité au haut du cadre (pas sur les jambes).
 
 `python build_canape.py strokes` (voir les balayages détectés) → `stills T…` → `video` ; `python thumb_canape.py`.
+Cartes : 7 vidéos (finit sur l'arraché barre) ; mur : 13 vidéos différentes (`MUR`), ajoutées le 24 nov. (vélo, tirage poulie, arraché, rameur, wall balls, jerk). Vidéo `lv_0_20260701102746` écartée (déjà montée, texte incrusté, chaussettes Bob l'éponge).
 Rushs : 145737 (intro casque/téléphone), 145821 (balayages + claquement 13,74 s), 150014 (claquement tenue de sport 4,53 s),
 150218 (clap 5,32 s). Prise 150135 (debout) non utilisée.
 Tournage : téléphone fixe, gestes francs, claquement et clap bien audibles.
