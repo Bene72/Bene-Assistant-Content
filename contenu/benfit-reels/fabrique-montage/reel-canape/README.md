@@ -15,6 +15,11 @@
    (détourage). La **tête est repérée à chaque image** dans le détourage (`zone_tete`) : aucune carte ne passe dessus.
    Histoire : il se lève du canapé, il n'a plus le choix, il est pris dans la spirale (légendes ajoutées par Bene).
 
+**Textes** (`textes_canape.py`, posés sur la vidéo rendue) : hook « POV : t'as *pas envie* d'aller à la salle »,
+puis « Bon… juste un petit truc *léger* » → « …*ah.* » (carrousel sur l'arraché) → « Le corps a *décidé* tout seul »
+(claquement) → « *Trop tard.* » (clap) → « Une fois dans la *spirale*… » → « …t'en sors *plus.* ». Coda blanc bord bleu,
+mots-clés en bloc bleu (`*mot*`), tiers haut. Miniature : « PAS ENVIE ? » + « d'aller à la salle… ».
+
 `python build_canape.py strokes` (voir les balayages détectés) → `stills T…` → `video` ; `python thumb_canape.py`.
 Cartes : 7 vidéos (finit sur l'arraché barre) ; mur : 13 vidéos différentes (`MUR`), ajoutées le 24 nov. (vélo, tirage poulie, arraché, rameur, wall balls, jerk). Vidéo `lv_0_20260701102746` écartée (déjà montée, texte incrusté, chaussettes Bob l'éponge).
 Rushs : 145737 (intro casque/téléphone), 145821 (balayages + claquement 13,74 s), 150014 (claquement tenue de sport 4,53 s),
