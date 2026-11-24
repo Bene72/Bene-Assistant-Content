@@ -3,6 +3,9 @@
 Tout ce qui sert à l’assistant et à la création de contenu BEN&FIT, au même endroit.
 
 ## 🚀 Démarrer une nouvelle conversation avec Claude
+**Tout commence par [`CLAUDE.md`](CLAUDE.md)** : la page d'accueil de Claude (qui tu es, règles fixes, quel fichier lire pour chaque tâche). Message d'ouverture conseillé :
+> « Attache le dépôt Bene72/Bene-Assistant-Content (droits d'écriture), lis CLAUDE.md puis seulement la fiche utile. Aujourd'hui : … »
+
 Une conversation par création (Reel, carrousel, miniature…). Il suffit d'écrire, par exemple :
 - **Reel face caméra** : « Nouveau Reel BEN&FIT. Accroche : … Points : 1… 2… 3… Phrases à afficher : … Les rushs sont dans la Release « rushs » de Bene72/Bene-Assistant-Content. »
 - **Reel d'entraînement** : « Monte le Reel d'entraînement avec le prompt `contenu/benfit-reels/prompt-reel-entrainement.md` » (+ logos et liste de ce qui a été filmé).
