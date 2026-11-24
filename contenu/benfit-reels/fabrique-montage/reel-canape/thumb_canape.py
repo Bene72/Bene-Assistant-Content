@@ -16,7 +16,7 @@ cv = E.Canvas(np.frombuffer(raw, np.uint8).reshape(H, W, 3).copy())
 
 
 def deco(c):
-    mot, size = "CHOISIS TA SÉANCE", 150
+    mot, size = "PAS ENVIE ?", 190
     E.font(c, E.NUM, size)
     while c.text_extents(mot).x_advance > 980:
         size -= 4
@@ -30,7 +30,7 @@ def deco(c):
     c.stroke_preserve()
     c.set_source_rgba(1, 1, 1, 1)
     c.fill()
-    tag = "depuis ton canapé."
+    tag = "d'aller à la salle…"
     E.font(c, E.SANS_B, 62)
     tw = c.text_extents(tag).x_advance
     bx, by = W / 2 - tw / 2, 1615
