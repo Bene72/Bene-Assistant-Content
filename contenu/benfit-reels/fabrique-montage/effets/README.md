@@ -78,18 +78,27 @@ qui se dessine), `mixed_title` (titre « Mot *italique* »), `env` (entrée/sort
   (= contour découpé), mot sur flash blanc (= match-cut / mot géant), collage photo (= polaroid), « screen dive »
   téléphone en main (≈ téléphone), mur de miniatures (déjà à apprendre).
 
+### Effets pilotés par les gestes (24 nov. 2026) — `reel-canape/build_canape.py`
+| Effet | Fonction | Quand l'utiliser |
+|---|---|---|
+| Carrousel au doigt | `strokes()` + `draw_carousel()` | « sélection de personnage » : chaque balayage de la main fait tourner un carrousel 3D de vidéos |
+| Claquement de doigts | coupe sur l'attaque du son + flash 3 images | changement de tenue / de lieu entre deux prises cadrées pareil |
+| Mur au clap | `draw_wall()` + `person_masks()` | au clap, mur de vidéos qui se construit derrière Bene en vague depuis ses mains |
+Gestes détectés par le flux optique (mouvement) et le son (claquement, clap) : pas besoin de modèle de main.
+
 ## Vus mais pas encore reproduits (à apprendre)
 - **Muscles qui s'allument** (anatomie 3D, muscles travaillés en couleur, corps qui tourne) : à faire avec la fabrique 3D
   `contenu/benfit-3d/` (corps MakeHuman + Blender), muscles en bleu BEN&FIT. Très utile pour les Reels technique.
 - **Relight** : changer l'éclairage du visage (golden hour, Rembrandt, stores vénitiens) → demande un modèle d'IA vidéo.
 - **Graphe tenu en main** : la carte suit la main de Bene → demande du suivi de mouvement (tracking).
 - Effets de **suivi des mains** (tenfoldmarc) : étiquettes au bout des doigts (*finger tags*), objet entre les mains
-  (*hand frame*), photo sortie de la poche (*pocket proof*), objet lancé (*ball toss*), mur de photos au clap (*clap wave*),
+  (*hand frame*), photo sortie de la poche (*pocket proof*), objet lancé (*ball toss*),
   plongée dans l'écran du téléphone (*screen dive*). À faire avec MediaPipe Hands (déjà dans l'environnement de `benfit-3d`).
 - **POV carrousel 3D** : écran de téléphone qui tourne en perspective avec des Reels qui défilent.
 - Mouvements de caméra : **zoom traversant** (zoom-through cut), **zoom numérique pixelisé**, **vertigo** (travelling compensé,
   demande le détourage), **pull-back reveal**, **orbit**.
 - **Écran « digital »** : mot en matrice de points / lignes de balayage.
+- Idée vue : **verre d'eau infini** (filet d'eau en boucle, verre qui reste plein) → boucle locale de la zone eau/verre, carafe immobile au tournage.
 - Liste « 17 effets » encore à voir en détail : *couch wall*, *ui world*, *frame break*, *green screen*, *cover story*.
 - Divers justyn.ai : bandes de couleurs de palette, étiquette « HELLO my name is », menu déroulant, mur de miniatures.
 - **Carrousels animés** (slides vidéo) : style « Liquid Glass » sombre et style éditorial crème + titres serif italiques.
