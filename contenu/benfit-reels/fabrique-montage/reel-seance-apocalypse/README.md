@@ -1,0 +1,16 @@
+# Reel « séance à deux » BEN&FIT × Apocalypse Training (26 nov. 2026)
+
+~65 s, séance haltéro avec l'ami d'Apocalypse Training. **Pas de sous-titres** (demande de Bene), répliques gardées avec leur son.
+Structure : accroche (réception d'arraché au ralenti + « SÉANCE À DEUX ») → « sponsorisé par Apocalypse » (selfie)
+→ **ÉCHAUFFEMENT** (mobilité accélérée, barre à vide) → **BLOC 1** arraché (+ « passation de pouvoir », écran partagé)
+→ **BLOC 2** arraché autre plateau → **BLOC 3** épaulé-jeté → **RENFORT** rowing haltère → carte de fin co-branding.
+
+Animations (`build_seance.py`) : barre de progression des 5 chapitres en haut (on veut voir la fin), bandeau de
+chapitre qui balaie (Anton + sous-titre Coda + n° 01/05), rampes de vitesse (ralenti 0,4–0,5 sur les réceptions,
+rushs 60 i/s), punch-ins sur les réceptions, flash 3 images sur les plus belles, écran partagé Bene | Apocalypse,
+transitions coup de fouet + whoosh. Couleurs d'origine. Son : ambiance basse (musique de salle), répliques -14 LUFS.
+Une 3e personne (sweat rose) visible dans 142735 : plans recadrés / évités.
+Noms des blocs déduits de l'ordre des rushs (à corriger dans `PLANS` si besoin). Logos absents du dépôt
+(`contenu/logos/` vide) → co-branding en texte.
+
+`python build_seance.py plan` → `stills T…` → `video` ; `python thumb_seance.py`.

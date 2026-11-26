@@ -146,3 +146,10 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 - **Hypothèse testée** : *des effets « magiques » pilotés par les gestes (sans texte, très visuels) font plus de partages et de vues que les Reels explicatifs.*
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter
+
+### #11 — Séance à deux, BEN&FIT × Apocalypse Training
+- **Date de publication** : à compléter (prêt le 26 nov. 2026)
+- **Format** : Reel d'entraînement de 65 s, sans sous-titres : chapitres animés + barre de progression, ralentis sur les réceptions, écran partagé, répliques gardées.
+- **Hypothèse testée** : *une barre de progression des chapitres (échauffement → renfort) fait regarder jusqu'au bout un Reel long (≥ 1 min) ; taux de visionnage complet à comparer aux Reels de 15–20 s.*
+- **J+2** : à compléter · **J+7** : à compléter
+- **Ce qu'on en retient** : à compléter
