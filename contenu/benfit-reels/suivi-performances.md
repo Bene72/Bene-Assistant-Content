@@ -149,7 +149,7 @@ Bene envoie les captures à Claude, qui remplit ce tableau et écrit la conclusi
 
 ### #11 — Séance à deux, BEN&FIT × Apocalypse Training
 - **Date de publication** : à compléter (prêt le 26 nov. 2026)
-- **Format** : Reel d'entraînement de 65 s, sans sous-titres : chapitres animés + barre de progression, ralentis sur les réceptions, écran partagé, répliques gardées.
-- **Hypothèse testée** : *une barre de progression des chapitres (échauffement → renfort) fait regarder jusqu'au bout un Reel long (≥ 1 min) ; taux de visionnage complet à comparer aux Reels de 15–20 s.*
+- **Format** : Reel d'entraînement de 78 s, sans sous-titres : chapitres animés, ralentis sur les réceptions, écran partagé, répliques et moments de discussion gardés (barre de progression retirée à la demande de Bene).
+- **Hypothèse testée** : *un Reel long (≥ 1 min) découpé en chapitres animés avec des moments de complicité entre les deux se regarde jusqu'au bout ; taux de visionnage complet à comparer aux Reels de 15–20 s.*
 - **J+2** : à compléter · **J+7** : à compléter
 - **Ce qu'on en retient** : à compléter

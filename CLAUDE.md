@@ -25,7 +25,7 @@
 | Tâche | Lire d'abord | Base de scripts / outils |
 |---|---|---|
 | Reel face caméra | `contenu/da/reels-face-camera.md`, `contenu/benfit-reels/design-system-v2.md` | `contenu/benfit-reels/fabrique-montage/` (le plus récent : `reel-zone2-hyrox/build_zone2.py`) + skill `monteur-reels-benfit` |
-| Reel d'entraînement / collab | `contenu/da/reels-entrainement.md`, `contenu/benfit-reels/prompt-reel-entrainement.md` | `reel-semaine-entrainement/build_semaine.py` (voix off + montage + ralentis 60 i/s + photo de fin), `reel-seance-apocalypse/build_seance.py` (séance longue ~1 min : chapitres animés, barre de progression, rampes de vitesse, écran partagé), `reel-apocalypse/` (collab) |
+| Reel d'entraînement / collab | `contenu/da/reels-entrainement.md`, `contenu/benfit-reels/prompt-reel-entrainement.md` | `reel-semaine-entrainement/build_semaine.py` (voix off + montage + ralentis 60 i/s + photo de fin), `reel-seance-apocalypse/build_seance.py` (séance longue ~1 min 20 : chapitres animés, rampes de vitesse, écran partagé ; **pas de barre de progression**, zooms ≤ 1,45×), `reel-apocalypse/` (collab) |
 | Montage « montage seulement » (sans effets/étalonnage) | — | `reel-discipline/build_discipline.py` (`SEQUENCE`, `VERSION=court`) |
 | Miniature | `contenu/da/miniatures.md` | `thumb_*.py` dans chaque dossier de Reel (naturelle, studio, **dark** = `reel-discipline/thumb_dark.py`) ; exemples `contenu/benfit-reels/miniatures/` |
 | Carrousel | `contenu/da/carrousels-storytelling.md` ou `carrousels-briefing.md`, `publications-instagram.md` | export **carré 1080×1080, PNG légers, pas de 2x** |
@@ -54,7 +54,7 @@
 - Upscale 4K : pas de GPU ici (Real-ESRGAN ≈ 30 s/image). Rendu validé en test : 50 % IA / 50 % image réelle. Pour une vidéo entière, conseiller Topaz / CapCut.
 
 ## 5. Ce qui a déjà été fait (Reels)
-#1 Fort ≠ en forme (trop « IA ») · #2 Zone 2 · #3 Tractions · #4 Les 4 qualités (adoré : motion design + GIFs) · #5 Cardio et muscle (`reel-cardio-muscle/`) · #6 Collab Apocalypse Training (`reel-apocalypse/`) · #7 Zone 2 / HYROX (`reel-zone2-hyrox/`) · #8 Discipline (`reel-discipline/`, versions 8 s et 15 s) · #9 Acteur principal, Reel d'entraînement (`reel-semaine-entrainement/`) · #10 Canapé, effets gestes (`reel-canape/`, **adoré** : format à développer et à décliner, voir `contenu/da/reels-effets-gestes.md`) · #11 Séance à deux × Apocalypse (`reel-seance-apocalypse/`, 65 s, pas de sous-titres).
+#1 Fort ≠ en forme (trop « IA ») · #2 Zone 2 · #3 Tractions · #4 Les 4 qualités (adoré : motion design + GIFs) · #5 Cardio et muscle (`reel-cardio-muscle/`) · #6 Collab Apocalypse Training (`reel-apocalypse/`) · #7 Zone 2 / HYROX (`reel-zone2-hyrox/`) · #8 Discipline (`reel-discipline/`, versions 8 s et 15 s) · #9 Acteur principal, Reel d'entraînement (`reel-semaine-entrainement/`) · #10 Canapé, effets gestes (`reel-canape/`, **adoré** : format à développer et à décliner, voir `contenu/da/reels-effets-gestes.md`) · #11 Séance à deux × Apocalypse (`reel-seance-apocalypse/`, 78 s, pas de sous-titres).
 Idées en attente : verre d'eau infini (effet), « Pourquoi tu finis tes WOD explosé ? » (pacing), « a day in the life » de coach, clip 3D épaulé-jeté.
 
 ## 6. Ses autres projets (dépôts séparés — ne pas mélanger)
