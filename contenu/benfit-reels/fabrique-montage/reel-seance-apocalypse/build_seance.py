@@ -2,7 +2,8 @@
 
 Séance haltéro filmée avec son ami d'Apocalypse Training : échauffement → bloc 1 → bloc 2 → bloc 3 → renfort.
 Montage très dynamique pour qu'on regarde jusqu'au bout :
-  - chapitres animés (titre Anton dans un bandeau bleu qui balaie) + barre de progression des 5 chapitres en haut ;
+  - chapitres animés (titre Anton dans un bandeau bleu qui balaie) ; PAS de barre de progression (Bene : « vraiment moche ») ;
+  - zooms plafonnés à ~1,45× et agrandissement Lanczos (au-delà, l'image devient molle) ; export CRF 10 ;
   - rampes de vitesse : vitesse réelle sur la tirée, **ralenti 0,4–0,5 sur la réception** (rushs 60 i/s = vraies images),
     punch-in sur la réception, petit flash sur les plus belles ;
   - écran partagé Bene | Apocalypse sur la même répétition ;
@@ -58,32 +59,38 @@ PLANS = [
       zk=[(8.9, 1.12), (9.4, 1.12), (9.6, 1.38), (10.9, 1.3)], cy=0.42),
     S("144615", 31.3, 33.9, 1, ramp=[(31.3, 1.0), (31.95, 0.5), (32.6, 1.0)],
       zk=[(31.3, 1.1), (32.15, 1.1), (32.35, 1.4), (33.9, 1.32)], cy=0.42, flash=[32.3]),
+    S("144752", 9.20, 10.80, 1, voix=True, zoom=1.2, cy=0.5),              # « Ouais il est pas mal de passer au-dessus »
     S("144752", 18.10, 19.35, 1, voix=True, zoom=1.25, cy=0.45),          # « …passation de pouvoir »
     S("144752", 25.0, 27.0, 1, ramp=[(25.0, 1.0), (25.5, 0.5), (26.1, 1.0)],
       zk=[(25.0, 1.12), (25.6, 1.12), (25.8, 1.4), (27.0, 1.32)], cy=0.42),
     S("144615", 37.1, 39.0, 1, split=dict(clip="144752", a=35.3, cxs=(0.50, 0.50)), zoom=1.0),  # écran partagé
     # BLOC 2 : autre plateau, autre angle
-    S("145519", 1.6, 3.6, 2, zoom=1.45, cy=0.45, titre="chap", sous="ARRACHÉ"),
+    S("145519", 1.6, 3.6, 2, zoom=1.35, cy=0.45, titre="chap", sous="ARRACHÉ"),
     S("145519", 14.2, 16.8, 2, ramp=[(14.2, 1.0), (14.7, 0.5), (15.3, 1.0)],
-      zk=[(14.2, 1.4), (14.8, 1.4), (15.0, 1.7), (16.8, 1.6)], cy=0.42, flash=[15.0]),
+      zk=[(14.2, 1.3), (14.8, 1.3), (15.0, 1.42), (16.8, 1.38)], cy=0.42, flash=[15.0]),
     S("145519", 23.0, 24.6, 2, zoom=1.0),                                   # Bene revient vers la caméra
+    S("145519", 31.05, 32.6, 2, voix=True, zoom=1.3, cy=0.48),             # « Oh, tu passes »
     S("145519", 32.6, 34.6, 2, ramp=[(32.6, 1.0), (33.1, 0.5), (33.7, 1.0)],
-      zk=[(32.6, 1.4), (33.2, 1.4), (33.4, 1.7), (34.6, 1.6)], cy=0.42),
+      zk=[(32.6, 1.3), (33.2, 1.3), (33.4, 1.42), (34.6, 1.38)], cy=0.42),
     # BLOC 3 : épaulé-jeté
     S("151817", 52.9, 55.0, 3, ramp=[(52.9, 1.0), (53.5, 0.45), (54.3, 1.0)],
       zk=[(52.9, 1.1), (53.6, 1.1), (53.8, 1.38), (55.0, 1.3)], cy=0.45, titre="chap", sous="ÉPAULÉ-JETÉ"),
+    S("152712", 25.15, 28.25, 3, voix=True, zk=[(25.15, 1.15), (28.25, 1.3)], cy=0.45),  # Bene explique le tirage lourd
+    S("151407", 33.0, 36.4, 3, ramp=[(33.0, 1.0), (34.6, 0.5), (35.4, 1.0)],
+      zk=[(33.0, 1.3), (34.7, 1.3), (34.9, 1.4), (36.4, 1.38)], cy=0.45),  # épaulé, autre angle
     S("151631", 50.9, 53.0, 3, ramp=[(50.9, 1.0), (51.9, 0.45), (52.6, 1.0)],
       zk=[(50.9, 1.1), (51.95, 1.1), (52.15, 1.38), (53.0, 1.3)], cy=0.45),
     S("151817", 58.2, 61.3, 3, ramp=[(58.2, 1.0), (58.9, 0.4), (59.6, 1.0)],
       zk=[(58.2, 1.1), (59.0, 1.1), (59.25, 1.42), (61.3, 1.34)], cy=0.42, flash=[59.3]),
-    S("151407", 39.0, 41.4, 3, zk=[(39.0, 1.35), (39.4, 1.35), (39.55, 1.6), (41.4, 1.55)], cy=0.42),
     S("151631", 62.5, 65.2, 3, ramp=[(62.5, 1.0), (63.0, 0.45), (63.7, 1.0)],
       zk=[(62.5, 1.1), (63.1, 1.1), (63.3, 1.4), (65.2, 1.32)], cy=0.42, flash=[63.3]),
     # RENFORT : rowing haltère
     S("155452", 5.0, 7.6, 4, vit=1.3, zoom=1.1, titre="chap", sous="ROWING HALTÈRE"),
+    S("155753", 8.5, 11.1, 4, vit=1.3, zoom=1.1),                           # rowing, autre angle
     S("155337", 56.0, 58.6, 4, vit=1.3, zoom=1.1),
     S("155520", 10.0, 12.6, 4, vit=1.3, zoom=1.2, cy=0.55),
     S("155337", 34.0, 36.6, 4, vit=1.3, zoom=1.3, cy=0.55),
+    S("155337", 5.85, 8.70, 4, voix=True, zoom=1.0),                       # Apocalypse rigole : « Il est trop fort, mais n'importe quoi »
     S("155452", 11.0, 13.4, 4, vit=1.0, zk=[(11.0, 1.1), (13.4, 1.25)], titre="fin"),
 ]
 FIN_GEL = 1.6     # secondes d'image figée sous la carte de fin
@@ -150,7 +157,7 @@ def reframe(frame, s, cx, cy):
     cw, ch = W / s, H / s
     x0 = E.clamp(cx * W - cw / 2, 0, W - cw)
     y0 = E.clamp(cy * H - ch / 2, 0, H - ch)
-    return np.asarray(Image.fromarray(frame).resize((W, H), Image.BILINEAR, box=(x0, y0, x0 + cw, y0 + ch)))
+    return np.asarray(Image.fromarray(frame).resize((W, H), Image.LANCZOS, box=(x0, y0, x0 + cw, y0 + ch)))
 
 
 def split_frame(fl, fr, cxs):
@@ -338,7 +345,6 @@ def render(only=None):
             def deco(c):
                 if p["titre"] == "hook":
                     draw_hook(c, age)
-                draw_progress(c, T, total, chap_start)
                 if p["titre"] == "chap":
                     draw_chapter(c, p["chap"], p["sous"], age)
                 if fs2 is not None:
@@ -350,7 +356,7 @@ def render(only=None):
         t0 = PLANS[-1]["start"] + len(PLANS[-1]["ts"]) / FPS
         for i in range(int(round(FIN_GEL * FPS))):
             cv = E.Canvas(np.array(last))
-            cv.draw(lambda c: (draw_progress(c, t0 + i / FPS, total, chap_start), draw_fin(c, i / FPS)))
+            cv.draw(lambda c: draw_fin(c, i / FPS))
             yield t0 + i / FPS, cv.out()
 
 
@@ -445,7 +451,7 @@ def video():
     wr = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
                            "-r", str(FPS), "-i", "-", "-vf",
                            "scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int,format=yuv420p",
-                           "-c:v", "libx264", "-preset", "slow", "-crf", "12", "-profile:v", "high",
+                           "-c:v", "libx264", "-preset", "slow", "-crf", "10", "-profile:v", "high", "-tune", "film",
                            "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709",
                            "-color_range", "tv", out], stdin=subprocess.PIPE)
     for _, f in render():
