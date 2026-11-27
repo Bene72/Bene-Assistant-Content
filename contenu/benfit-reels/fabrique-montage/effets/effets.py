@@ -1304,3 +1304,241 @@ EFFETS.update({
     "cta": (fx_cta_commente, 3.0),
     "entoure": (fx_entoure, 2.0),
 })
+
+
+# =====================================================================================================
+# Lot « modèles CapCut » (27 nov. 2026) : effets image / transitions vus dans la capture d'écran de Bene.
+# Fonctions sur des images numpy uint8 (H×W×3) ; `mask` = masque de la personne (segmentation.mask ou rembg),
+# float32 H×W, 1 = Bene. Écartés volontairement (trop « IA ») : particules, contours néon, halos colorés.
+# =====================================================================================================
+import cv2 as _cv2
+
+
+def tr_zoom_flou(frame_a, frame_b, p, centre=(W / 2, H * 0.45), force=0.35):
+    """Transition « aspiration » : zoom radial flou dans A, on ressort dans B (≈0,3 s, coupe au milieu)."""
+    img = frame_a if p < 0.5 else frame_b
+    k = math.sin(math.pi * p) * force                    # 0 → max → 0
+    if k < 0.01:
+        return img
+    acc = np.zeros(img.shape, np.float32)
+    n = 8
+    cx, cy = centre
+    for i in range(n):
+        s = 1 + k * i / n * (1 if p < 0.5 else -0.6)
+        M = np.float32([[s, 0, cx * (1 - s)], [0, s, cy * (1 - s)]])
+        acc += _cv2.warpAffine(img, M, (W, H), borderMode=_cv2.BORDER_REFLECT)
+    return (acc / n).astype(np.uint8)
+
+
+def fx_rgb(frame, force):
+    """Décalage RVB (aberration chromatique) sur un temps fort : force 0→1, à lâcher en 3–5 images."""
+    d = int(round(14 * force))
+    if d <= 0:
+        return frame
+    out = frame.copy()
+    out[..., 0] = np.roll(frame[..., 0], d, axis=1)
+    out[..., 2] = np.roll(frame[..., 2], -d, axis=1)
+    return out
+
+
+def fx_eclats(frame, t, intensite=1.0, seed=3):
+    """Éclats de miroir : l'image cassée en panneaux inclinés bordés de blanc, chacun légèrement décalé /
+    agrandi / retourné (kaléidoscope). intensite 0→1 pour l'entrée/sortie (≈0,6 s)."""
+    if intensite <= 0.01:
+        return frame
+    rng = np.random.default_rng(seed)
+    out = frame.copy()
+    # lignes de cassure : 5 droites inclinées qui traversent l'image
+    pts = []
+    for k in range(5):
+        x0 = rng.uniform(-200, W + 200)
+        ang = rng.uniform(-1.2, 1.2) + (0 if k % 2 else math.pi / 2)
+        pts.append((x0, rng.uniform(0, H), ang))
+    zones = np.zeros((H, W), np.int32)
+    yy, xx = np.mgrid[0:H, 0:W]
+    for k, (x0, y0, a) in enumerate(pts):
+        side = ((xx - x0) * math.sin(a) - (yy - y0) * math.cos(a)) > 0
+        zones += side.astype(np.int32) << k
+    for z in np.unique(zones):
+        m = zones == z
+        s = 1.0 + intensite * rng.uniform(0.02, 0.12)
+        dx, dy = intensite * rng.uniform(-50, 50), intensite * rng.uniform(-40, 40)
+        rot = intensite * rng.uniform(-4, 4) + 1.2 * math.sin(t * 3 + z)
+        M = _cv2.getRotationMatrix2D((W / 2, H / 2), rot, s)
+        M[:, 2] += (dx, dy)
+        src = frame[:, ::-1] if rng.random() < 0.35 else frame     # certains panneaux retournés (miroir)
+        out[m] = _cv2.warpAffine(src, M, (W, H), borderMode=_cv2.BORDER_REFLECT)[m]
+    # filets blancs le long des cassures
+    edges = np.zeros((H, W), np.uint8)
+    edges[:-1][zones[:-1] != zones[1:]] = 255
+    edges[:, :-1][zones[:, :-1] != zones[:, 1:]] = 255
+    edges = _cv2.dilate(edges, np.ones((7, 7), np.uint8))
+    a = (edges.astype(np.float32) / 255 * intensite)[..., None]
+    return (out * (1 - a) + 255 * a).astype(np.uint8)
+
+
+def tr_cadres(frame_a, frame_b, p, n=3):
+    """Zoom à travers des cadres : A rétrécit dans un cadre blanc (polaroid) sur fond noir, d'autres cadres
+    emboîtés apparaissent, puis on plonge dans le plus petit qui contient B (≈0,8 s)."""
+    out = np.zeros((H, W, 3), np.uint8)
+    if p < 0.45:                                          # A rétrécit dans son cadre
+        u = eio(p / 0.45)
+        s = 1 - 0.55 * u
+        img = frame_a
+    else:                                                 # B grandit depuis le cadre central
+        u = eio((p - 0.45) / 0.55)
+        s = 0.3 + 0.7 * u
+        img = frame_b
+    for k in range(n, -1, -1):                            # cadres emboîtés (du plus grand au plus petit)
+        sk = s * (1 + 0.28 * k) if p < 0.45 else s * (1 + 0.28 * k * (1 - u))
+        w, h = int(W * sk), int(H * sk)
+        if w < 8 or w > W * 1.6:
+            continue
+        x0, y0 = (W - w) // 2, (H - h) // 2
+        b = max(6, int(28 * sk))
+        _cv2.rectangle(out, (x0, y0), (x0 + w, y0 + h), (255, 255, 255), -1)
+        _cv2.rectangle(out, (x0 + b, y0 + b), (x0 + w - b, y0 + h - b), (0, 0, 0), -1)
+    w, h = int(W * s), int(H * s)
+    small = _cv2.resize(img, (max(w, 2), max(h, 2)), interpolation=_cv2.INTER_AREA)
+    x0, y0 = (W - w) // 2, (H - h) // 2
+    xa, ya = max(x0, 0), max(y0, 0)
+    out[ya:ya + min(h, H), xa:xa + min(w, W)] = small[ya - y0:ya - y0 + min(h, H), xa - x0:xa - x0 + min(w, W)]
+    return out
+
+
+def fx_fond_noir(frame, mask, p):
+    """Bene seul sur fond noir (p=1), décor qui revient quand p redescend à 0."""
+    a = (1 - E_clamp(p)) + mask * E_clamp(p)
+    return (frame * a[..., None]).astype(np.uint8)
+
+
+def E_clamp(x):
+    return clamp(x)
+
+
+def fx_echo(frames, masks, n=4, gap=3, alpha=0.45):
+    """Écho fantôme : les positions précédentes de Bene en traînée transparente derrière lui.
+    frames / masks = historique (la dernière = image actuelle)."""
+    cur = frames[-1].astype(np.float32)
+    out = cur.copy()
+    for k in range(n, 0, -1):
+        i = len(frames) - 1 - k * gap
+        if i < 0:
+            continue
+        a = (masks[i] * alpha * (1 - k / (n + 1)))[..., None] * (1 - masks[-1][..., None])
+        out = out * (1 - a) + frames[i].astype(np.float32) * a
+    return out.astype(np.uint8)
+
+
+def fx_clones(frame, mask, dx=300, n=1, alpha=0.9):
+    """Clones : Bene dupliqué à gauche et à droite (n copies de chaque côté), lui reste devant."""
+    out = frame.astype(np.float32)
+    for k in range(n, 0, -1):
+        for s in (-1, 1):
+            M = np.float32([[1, 0, s * dx * k], [0, 1, 0]])
+            cl = _cv2.warpAffine(frame, M, (W, H))
+            cm = _cv2.warpAffine(mask, M, (W, H)) * alpha * (1 - 0.25 * (k - 1))
+            cm = cm * (1 - mask)
+            out = out * (1 - cm[..., None]) + cl * cm[..., None]
+    return out.astype(np.uint8)
+
+
+def fx_texte_echo(cv, mask, t, mot="BEN&FIT", y=820, size=230, n=4, dur=3.0):
+    """Texte écho derrière Bene : le mot plein au centre + copies en contour au-dessus et en dessous,
+    qui apparaissent l'une après l'autre ; Bene passe devant (masque)."""
+    a = clamp(t / 0.25) * (1 - clamp((t - dur + 0.3) / 0.3))
+    if a <= 0:
+        return
+    def draw(c):
+        font(c, NUM, size)
+        w_ = c.text_extents(mot).x_advance
+        for k in range(-n // 2, n // 2 + 1):
+            ak = a * clamp((t - 0.12 * abs(k)) / 0.2)
+            c.move_to(W / 2 - w_ / 2, y + k * size * 0.86)
+            c.text_path(mot)
+            if k == 0:
+                c.set_source_rgba(1, 1, 1, ak)
+                c.fill()
+            else:
+                c.set_source_rgba(1, 1, 1, ak * 0.85)
+                c.set_line_width(4)
+                c.stroke()
+    _behind_mask(cv, draw, mask)
+
+
+def _behind_mask(cv, draw_fn, mask):
+    """Dessine draw_fn puis remet Bene par-dessus avec son masque."""
+    before = cv.f.copy()
+    cv.draw(draw_fn)
+    m = mask[..., None]
+    cv.f = cv.f * (1 - m) + before * m
+
+
+def fx_mosaique(medias, t, angle=-18, cols=4, vitesse=120, tuile=(300, 430), gap=26):
+    """Mosaïque inclinée : mur de vidéos en cartes arrondies, penché, qui défile en diagonale (fond marine).
+    medias = listes d'images (cartes vidéo) ; t en secondes."""
+    big = int(math.hypot(W, H)) + 400
+    canvas = np.zeros((big, big, 3), np.uint8)
+    canvas[:] = (3, 10, 26)
+    tw_, th_ = tuile
+    off = (t * vitesse) % (th_ + gap)
+    k = 0
+    for c_ in range(-1, big // (tw_ + gap) + 1):
+        colo = (off if c_ % 2 else -off)
+        for r_ in range(-2, big // (th_ + gap) + 2):
+            x = c_ * (tw_ + gap) + gap
+            y = int(r_ * (th_ + gap) + colo)
+            fs = medias[(c_ * 3 + r_) % len(medias)]
+            img = fs[int(t * 30 + k * 7) % len(fs)]
+            k += 1
+            tile = _cv2.resize(img, (tw_, th_), interpolation=_cv2.INTER_AREA)
+            m = np.zeros((th_, tw_), np.uint8)
+            _cv2.rectangle(m, (18, 0), (tw_ - 18, th_), 255, -1)
+            _cv2.rectangle(m, (0, 18), (tw_, th_ - 18), 255, -1)
+            for (px, py) in ((18, 18), (tw_ - 18, 18), (18, th_ - 18), (tw_ - 18, th_ - 18)):
+                _cv2.circle(m, (px, py), 18, 255, -1, _cv2.LINE_AA)
+            xa, ya, xb, yb = max(x, 0), max(y, 0), min(x + tw_, big), min(y + th_, big)
+            if xb <= xa or yb <= ya:
+                continue
+            mm = m[ya - y:yb - y, xa - x:xb - x, None].astype(np.float32) / 255
+            reg = canvas[ya:yb, xa:xb].astype(np.float32)
+            canvas[ya:yb, xa:xb] = (reg * (1 - mm) + tile[ya - y:yb - y, xa - x:xb - x] * mm).astype(np.uint8)
+    M = _cv2.getRotationMatrix2D((big / 2, big / 2), angle, 1.0)
+    rot = _cv2.warpAffine(canvas, M, (big, big))
+    x0, y0 = (big - W) // 2, (big - H) // 2
+    return rot[y0:y0 + H, x0:x0 + W].copy()
+
+
+def fx_titre_sol(frame, mask, t, mot="BEN&FIT", y_sol=1380, hauteur=260, dur=3.0, derriere=True):
+    """Titre géant posé dans le décor (au sol, en perspective), comme « SMILE » : lettres Anton blanches
+    légèrement inclinées vers l'arrière ; Bene peut passer devant (derriere=True)."""
+    a = clamp(t / 0.2) * (1 - clamp((t - dur + 0.3) / 0.3))
+    if a <= 0:
+        return frame
+    tmp = Canvas(np.zeros((H, W, 3), np.uint8))
+
+    def draw(c):
+        font(c, NUM, hauteur)
+        w_ = c.text_extents(mot).x_advance
+        s = min(1.0, 960 / w_)
+        c.save()
+        c.translate(W / 2, y_sol)
+        c.scale(s, s)
+        c.move_to(-w_ / 2, 0)
+        c.text_path(mot)
+        c.set_source_rgba(1, 1, 1, 1)
+        c.fill()
+        c.restore()
+    tmp.draw(draw)
+    txt = tmp.out()
+    # perspective : le haut des lettres recule (trapèze)
+    src = np.float32([[0, 0], [W, 0], [W, H], [0, H]])
+    k = 0.18
+    dst = np.float32([[W * k, H * 0.08], [W * (1 - k), H * 0.08], [W, H], [0, H]])
+    Mp = _cv2.getPerspectiveTransform(src, dst)
+    txt = _cv2.warpPerspective(txt, Mp, (W, H))
+    alpha = (txt.max(axis=2).astype(np.float32) / 255 * a)
+    if derriere and mask is not None:
+        alpha = alpha * (1 - mask)
+    out = frame.astype(np.float32) * (1 - alpha[..., None]) + txt.astype(np.float32) * alpha[..., None]
+    return out.astype(np.uint8)

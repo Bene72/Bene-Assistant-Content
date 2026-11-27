@@ -13,6 +13,7 @@
 - Objectif Instagram : **10 000 vues par vidéo**.
 
 ## 2. Règles qui valent partout
+0. **Reels de séance : monter comme Bene** (réf. 27 nov., `contenu/da/reels-entrainement.md`) : plans longs à vitesse réelle, répétitions entières, coupes franches entre les reps, **pas de ralentis en rampe, zooms animés, flashs ni flous** ; les effets seulement sur 1–2 temps forts. Mieux vaut sobre et net que « monteur qui en fait trop ».
 1. **Ne jamais inventer ses propos** : sous-titres = ses mots exacts (orthographe corrigée seulement). Si l'audio est douteux, le dire et demander.
 2. **Rendu « créateur humain », pas « IA »** : son audience repère l'IA et décroche. Pas de look saturé, halos, éclairs, statues, dégradés, rebonds partout. Une seule couleur d'accent.
 3. **Couleurs BEN&FIT uniquement** : marine `#0A206B`, bleu vif `#2E6BFF`, blanc (+ marine profond `#030A1A`, bleu clair `#8CB8FF` sur marine). Pas d'orange, pas d'autres bleus.
@@ -30,7 +31,7 @@
 | Miniature | `contenu/da/miniatures.md` | `thumb_*.py` dans chaque dossier de Reel (naturelle, studio, **dark** = `reel-discipline/thumb_dark.py`) ; exemples `contenu/benfit-reels/miniatures/` |
 | Carrousel | `contenu/da/carrousels-storytelling.md` ou `carrousels-briefing.md`, `publications-instagram.md` | export **carré 1080×1080, PNG légers, pas de 2x** |
 | Reel « effets gestes » (carrousel au doigt, claquement, mur au clap, tornade multivers) — **format adoré** | `contenu/da/reels-effets-gestes.md` (style, tournage, idées), `fabrique-montage/reel-canape/README.md` | `reel-canape/build_canape.py` (flux optique + son, détourage rembg) |
-| Effets à apprendre (il envoie des Reels d'autres créateurs) | `fabrique-montage/effets/README.md` | `effets/effets.py` ; but = enregistrer le savoir-faire, pas livrer une vidéo |
+| Effets à apprendre (il envoie des Reels d'autres créateurs) ; lot « modèles CapCut » (zoom flou, RVB, éclats, cadres, fond noir, écho, clones, texte écho, titre dans le décor, mosaïque) | `fabrique-montage/effets/README.md` | `effets/effets.py` ; but = enregistrer le savoir-faire, pas livrer une vidéo |
 | Clip 3D d'athlète | `contenu/da/animations-3d.md` | `contenu/benfit-3d/` (référence : arraché v2) |
 | Plan de contenu / audit profil / analyse concurrents | `contenu/methodes-claude/*.md` | skills du même nom |
 | Suivi des Reels (stats, hypothèses) | `contenu/benfit-reels/suivi-performances.md` | ajouter une fiche à chaque Reel livré |
