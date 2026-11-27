@@ -21,3 +21,14 @@ Vidéos de séances, sans discours explicatif. Prompt prêt à l'emploi : [`cont
 - **Qualité max** : pas de zoom au-delà de ~1,45× (image molle), agrandissement Lanczos, export CRF 10. « Pas de rendu chelou. »
 - Garder les **moments de discussion / complicité** (répliques avec leur son), pas de sous-titres sur ce format.
 - Séance longue OK : ~1 min à 1 min 20.
+
+## ⚠️ Leçon du 27 nov. 2026 : le montage de Bene (réf.) bat le mien
+Bene a remonté la séance × Apocalypse lui-même (96 s) et l'a trouvée « beaucoup mieux » ; la mienne faisait « montage flou,
+cuts bizarres ». Son montage, à reproduire **par défaut** sur les Reels de séance :
+- **Plans longs, vitesse réelle** : on voit la **répétition entière** (de la prise de barre au verrouillage), ~15 coupes en 96 s
+  (≈ un plan toutes les 5–7 s). Pas de micro-plans de 1–2 s.
+- **Coupes franches entre deux répétitions**, jamais au milieu d'un mouvement. Ordre chronologique de la séance.
+- **Aucun ralenti en rampe, aucun zoom animé / punch-in, aucun flash, aucun flou de transition** sur ce format :
+  l'image d'origine, nette, plein cadre (zoom 1,0).
+- Garder les moments humains en entier (selfie « sponsorisé par Apocalypse », l'ami qui rigole).
+- Les effets (bibliothèque) se gardent pour **1 ou 2 temps forts** maximum, et seulement s'il les demande.

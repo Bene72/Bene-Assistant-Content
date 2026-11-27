@@ -87,6 +87,22 @@ qui se dessine), `mixed_title` (titre « Mot *italique* »), `env` (entrée/sort
 | Tornade multivers | `draw_tornado()` + `zone_tete()` | Bene debout au centre, ses vidéos tournent autour de lui en entonnoir (derrière/devant), jamais sur la tête |
 Gestes détectés par le flux optique (mouvement) et le son (claquement, clap) : pas besoin de modèle de main.
 
+### Lot « modèles CapCut » (27 nov. 2026) — `demo_capcut.py`, aperçus `apercus/capcut-*.jpg`
+Vus dans une capture de modèles CapCut que Bene aime. **À doser** : 1–2 par Reel, sur un temps fort, jamais en continu.
+| Effet | Fonction | Usage |
+|---|---|---|
+| Zoom flou | `tr_zoom_flou(a, b, p)` | transition « aspiration » entre deux plans (≈0,3 s) |
+| Décalage RVB | `fx_rgb(frame, force)` | 3–5 images sur une réception / un coup de basse |
+| Éclats de miroir | `fx_eclats(frame, t, intensite)` | image cassée en panneaux bordés de blanc (≈0,6 s) |
+| Zoom à travers les cadres | `tr_cadres(a, b, p)` | plan qui rétrécit dans des cadres emboîtés, on plonge dans le suivant |
+| Fond noir | `fx_fond_noir(frame, mask, p)` | Bene seul, décor éteint (temps fort, intro) |
+| Écho fantôme | `fx_echo(frames, masks)` | traînée des positions précédentes (mouvement rapide) |
+| Clones | `fx_clones(frame, mask, dx)` | Bene dupliqué à gauche et à droite |
+| Texte écho derrière | `fx_texte_echo(cv, mask, t, mot)` | mot répété en contours derrière Bene |
+| Titre géant dans le décor | `fx_titre_sol(frame, mask, t, mot)` | titre en perspective posé dans la salle (« SMILE ») |
+| Mosaïque inclinée | `fx_mosaique(medias, t)` | mur de vidéos penché qui défile (intro / fin) |
+Écartés (trop « IA ») : particules, contours néon, halos de couleur, éclairage rose.
+
 ## Vus mais pas encore reproduits (à apprendre)
 - **Muscles qui s'allument** (anatomie 3D, muscles travaillés en couleur, corps qui tourne) : à faire avec la fabrique 3D
   `contenu/benfit-3d/` (corps MakeHuman + Blender), muscles en bleu BEN&FIT. Très utile pour les Reels technique.
