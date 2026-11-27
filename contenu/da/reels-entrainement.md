@@ -32,5 +32,5 @@ cuts bizarres ». Son montage, à reproduire **par défaut** sur les Reels de s�
   l'image d'origine, nette, plein cadre (zoom 1,0).
 - Garder les moments humains en entier (selfie « sponsorisé par Apocalypse », l'ami qui rigole).
 - Les effets (bibliothèque) se gardent pour **1 ou 2 temps forts** maximum, et seulement s'il les demande.
-- Transitions validées pour le côté vlog : **néon orange** (filet de lumière qui balaie) + bruitages (whoosh, impact), **3 max**.
+- Transitions validées pour le côté vlog : **néon orange** (filet de lumière qui balaie) + bruitages (whoosh, impact), **3 max** — Bene adore, on garde (27 nov.). L'orange reste **interdit sur les titres et textes** (c'est ça qu'il n'aimait pas).
 - **Jamais de repères / titres de chapitres** sur ses vidéos de séance (« je trouve ça horrible »), ni de texte s'il ne le demande pas.

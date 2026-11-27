@@ -16,7 +16,7 @@
 0. **Reels de séance : monter comme Bene** (réf. 27 nov., `contenu/da/reels-entrainement.md`) : plans longs à vitesse réelle, répétitions entières, coupes franches entre les reps, **pas de ralentis en rampe, zooms animés, flashs ni flous** ; les effets seulement sur 1–2 temps forts. Mieux vaut sobre et net que « monteur qui en fait trop ».
 1. **Ne jamais inventer ses propos** : sous-titres = ses mots exacts (orthographe corrigée seulement). Si l'audio est douteux, le dire et demander.
 2. **Rendu « créateur humain », pas « IA »** : son audience repère l'IA et décroche. Pas de look saturé, halos, éclairs, statues, dégradés, rebonds partout. Une seule couleur d'accent.
-3. **Couleurs BEN&FIT uniquement** : marine `#0A206B`, bleu vif `#2E6BFF`, blanc (+ marine profond `#030A1A`, bleu clair `#8CB8FF` sur marine). Pas d'orange, pas d'autres bleus.
+3. **Couleurs BEN&FIT uniquement** : marine `#0A206B`, bleu vif `#2E6BFF`, blanc (+ marine profond `#030A1A`, bleu clair `#8CB8FF` sur marine). **Pas d'orange dans les textes / titres**, pas d'autres bleus. Exception validée et adorée : les **transitions néon orange** (+ bruitages) des Reels de séance, 3 max.
 4. **Polices** (`contenu/polices/`) : Coda (sous-titres/textes), Anton (titres/chiffres), Permanent Marker (annotations, avec parcimonie).
 5. **Photos de Bene** (« Optimise cette photo ») : plus lumineuse, nette, en relief, **sans rien inventer** (pas d'IA qui ajoute muscles/veines). Script : `contenu/photos/optimise_photo.py`. Exception seulement s'il demande explicitement de « tricher ».
 6. **La demande du jour l'emporte** sur les fiches. Quand il valide/refuse un style durablement → mettre à jour la fiche concernée (`contenu/da/…`) + ce fichier, via PR fusionnée.
