@@ -18,3 +18,9 @@ Noms des blocs déduits de l'ordre des rushs (à corriger dans `PLANS` si besoin
 (`contenu/logos/` vide) → co-branding en texte.
 
 `python build_seance.py plan` → `stills T…` → `video` ; `python thumb_seance.py`.
+
+## Version « vlog » (27 nov.) — `build_vlog.py`, à partir du montage de Bene
+Son montage gardé tel quel (plans longs, vitesse réelle, aucun texte) + seulement : selfie « sponsorisé par Apocalypse »
+en accroche, long plan d'arraché resserré sur 2 reps, ~70 s, et **3 transitions néon orange** (filet de lumière qui balaie
++ whoosh et petit impact grave). Orange = demande de Bene pour ces transitions. Pas de repères de chapitres (« horrible »).
+Résolution d'origine 1440×2560. Lecture image par image (sinon mémoire saturée).
