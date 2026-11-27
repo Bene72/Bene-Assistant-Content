@@ -35,6 +35,7 @@
 | Clip 3D d'athlète | `contenu/da/animations-3d.md` | `contenu/benfit-3d/` (référence : arraché v2) |
 | Plan de contenu / audit profil / analyse concurrents | `contenu/methodes-claude/*.md` | skills du même nom |
 | Suivi des Reels (stats, hypothèses) | `contenu/benfit-reels/suivi-performances.md` | ajouter une fiche à chaque Reel livré |
+| Logos (BEN&FIT, Apocalypse) / intro logo animée | `contenu/logos/README.md` | `fabrique-montage/logo-anim/logo_anim.py` (5 s style clip de rap, sorties .mov transparent / .webm / fond vert) |
 | Inspirations | `contenu/da/references.md` | |
 | Hors BEN&FIT (Twin's League / Ultimate League) | `contenu/da/autres-marques.md` | |
 | Agent Telegram | `agent-telegram/README.md` | prompts coach (« Kairo ») et programmation dans `agent-telegram/agent/prompts/` |
