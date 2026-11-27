@@ -41,7 +41,7 @@
 | Agent Telegram | `agent-telegram/README.md` | prompts coach (« Kairo ») et programmation dans `agent-telegram/agent/prompts/` |
 
 ## 4. Reels : règles fixes (déjà validées, ne pas redemander)
-- **Rushs** : Release GitHub « rushs » de ce dépôt. Prendre **les plus récents** (trier par date). Téléchargement fiable :
+- **Rushs** : Release GitHub « rushs » de ce dépôt (ou une Release par séance `rushs-AAAA-MM-JJ-sujet` si Bene les a rangées). **Index : `contenu/benfit-reels/rushs-index.md`** (quelle vidéo = quelle séance) → le tenir à jour à chaque nouveau lot. Claude ne peut pas créer / modifier / supprimer de Release. Prendre **les plus récents** (trier par date). Téléchargement fiable :
   `gh api -H "Accept: application/octet-stream" repos/Bene72/Bene-Assistant-Content/releases/assets/<id> > fichier` (`gh release download` peut être bloqué). Ids : `gh api repos/Bene72/Bene-Assistant-Content/releases/tags/rushs -q '.assets[]|[.id,.name,.created_at]|@tsv'`.
 - **Transcription** : Parakeet (sherpa-onnx) — modèle `sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8` depuis les releases GitHub `k2-fsa/sherpa-onnx` (asr-models) ; si son difficile, recouper avec `sherpa-onnx-whisper-medium` (même endroit). HuggingFace est bloqué. `fabrique-montage/transcribe.py`.
 - **Montage** : coupes sèches calées sur les mots (couper au point le plus calme ±60 ms), punch-ins rythmés, recadrage si mal centré, accélération ×1,05.
